@@ -11,20 +11,21 @@ angular.module('myApp.services', ['ngResource'])
 										Layer: 'Layers',
 										Annotation: 'Annotations'
 	})
-	.factory('Corpus', ['$resource', function($resource) {
-			return $resource('/corpus/:corpusId',
+  .value('RESTroot', 'http://localhost\\:3000')// double esc. needed to specify port, see https://github.com/angular/angular.js/issues/1243
+	.factory('Corpus', ['$resource', 'RESTroot', function($resource, RESTroot) {
+			return $resource(RESTroot + '/corpus/:corpusId',
 					{corpusId: '@corpusId'});
 	}])
-	.factory('Media', ['$resource', function($resource) {
-			return $resource('/corpus/:corpusId/media/:mediaId',
+	.factory('Media', ['$resource', 'RESTroot', function($resource, RESTroot) {
+			return $resource(RESTroot + '/corpus/:corpusId/media/:mediaId',
 					{corpusId: '@corpusId', mediaId: '@mediaId'});
 	}])
-	.factory('Layer', ['$resource', function($resource) {
-		return $resource('/corpus/:corpusId/media/:mediaId/layer/:layerId',
+	.factory('Layer', ['$resource', 'RESTroot', function($resource, RESTroot) {
+		return $resource(RESTroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId',
 				{corpusId: '@corpusId', mediaId: '@mediaId', layerId: '@layerId'});
 	}])
-	.factory('Annotation', ['$resource', function($resource) {
-		return $resource('/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId',
+	.factory('Annotation', ['$resource', 'RESTroot', function($resource, RESTroot) {
+		return $resource(RESTroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId',
 				{corpusId: '@corpusId', mediaId: '@mediaId', layerId: '@layerId', annotationId: '@annotationId'});
 	}]);
 //	.factory('LayerAll', ['$resource', function($resource) {
