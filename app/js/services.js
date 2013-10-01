@@ -28,8 +28,3 @@ angular.module('myApp.services', ['ngResource'])
 		return $resource(RESTroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId',
 				{corpusId: '@corpusId', mediaId: '@mediaId', layerId: '@layerId', annotationId: '@annotationId'});
 	}]);
-//	.factory('LayerAll', ['$resource', function($resource) {
-//		return $resource('/corpus/:corpusId/media/:mediaId/layerAll',
-//				{corpusId: '@corpusId', mediaId: '@mediaId'});
-//	}]);
-
