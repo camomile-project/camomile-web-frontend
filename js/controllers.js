@@ -79,8 +79,64 @@ angular.module('myApp.controllers', ['myApp.services'])
 			}
 		});
 	}])
-	.controller('SelectListCtrl', ['$scope', 'sampleList', function($scope, sampleList) {
+	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', function($scope, Corpus, Media, Layer) {
 		$scope.model = {
-			list: sampleList
+			list: []
 		};
+
+
+			// with the use of promises
+//		(function() {
+//			var idelay = $q.defer();
+//			Corpus.query(function(corpuses) {
+//				idelay.resolve(corpuses);
+//			}, function() {
+//				idelay.reject("Error fetching corpuses.");
+//			});
+//			return idelay.promise;
+//		})().then(function(corpuses) {
+//				corpuses.forEach(function(c) {
+//					(function() {
+//						var jdelay = $q.defer();
+//						Media.query({corpusId: c._id}, function(media) {
+//							jdelay.resolve(media);
+//						}, function() {
+//							jdelay.reject("Error fetching media for corpus " + c._id);
+//						});
+//						return jdelay.promise;
+//					})().then(function(media) {
+//						media.forEach(function(m) {
+//								Layer.query({corpusId: c._id, mediaId: m._id}, function(layer){
+//
+//								})
+//							})
+//						})
+//						})
+//				});
+
+		Corpus.query(function(corpuses) {
+			corpuses.forEach(function(c) {
+				Media.query({corpusId: c._id}, function(media) {
+					media.forEach(function(m) {
+						Layer.query({corpusId: c._id, mediaId: m._id}, function(layer){
+							layer.forEach(function(l) {
+								$scope.model.list.push("Media: " + m.name + ", Layer: " + l.layer_type);
+							});
+						});
+					});
+				});
+			});
+		});
+
 	}]);
+
+
+
+
+
+
+
+
+
+
+
