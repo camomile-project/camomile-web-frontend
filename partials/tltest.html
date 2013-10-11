@@ -1,0 +1,14 @@
+<div class="row">
+	<div class="twelve columns">
+		<h3>Timeline component test page</h3>
+	</div>
+	<div ui-jq="jScrollPane" ui-options="{showArrows: true,autoReinitialise: true, jScrollPane.VERTICAL_SCROLLBAR_ALWAYS: true}" class="scroll-pane">
+		<div>
+			<div ng-repeat="item in model.list">
+				<div class=span">{{item}}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+		
