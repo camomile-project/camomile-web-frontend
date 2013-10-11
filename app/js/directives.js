@@ -3,13 +3,13 @@
 /* Directives */
 
 
-angular.module('myApp.directives', []).
+angular.module('myApp.directives', ['ui.utils']).
   directive('appVersion', ['version', function(version) {
     return function(scope, elm, attrs) {
       elm.text(version);
     };
   }])
-	.directive('toggable', function() {
+	.directive('cmToggable', function() {
 		return {
 			restrict: 'C',
 			replace: false,
@@ -25,7 +25,35 @@ angular.module('myApp.directives', []).
 					clickElmt.removeClass(scope.opened ? 'closed' : 'opened');
 					clickElmt.addClass(scope.opened ? 'opened' : 'closed');
 				}
-			}}
+			}};
+	})
+	.directive('uiScroll',['ui.config', function(uiConfig) {
+		uiConfig.uiScrollr = uiConfig.uiSCroll || {};
+		return {
+			restrict: 'A',
+			transclude: true,
+			scope: {
+				values: '=ngModel'
+			},
+			template: '<div class="scroll-pane"><div ng-transclude></div></div>',
+			link:function(scope,elm,$attrs,uiEvent ) {
+				var expression,
+					options = {
+					};
+				if ($attrs.uiScroll) {
+					expression = scope.$eval($attrs.uiScroll);
+				} else {
+					expression = {};
+				}
 
-	});
+				//Set the options from the directive's configuration
+				angular.extend(options, uiConfig.uiScroll, expression);
+				console.log(options);
+				elm.jScrollPane(options);
+
+			},
+			replace: true
+		};
+	}]);
+
 

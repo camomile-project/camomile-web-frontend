@@ -78,5 +78,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 				scope.model.annotationOpened = false;
 			}
 		});
+	}])
+	.controller('SelectListCtrl', ['$scope', 'sampleList', function($scope, sampleList) {
+		$scope.model = {
+			list: sampleList
+		};
 	}]);
-
