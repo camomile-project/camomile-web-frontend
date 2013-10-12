@@ -79,7 +79,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 			}
 		});
 	}])
-	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', function($scope, Corpus, Media, Layer) {
+	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', 'Annotation', function($scope, Corpus, Media, Layer, Annotation) {
 		$scope.model = {
 			list: [],
 			annotations: [],
@@ -88,7 +88,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		$scope.selectLayer = function(index) {
 			$scope.model.selected = index;
-			// populate annotations vector
+			if(index !== undefined) {
+				var selectedElem = $scope.model.list[index];
+				$scope.model.annotations = Annotation.query({corpusId: selectedElem.corpusId,
+					mediaId: selectedElem.mediaId,
+					layerId: selectedElem.layerId
+				});
+			} else {
+				$scope.model.annotations = [];
+			}
 		};
 
 		// nested populating snippet
