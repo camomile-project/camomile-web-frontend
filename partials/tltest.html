@@ -2,10 +2,20 @@
 	<div class="twelve columns">
 		<h3>Timeline component test page</h3>
 	</div>
-	<div ui-jq="jScrollPane" ui-options="{showArrows: true,autoReinitialise: true, jScrollPane.VERTICAL_SCROLLBAR_ALWAYS: true}" class="scroll-pane">
+	<div ui-jq="jScrollPane" ui-options="{showArrows: true,autoReinitialise: true, jScrollPane.VERTICAL_SCROLLBAR_ALWAYS: true}" class="scroll-pane layerList">
 		<div>
 			<div ng-repeat="item in model.list">
-				<div class=span">{{item}}</div>
+				<span class="label clickable cm-clickable" index="$index" ng-click="selectLayer($index)">
+					Media: {{item.mediaName}}, Layer: {{item.layerType}}
+				</span>
+			</div>
+		</div>
+	</div>
+	<div class="filler"></div>
+	<div ui-jq="jScrollPane" ui-options="{showArrows: true,autoReinitialise: true, jScrollPane.VERTICAL_SCROLLBAR_ALWAYS: true}" class="scroll-pane annotDisplay">
+		<div>
+			<div ng-repeat="item in model.annotations">
+				{{item}}
 			</div>
 		</div>
 	</div>

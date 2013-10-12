@@ -25,9 +25,31 @@ angular.module('myApp.directives', ['ui.utils']).
 					clickElmt.removeClass(scope.opened ? 'closed' : 'opened');
 					clickElmt.addClass(scope.opened ? 'opened' : 'closed');
 				}
+
 			}};
 	})
-	.directive('uiScroll',['ui.config', function(uiConfig) {
+	.directive('cmClickable', function() {
+		return {
+			restrict: 'C',
+//			scope: {
+//				index: '=',
+//				selected: '='
+//			},
+			link: function(scope, element, attrs) {
+				//var clickElmt = angular.element(element.children()[0]);
+				//var clickElmt = angular.element(element.children()[0]);
+				scope.$watch('model.selected', function(newValue, oldValue, scope) {
+					if(element.hasClass('alert') && (newValue !== scope.$index)) {
+						element.removeClass('round').removeClass('alert');
+					}
+					if((!element.hasClass('alert')) && (newValue === scope.$index)) {
+						element.addClass('round').addClass('alert');
+					}
+				});
+			}
+		};
+	})
+	.directive('uiScroll', ['ui.config', function(uiConfig) {
 		uiConfig.uiScrollr = uiConfig.uiSCroll || {};
 		return {
 			restrict: 'A',
