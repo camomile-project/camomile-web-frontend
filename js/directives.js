@@ -9,6 +9,7 @@ angular.module('myApp.directives', ['ui.utils']).
       elm.text(version);
     };
   }])
+	// toggable panel for nested display
 	.directive('cmToggable', function() {
 		return {
 			restrict: 'C',
@@ -28,13 +29,38 @@ angular.module('myApp.directives', ['ui.utils']).
 
 			}};
 	})
+	// scrollable div
+	.directive('uiScroll', ['ui.config', function(uiConfig) {
+		uiConfig.uiScrollr = uiConfig.uiSCroll || {};
+		return {
+			restrict: 'A',
+			transclude: true,
+			replace: true,
+			scope: {
+				values: '=ngModel'
+			},
+			template: '<div class="scroll-pane"><div ng-transclude></div></div>',
+			link:function(scope,elm, $attrs,uiEvent ) {
+				var expression,
+					options = {
+					};
+				if ($attrs.uiScroll) {
+					expression = scope.$eval($attrs.uiScroll);
+				} else {
+					expression = {};
+				}
+
+				//Set the options from the directive's configuration
+				angular.extend(options, uiConfig.uiScroll, expression);
+				console.log(options);
+				elm.jScrollPane(options);
+			}
+		};
+	}])
+	//clickable elements in a list
 	.directive('cmClickable', function() {
 		return {
 			restrict: 'C',
-//			scope: {
-//				index: '=',
-//				selected: '='
-//			},
 			link: function(scope, element, attrs) {
 				//var clickElmt = angular.element(element.children()[0]);
 				//var clickElmt = angular.element(element.children()[0]);
@@ -49,33 +75,19 @@ angular.module('myApp.directives', ['ui.utils']).
 			}
 		};
 	})
-	.directive('uiScroll', ['ui.config', function(uiConfig) {
-		uiConfig.uiScrollr = uiConfig.uiSCroll || {};
+	// hack to deselect currently selected element
+	.directive('clickAnywhereButHere', function($document){
 		return {
 			restrict: 'A',
-			transclude: true,
-			scope: {
-				values: '=ngModel'
-			},
-			template: '<div class="scroll-pane"><div ng-transclude></div></div>',
-			link:function(scope,elm,$attrs,uiEvent ) {
-				var expression,
-					options = {
-					};
-				if ($attrs.uiScroll) {
-					expression = scope.$eval($attrs.uiScroll);
-				} else {
-					expression = {};
-				}
-
-				//Set the options from the directive's configuration
-				angular.extend(options, uiConfig.uiScroll, expression);
-				console.log(options);
-				elm.jScrollPane(options);
-
-			},
-			replace: true
-		};
-	}]);
-
+			link: function(scope, elem, attr, ctrl) {
+				elem.bind('click', function(e) {
+					e.stopPropagation();
+				});
+				$document.bind('click', function() {
+					// magic here.
+					scope.$apply(attr.clickAnywhereButHere);
+				})
+			}
+		}
+	});
 
