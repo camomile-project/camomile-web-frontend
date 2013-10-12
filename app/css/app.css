@@ -42,4 +42,7 @@
     padding: 10px;
 }
 
-
+span.label {
+    background-color: #6f6f6f;
+    font-size: 14pt;
+}
