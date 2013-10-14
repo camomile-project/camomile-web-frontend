@@ -80,6 +80,20 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 	}])
 	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', 'Annotation', function($scope, Corpus, Media, Layer, Annotation) {
+		var msToTime = function(s) {
+			function addZ(n) {
+				return (n<10? '0':'') + n;
+			}
+			var ms = s % 1000;
+			s = (s - ms) / 1000;
+			var secs = s % 60;
+			s = (s - secs) / 60;
+			var mins = s % 60;
+			var hrs = (s - mins) / 60;
+
+			return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
+		};
+
 		$scope.model = {
 			list: [],
 			annotations: [],
@@ -93,6 +107,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 				$scope.model.annotations = Annotation.query({corpusId: selectedElem.corpusId,
 					mediaId: selectedElem.mediaId,
 					layerId: selectedElem.layerId
+				}, function() {
+					//post-processing : convert to adequate timestamps
+					$scope.model.annotations.forEach(function(elt) {
+						elt.
+					})
 				});
 			} else {
 				$scope.model.annotations = [];
