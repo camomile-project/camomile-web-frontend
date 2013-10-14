@@ -101,20 +101,6 @@ angular.module('myApp.directives', ['ui.utils']).
 				var d3elmt = d3.select(element); // d3 wrapper
 				var brush;
 
-				var msToTime = function(s) {
-					function addZ(n) {
-						return (n<10? '0':'') + n;
-					}
-					var ms = s % 1000;
-					s = (s - ms) / 1000;
-					var secs = s % 60;
-					s = (s - secs) / 60;
-					var mins = s % 60;
-					var hrs = (s - mins) / 60;
-
-					return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
-				};
-
 				// get luminance in [0,255]
 				// used to set appropriate font color
 				var getLuminance = function(colorStr) {
