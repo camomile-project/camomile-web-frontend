@@ -80,20 +80,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 	}])
 	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', 'Annotation', function($scope, Corpus, Media, Layer, Annotation) {
-		var msToTime = function(s) {
-			function addZ(n) {
-				return (n<10? '0':'') + n;
-			}
-			var ms = s % 1000;
-			s = (s - ms) / 1000;
-			var secs = s % 60;
-			s = (s - secs) / 60;
-			var mins = s % 60;
-			var hrs = (s - mins) / 60;
-
-			return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
-		};
-
 		$scope.model = {
 			list: [],
 			annotations: [],
@@ -101,21 +87,18 @@ angular.module('myApp.controllers', ['myApp.services'])
 		};
 
 		$scope.selectLayer = function(index) {
-			$scope.model.selected = index;
 			if(index !== undefined) {
 				var selectedElem = $scope.model.list[index];
 				$scope.model.annotations = Annotation.query({corpusId: selectedElem.corpusId,
 					mediaId: selectedElem.mediaId,
 					layerId: selectedElem.layerId
 				}, function() {
-					//post-processing : convert to adequate timestamps
-					$scope.model.annotations.forEach(function(elt) {
-						elt.fragment.start = msToTime(elt.fragment.start);
-						elt.fragment.end = msToTime(elt.fragment.end);
-					});
+					// update "model.selected" only on effective success
+					$scope.model.selected = index;
 				});
 			} else {
 				$scope.model.annotations = [];
+				$scope.model.selected = undefined;
 			}
 		};
 

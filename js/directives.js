@@ -98,7 +98,7 @@ angular.module('myApp.directives', ['ui.utils']).
 				var x, x2, yBand, yCol, yFont;
 				// no need for a scale/axis for context view - use the whole height
 				var xAxis, xAxis2, yAxis;
-				var d3elmt = d3.select(element); // d3 wrapper
+				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var brush, focus, context;
 
 				// get luminance in [0,255]
@@ -109,6 +109,45 @@ angular.module('myApp.directives', ['ui.utils']).
 					var G = parseInt(colorStr.slice(3,5), 16);
 					var B = parseInt(colorStr.slice(5,7), 16);
 					return 0.299*R + 0.587*G + 0.114*B;
+				};
+
+				// for gymnastics with time
+				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
+
+				var msToTime = function(s) {
+					function addZ(n) {
+						return (n<10? '0':'') + n;
+					}
+					var ms = s % 1000;
+					s = (s - ms) / 1000;
+					var secs = s % 60;
+					s = (s - secs) / 60;
+					var mins = s % 60;
+					var hrs = (s - mins) / 60;
+
+					return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
+				};
+
+
+				var drawAnnots = function() {
+					focus.selectAll(".annots")
+						.data(scope.model.annotations)
+						.enter()
+						.append("rect")
+						.attr("fill", function(d) {
+							return yCol(d.data);
+						})
+						.attr("x", function(d) {
+							return x(parseDate(msToTime(d.fragment.start)));
+						})
+						.attr("width", function(d) {
+							return x(parseDate(msToTime(d.fragment.end-d.fragment.start)));
+						})
+						.attr("y", function(d) {
+							return yBand(d.data);
+						})
+						.attr("height", yBand.rangeBand());
+
 				};
 
 				var initComp = function() {
@@ -129,7 +168,7 @@ angular.module('myApp.directives', ['ui.utils']).
 					yCol = d3.scale.category10();
 
 					// adapt font colors to yCol
-					yFont = d3.scale.ordinal().range(yCol.domain().map(function(el) {
+					yFont = d3.scale.ordinal().range(yCol.range().map(function(el) {
 						if(getLuminance(el) > 127) {
 							return 'black';
 						} else {
@@ -146,6 +185,7 @@ angular.module('myApp.directives', ['ui.utils']).
 					function brushed() {
 						x.domain(brush.empty() ? x2.domain() : brush.extent());
 						//focus.select("path").attr("d", area); // no need - other primitive
+						drawAnnots();
 						focus.select(".x.axis").call(xAxis);
 					};
 
@@ -160,8 +200,11 @@ angular.module('myApp.directives', ['ui.utils']).
 
 
 				};
+
+				// alternatively : specify rect by its bounds ?
 				var updateComp = function() {
-					x.domain([0, d3.max(scope.model.annotations.map(function(d) { return d.fragment.end; }))]);
+					x.domain([parseDate("00:00:00.000"),
+						d3.max(scope.model.annotations.map(function(d) { return parseDate(msToTime(d.fragment.end)); }))]);
 					x2.domain(x.domain());
 					// infer y domains from usage, see doc
 					var modalities = [];
@@ -173,12 +216,28 @@ angular.module('myApp.directives', ['ui.utils']).
 					});
 					yBand.domain(modalities);
 					yCol.domain(modalities);
+					yFont.domain(modalities);
 
-					// first add background rects
-					focus.append("g")
+					// background rects for lanes
+					// static, and not updated by brushes
+					focus.selectAll(".lanes")
 						.data(modalities)
+						.enter()
 						.append("rect")
+						.attr("fill", function(d) {
+							return yCol(d);
+						})
+						.attr("opacity", 0.1)
+						.attr("x", x.range()[0])
+						.attr("width", x.range()[1])
+						.attr("y", function(d) {
+							return yBand(d);
+						})
+						.attr("height", function(d) {
+							return yBand.rangeBand();
+						});
 
+					drawAnnots();
 
 
 					// display all at each step/brush -> clamp will filter what is displayed
