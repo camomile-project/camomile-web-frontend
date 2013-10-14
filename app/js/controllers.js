@@ -110,8 +110,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 				}, function() {
 					//post-processing : convert to adequate timestamps
 					$scope.model.annotations.forEach(function(elt) {
-						elt.
-					})
+						elt.fragment.start = msToTime(elt.fragment.start);
+						elt.fragment.end = msToTime(elt.fragment.end);
+					});
 				});
 			} else {
 				$scope.model.annotations = [];

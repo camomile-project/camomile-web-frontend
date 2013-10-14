@@ -95,11 +95,11 @@ angular.module('myApp.directives', ['ui.utils']).
 			template: '<svg></svg>',
 			link: function(scope, element, attrs) {
 				var margin = {}, margin2 = {}, width, height, height2;
-				var x, x2, yLabs, yBand, yCol;
-				// no need for a scale for context view - use the whole height
-				var xAxis, xAxis2;
+				var x, x2, yBand, yCol, yFont;
+				// no need for a scale/axis for context view - use the whole height
+				var xAxis, xAxis2, yAxis;
 				var d3elmt = d3.select(element); // d3 wrapper
-				var brush;
+				var brush, focus, context;
 
 				// get luminance in [0,255]
 				// used to set appropriate font color
@@ -125,12 +125,21 @@ angular.module('myApp.directives', ['ui.utils']).
 
 					x = d3.time.scale().range([0, width]).clamp(true),
 					x2 = d3.time.scale().range([0, width]).clamp(true),
-					yLabs = d3.scale.ordinal().rangePoints([0, height])
 					yBand = d3.scale.ordinal().rangeBands([0, height]),
 					yCol = d3.scale.category10();
 
-					xAxis = d3.svg.axis().scale(x).orient("bottom"),
+					// adapt font colors to yCol
+					yFont = d3.scale.ordinal().range(yCol.domain().map(function(el) {
+						if(getLuminance(el) > 127) {
+							return 'black';
+						} else {
+							return 'white';
+						}
+					}));
+
+					xAxis = d3.svg.axis().scale(x).orient("bottom");
 					xAxis2 = d3.svg.axis().scale(x2).orient("bottom");
+					yAxis = d3.svg.axis().scale(yBand).orient("left");
 
 					brush = d3.svg.brush().x(x2).on("brush", brushed);
 
@@ -138,12 +147,12 @@ angular.module('myApp.directives', ['ui.utils']).
 						x.domain(brush.empty() ? x2.domain() : brush.extent());
 						//focus.select("path").attr("d", area); // no need - other primitive
 						focus.select(".x.axis").call(xAxis);
-					}
+					};
 
-					var focus = d3elmt.append("g")
+					focus = d3elmt.append("g")
 						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-					var context = d3elmt.append("g")
+					context = d3elmt.append("g")
 						.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
 					// use time scale, ordinal scale for band layout,
@@ -152,12 +161,42 @@ angular.module('myApp.directives', ['ui.utils']).
 
 				};
 				var updateComp = function() {
-					// update the displayed pattern, reflecting new model.annotations
+					x.domain([0, d3.max(scope.model.annotations.map(function(d) { return d.fragment.end; }))]);
+					x2.domain(x.domain());
+					// infer y domains from usage, see doc
+					var modalities = [];
+					scope.model.annotations.forEach(function(elm) {
+						if(!modalities.hasOwnProperty('mod'+elm.data)) {
+							modalities.push(elm.data);
+							modalities['mod'+elm.data] = modalities.length-1;
+						}
+					});
+					yBand.domain(modalities);
+					yCol.domain(modalities);
+
+					// first add background rects
+					focus.append("g")
+						.data(modalities)
+						.append("rect")
+
+
+
+					// display all at each step/brush -> clamp will filter what is displayed
+					// area operates this way - no data remap is performed at each interaction
+
+				};
+
+				var resetComp = function() {
+					// reset component to init in a consistent and stable way
 				};
 
 				initComp();
 				scope.$watch('model.selected', function(newValue, oldValue, scope) {
-					updateComp();
+					if(newValue !== undefined) {
+						updateComp();
+					} else {
+						resetComp();
+					}
 				});
 			}
 		}
