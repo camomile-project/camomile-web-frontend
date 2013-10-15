@@ -11,17 +11,17 @@
 				</div>
 			</div>
 		</div>
-		<div class="filler"></div>
-		<div ui-jq="jScrollPane" ui-options="{showArrows: true,autoReinitialise: true, jScrollPane.VERTICAL_SCROLLBAR_ALWAYS: true}"
-				 class="scroll-pane annotDisplay" click-anywhere-but-here="selectLayer(undefined)">
-			<div>
-				<div ng-repeat="item in model.annotations" class="padded">
-					{{item}}
+		<div class="filler">{{getWidth()}}</div>
+			<div ui-jq="jScrollPane" ui-options="{showArrows: true,autoReinitialise: true, jScrollPane.VERTICAL_SCROLLBAR_ALWAYS: true}"
+					 class="scroll-pane annotDisplay" click-anywhere-but-here="selectLayer(undefined)">
+				<div>
+					<div ng-repeat="item in model.annotations" class="padded">
+						{{item}}
+					</div>
 				</div>
 			</div>
-		</div>
 		<div class="filler"></div>
-		<cm-timeline></cm-timeline>
+		<cm-timeline click-anywhere-but-here="selectLayer(undefined)"></cm-timeline>
 	</div>
 </div>
 
