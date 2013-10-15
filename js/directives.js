@@ -29,34 +29,39 @@ angular.module('myApp.directives', ['ui.utils']).
 
 			}};
 	})
-	// scrollable div
-	.directive('uiScroll', ['ui.config', function(uiConfig) {
-		uiConfig.uiScrollr = uiConfig.uiSCroll || {};
-		return {
-			restrict: 'A',
-			transclude: true,
-			replace: true,
-			scope: {
-				values: '=ngModel'
-			},
-			template: '<div class="scroll-pane"><div ng-transclude></div></div>',
-			link:function(scope,elm, $attrs,uiEvent ) {
-				var expression,
-					options = {
-					};
-				if ($attrs.uiScroll) {
-					expression = scope.$eval($attrs.uiScroll);
-				} else {
-					expression = {};
-				}
-
-				//Set the options from the directive's configuration
-				angular.extend(options, uiConfig.uiScroll, expression);
-				console.log(options);
-				elm.jScrollPane(options);
-			}
-		};
-	}])
+//	// scrollable div
+//	.directive('uiScroll', ['ui.config', function(uiConfig) {
+//		uiConfig.uiScrollr = uiConfig.uiSCroll || {};
+//		return {
+//			restrict: 'A',
+//			transclude: true,
+//			replace: true,
+//			scope: {
+//				values: '=ngModel'
+//			},
+//			template: '<div class="scroll-pane"><div ng-transclude></div></div>',
+//			link:function(scope,elm, $attrs,uiEvent ) {
+//				var expression,
+//					options = {
+//					};
+//				if ($attrs.uiScroll) {
+//					expression = scope.$eval($attrs.uiScroll);
+//				} else {
+//					expression = {};
+//				}
+//
+//				//Set the options from the directive's configuration
+//				angular.extend(options, uiConfig.uiScroll, expression);
+//				console.log(options);
+//				elm.jScrollPane(options);
+//
+//				// get appropriate width
+//				scope.getWidth = function() {
+//					return elm.parent().width();
+//				};
+//			}
+//		};
+//	}])
 	//clickable elements in a list
 	.directive('cmClickable', function() {
 		return {
@@ -69,6 +74,10 @@ angular.module('myApp.directives', ['ui.utils']).
 					if((!element.hasClass('alert')) && (newValue === scope.$index)) {
 						element.addClass('round').addClass('alert');
 					}
+				});
+				$('.scroll-pane').jScrollPane({
+					showArrows: true,
+					autoReinitialise: true
 				});
 			}
 		};
@@ -95,8 +104,8 @@ angular.module('myApp.directives', ['ui.utils']).
 			template: '<svg></svg>',
 			link: function(scope, element, attrs) {
 				var margin = {}, margin2 = {}, width, height, height2;
-				var x, x2, yBand, yCol, yFont;
-				// no need for a scale/axis for context view - use the whole height
+				// hack : multiple time scales, to circumvent unsupported date differences in JS
+				var xMsScale, xTimeScale, x2MsScale, x2TimeScale, yBand, yPoints, yCol, yFont;
 				var xAxis, xAxis2, yAxis;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var brush, focus, context;
@@ -118,30 +127,34 @@ angular.module('myApp.directives', ['ui.utils']).
 					function addZ(n) {
 						return (n<10? '0':'') + n;
 					}
-					var ms = s % 1000;
-					s = (s - ms) / 1000;
-					var secs = s % 60;
-					s = (s - secs) / 60;
-					var mins = s % 60;
-					var hrs = (s - mins) / 60;
+					var roundedS = Math.round(s);
+					var ms = roundedS % 1000;
+					roundedS = (roundedS - ms) / 1000;
+					var secs = roundedS % 60;
+					roundedS = (roundedS - secs) / 60;
+					var mins = roundedS % 60;
+					var hrs = (roundedS - mins) / 60;
 
 					return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
 				};
 
-
+				// readapt annotations to current scale
 				var drawAnnots = function() {
-					focus.selectAll(".annots")
+					focus.selectAll(".annot")
 						.data(scope.model.annotations)
 						.enter()
 						.append("rect")
 						.attr("fill", function(d) {
 							return yCol(d.data);
 						})
+						.attr("class", "annot");
+
+					focus.selectAll(".annot")
 						.attr("x", function(d) {
-							return x(parseDate(msToTime(d.fragment.start)));
+							return xMsScale(d.fragment.start);
 						})
 						.attr("width", function(d) {
-							return x(parseDate(msToTime(d.fragment.end-d.fragment.start)));
+							return xMsScale(d.fragment.end)-xMsScale(d.fragment.start);
 						})
 						.attr("y", function(d) {
 							return yBand(d.data);
@@ -152,19 +165,19 @@ angular.module('myApp.directives', ['ui.utils']).
 
 				var initComp = function() {
 					// init dimensions/margins
+					// height set depending on number of modalities - in updateComp
 					var extWidth = element.parent().width();
-					margin = {top: 10, right: 0.1*extWidth, bottom: 100, left: 0.1*extWidth},
-					margin2 = {top: 430, right: 0.1*extWidth, bottom: 20, left: 0.1*extWidth},
+					margin = {top: 10, right: 0, bottom: 60, left: 0.1*extWidth},
+					margin2 = {right: 0, bottom: 20, left: 0.1*extWidth},
 					width = extWidth - margin.left - margin.right,
-					height = 500 - margin.top - margin.bottom,
-					height2 = 500 - margin2.top - margin2.bottom;
+					height2 = 30;
 
-					d3elmt.attr("width", width + margin.left + margin.right)
-						.attr("height", height + margin.top + margin.bottom);
 
-					x = d3.time.scale().range([0, width]).clamp(true),
-					x2 = d3.time.scale().range([0, width]).clamp(true),
-					yBand = d3.scale.ordinal().rangeBands([0, height]),
+					xTimeScale = d3.time.scale().range([0, width]).clamp(true),
+					x2TimeScale = d3.time.scale().range([0, width]).clamp(true),
+					xMsScale = d3.scale.linear().range([0, width]).clamp(true);
+					x2MsScale = d3.scale.linear().range([0, width]).clamp(true);
+					yBand = d3.scale.ordinal();
 					yCol = d3.scale.category10();
 
 					// adapt font colors to yCol
@@ -176,37 +189,37 @@ angular.module('myApp.directives', ['ui.utils']).
 						}
 					}));
 
-					xAxis = d3.svg.axis().scale(x).orient("bottom");
-					xAxis2 = d3.svg.axis().scale(x2).orient("bottom");
+					xAxis = d3.svg.axis().scale(xTimeScale).orient("bottom");
+					xAxis2 = d3.svg.axis().scale(x2TimeScale).orient("bottom");
 					yAxis = d3.svg.axis().scale(yBand).orient("left");
 
-					brush = d3.svg.brush().x(x2).on("brush", brushed);
+					brush = d3.svg.brush().x(x2MsScale).on("brush", brushed);
 
 					function brushed() {
-						x.domain(brush.empty() ? x2.domain() : brush.extent());
-						//focus.select("path").attr("d", area); // no need - other primitive
+						var brushRange = brush.extent().map(x2MsScale);
+						xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
+						xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
 						drawAnnots();
 						focus.select(".x.axis").call(xAxis);
 					};
 
-					focus = d3elmt.append("g")
-						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+					// init elements
+					focus = d3elmt.append("g");
 
-					context = d3elmt.append("g")
-						.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+					context = d3elmt.append("g");
 
-					// use time scale, ordinal scale for band layout,
-					// and color scale for lane design (background with alpha value)
 
 
 				};
 
-				// alternatively : specify rect by its bounds ?
+
 				var updateComp = function() {
-					x.domain([parseDate("00:00:00.000"),
+					xTimeScale.domain([parseDate("00:00:00.000"),
 						d3.max(scope.model.annotations.map(function(d) { return parseDate(msToTime(d.fragment.end)); }))]);
-					x2.domain(x.domain());
-					// infer y domains from usage, see doc
+					x2TimeScale.domain(xTimeScale.domain());
+					xMsScale.domain([0, d3.max(scope.model.annotations.map(function(d) { return d.fragment.end; }))]);
+					x2MsScale.domain(xMsScale.domain());
+
 					var modalities = [];
 					scope.model.annotations.forEach(function(elm) {
 						if(!modalities.hasOwnProperty('mod'+elm.data)) {
@@ -214,13 +227,28 @@ angular.module('myApp.directives', ['ui.utils']).
 							modalities['mod'+elm.data] = modalities.length-1;
 						}
 					});
+
+					// customize dimensions depending on number of modalities
+					height = modalities.length * 30;
+					margin2.top = height + margin.top + 10;
+
+					d3elmt.attr("width", width + margin.left + margin.right)
+						.attr("height", height + margin.top + margin.bottom);
+
+					focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+					context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+					yBand.rangeBands([0, height]);
+					//yPoints = d3.scale.ordinal().rangePoints([0, height]);
+
 					yBand.domain(modalities);
+					//yPoints.domain(modalities);
 					yCol.domain(modalities);
 					yFont.domain(modalities);
 
+
 					// background rects for lanes
 					// static, and not updated by brushes
-					focus.selectAll(".lanes")
+					focus.selectAll(".lane")
 						.data(modalities)
 						.enter()
 						.append("rect")
@@ -228,35 +256,85 @@ angular.module('myApp.directives', ['ui.utils']).
 							return yCol(d);
 						})
 						.attr("opacity", 0.1)
-						.attr("x", x.range()[0])
-						.attr("width", x.range()[1])
+						.attr("x", xMsScale.range()[0])
+						.attr("width", xMsScale.range()[1])
 						.attr("y", function(d) {
 							return yBand(d);
 						})
 						.attr("height", function(d) {
 							return yBand.rangeBand();
-						});
+						})
+						.attr("class", "lane");
 
 					drawAnnots();
 
+					context.selectAll(".annot")
+						.data(scope.model.annotations)
+						.enter()
+						.append("rect")
+						.attr("fill", "#999999")
+						.attr("opacity", 0.2)
+						.attr("x", function(d) {
+							return x2MsScale(d.fragment.start);
+						})
+						.attr("width", function(d) {
+							return x2MsScale(d.fragment.end)-x2MsScale(d.fragment.start);
+						})
+						.attr("y", 0)
+						.attr("height", height2)
+						.attr("class", "annot");
 
-					// display all at each step/brush -> clamp will filter what is displayed
-					// area operates this way - no data remap is performed at each interaction
+					context.append("g")
+						.attr("class", "x brush")
+						.call(brush)
+						.selectAll("rect")
+						.attr("y", -6)
+						.attr("height", height2 + 7);
+
+					focus.append("g")
+						.attr("class", "x axis")
+						.attr("transform", "translate(0," + height + ")")
+						.call(xAxis);
+
+					context.append("g")
+						.attr("class", "x axis")
+						.attr("transform", "translate(0," + height2 + ")")
+						.call(xAxis2);
+
+					focus.append("g")
+						.attr("class", "y axis")
+						.call(yAxis);
+
 
 				};
 
 				var resetComp = function() {
 					// reset component to init in a consistent and stable way
+					focus.selectAll(".lane")
+						.remove();
+					focus.selectAll(".annot")
+						.remove();
+					context.selectAll(".annot")
+						.remove();
+					context.selectAll(".brush")
+						.remove();
+					focus.selectAll(".axis")
+						.remove();
+					context.selectAll(".axis")
+						.remove();
+					brush.clear();
 				};
 
-				initComp();
+
 				scope.$watch('model.selected', function(newValue, oldValue, scope) {
+					resetComp();
 					if(newValue !== undefined) {
 						updateComp();
-					} else {
-						resetComp();
 					}
 				});
+
+				initComp();
+
 			}
 		}
 	});
