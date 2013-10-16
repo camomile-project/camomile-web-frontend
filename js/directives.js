@@ -116,7 +116,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 					if(ext < 60000) {
 						minutes = "";
 					}
-
 					return hours+minutes+seconds;
 				};
 
@@ -157,7 +156,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 							return(videoTime(d, ext)+msecs);
 						});
 				}
-				// generalize behaviour CURPBR
 
 				var initComp = function() {
 					// init dimensions/margins
@@ -197,7 +195,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 						xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
 						drawAnnots();
 						focus.select(".x.axis").call(xAxis);
-						filterXAxis();
+						filterXAxis(focus.select(".x"), xMsScale);
 					};
 
 					// init elements
@@ -280,7 +278,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("class", "annot");
 
 					context.append("g")
-						.attr("class", "x brush")
+						.attr("class", "brush")
 						.call(brush)
 						.selectAll("rect")
 						.attr("y", -6)
@@ -288,15 +286,16 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 					focus.append("g")
 						.attr("class", "x axis")
-						//.attr("transform", "translate(0," + height + ")")
 						.call(xAxis);
 
-					filterXAxis();
+					filterXAxis(focus.select(".x"), xMsScale);
 
 					context.append("g")
 						.attr("class", "x axis")
 						.attr("transform", "translate(0," + height2 + ")")
 						.call(xAxis2);
+
+					filterXAxis(context.select(".x"), x2MsScale);
 
 					focus.append("g")
 						.attr("class", "y axis")
