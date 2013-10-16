@@ -106,18 +106,13 @@ angular.module('myApp.directives', ['myApp.filters']).
 					return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
 				};
 
-				var videoTime = function(date, ext) {
-					var hours = date.toString().slice(16,18)+":";
-					var minutes = date.toString().slice(19,21)+":";
-					var seconds = date.toString().slice(22,24);
-					if(ext < 3600000) {
-						hours = "";
-					}
-					if(ext < 60000) {
-						minutes = "";
-					}
-					return hours+minutes+seconds;
-				};
+				function timeFormat(formats) {
+					return function(date) {
+						var i = formats.length - 1, f = formats[i];
+						while (!f[1](date)) f = formats[--i];
+						return f[0](date);
+					};
+				}
 
 				// readapt annotations to current scale
 				var drawAnnots = function() {
@@ -144,19 +139,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				};
 
-				var filterXAxis = function(axis, scale) {
-					// get axis extent
-					var ext = scale.domain();
-					ext = ext[1] - ext[0];
-					axis.selectAll("text")
-						.text(function(d) {
-							// d3 time scale displays ms as ".057" for very small scale - use that pattern
-							var msecs = this.textContent.match(/^\..*/);
-							msecs = (msecs ? msecs[0] : "");
-							return(videoTime(d, ext)+msecs);
-						});
-				}
-
 				var initComp = function() {
 					// init dimensions/margins
 					// height set depending on number of modalities - in updateComp
@@ -167,8 +149,8 @@ angular.module('myApp.directives', ['myApp.filters']).
 					height2 = 30;
 
 
-					xTimeScale = d3.time.scale().range([0, width]).clamp(true),
-					x2TimeScale = d3.time.scale().range([0, width]).clamp(true),
+					xTimeScale = d3.time.scale().range([0, width]).clamp(true);
+					x2TimeScale = d3.time.scale().range([0, width]).clamp(true);
 					xMsScale = d3.scale.linear().range([0, width]).clamp(true);
 					x2MsScale = d3.scale.linear().range([0, width]).clamp(true);
 					yBand = d3.scale.ordinal();
@@ -183,8 +165,16 @@ angular.module('myApp.directives', ['myApp.filters']).
 						}
 					}));
 
-					xAxis = d3.svg.axis().scale(xTimeScale).orient("top");
-					xAxis2 = d3.svg.axis().scale(x2TimeScale).orient("bottom");
+					var customTimeFormat = timeFormat([
+						[d3.time.format("%H:%M:%S"), function(d) { return true; }],
+						[d3.time.format("%M:%S"), function(d) { return d.getSeconds(); }],
+						[d3.time.format("%S.%L"), function(d) { return d.getMilliseconds(); }]
+					]);
+
+					xAxis = d3.svg.axis().scale(xTimeScale).orient("top").ticks(5)
+						.tickFormat(customTimeFormat);
+					xAxis2 = d3.svg.axis().scale(x2TimeScale).orient("bottom").ticks(5)
+						.tickFormat(customTimeFormat);
 					yAxis = d3.svg.axis().scale(yBand).orient("left");
 
 					brush = d3.svg.brush().x(x2MsScale).on("brush", brushed);
@@ -195,7 +185,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 						xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
 						drawAnnots();
 						focus.select(".x.axis").call(xAxis);
-						filterXAxis(focus.select(".x"), xMsScale);
 					};
 
 					// init elements
@@ -209,11 +198,12 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 
 				var updateComp = function() {
-					xTimeScale.domain([parseDate("00:00:00.000"),
-						d3.max(scope.model.annotations.map(function(d) { return parseDate(msToTime(d.fragment.end)); }))]);
-					x2TimeScale.domain(xTimeScale.domain());
 					xMsScale.domain([0, d3.max(scope.model.annotations.map(function(d) { return d.fragment.end; }))]);
 					x2MsScale.domain(xMsScale.domain());
+
+					xTimeScale.domain([parseDate("00:00:00.000"),
+							d3.max(scope.model.annotations.map(function(d) { return parseDate(msToTime(d.fragment.end)); }))])
+					x2TimeScale.domain(xTimeScale.domain());
 
 					var modalities = [];
 					scope.model.annotations.forEach(function(elm) {
@@ -288,14 +278,10 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("class", "x axis")
 						.call(xAxis);
 
-					filterXAxis(focus.select(".x"), xMsScale);
-
 					context.append("g")
 						.attr("class", "x axis")
 						.attr("transform", "translate(0," + height2 + ")")
 						.call(xAxis2);
-
-					filterXAxis(context.select(".x"), x2MsScale);
 
 					focus.append("g")
 						.attr("class", "y axis")
@@ -349,5 +335,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 			}
 		}
 	});
+
 
 
