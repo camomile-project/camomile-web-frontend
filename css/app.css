@@ -53,10 +53,19 @@ span.label {
     shape-rendering: crispEdges;
 }
 
+.axis {
+    font-size: 100%;
+}
+
 .axis path,
 .axis line {
     fill: none;
     stroke: #000;
     shape-rendering: crispEdges;
+}
+
+.scroll-pane {
+    height: 200px;
+    outline: none;
 }
 

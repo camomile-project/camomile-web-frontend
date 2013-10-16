@@ -3,7 +3,7 @@
 /* Directives */
 
 
-angular.module('myApp.directives', ['ui.utils']).
+angular.module('myApp.directives', ['myApp.filters']).
   directive('appVersion', ['version', function(version) {
     return function(scope, elm, attrs) {
       elm.text(version);
@@ -29,39 +29,7 @@ angular.module('myApp.directives', ['ui.utils']).
 
 			}};
 	})
-//	// scrollable div
-//	.directive('uiScroll', ['ui.config', function(uiConfig) {
-//		uiConfig.uiScrollr = uiConfig.uiSCroll || {};
-//		return {
-//			restrict: 'A',
-//			transclude: true,
-//			replace: true,
-//			scope: {
-//				values: '=ngModel'
-//			},
-//			template: '<div class="scroll-pane"><div ng-transclude></div></div>',
-//			link:function(scope,elm, $attrs,uiEvent ) {
-//				var expression,
-//					options = {
-//					};
-//				if ($attrs.uiScroll) {
-//					expression = scope.$eval($attrs.uiScroll);
-//				} else {
-//					expression = {};
-//				}
-//
-//				//Set the options from the directive's configuration
-//				angular.extend(options, uiConfig.uiScroll, expression);
-//				console.log(options);
-//				elm.jScrollPane(options);
-//
-//				// get appropriate width
-//				scope.getWidth = function() {
-//					return elm.parent().width();
-//				};
-//			}
-//		};
-//	}])
+
 	//clickable elements in a list
 	.directive('cmClickable', function() {
 		return {
@@ -105,7 +73,7 @@ angular.module('myApp.directives', ['ui.utils']).
 			link: function(scope, element, attrs) {
 				var margin = {}, margin2 = {}, width, height, height2;
 				// hack : multiple time scales, to circumvent unsupported date differences in JS
-				var xMsScale, xTimeScale, x2MsScale, x2TimeScale, yBand, yPoints, yCol, yFont;
+				var xMsScale, xTimeScale, x2MsScale, x2TimeScale, yBand, yCol, yFont;
 				var xAxis, xAxis2, yAxis;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var brush, focus, context;
@@ -138,6 +106,20 @@ angular.module('myApp.directives', ['ui.utils']).
 					return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
 				};
 
+				var videoTime = function(date, ext) {
+					var hours = date.toString().slice(16,18)+":";
+					var minutes = date.toString().slice(19,21)+":";
+					var seconds = date.toString().slice(22,24);
+					if(ext < 3600000) {
+						hours = "";
+					}
+					if(ext < 60000) {
+						minutes = "";
+					}
+
+					return hours+minutes+seconds;
+				};
+
 				// readapt annotations to current scale
 				var drawAnnots = function() {
 					focus.selectAll(".annot")
@@ -163,12 +145,26 @@ angular.module('myApp.directives', ['ui.utils']).
 
 				};
 
+				var filterXAxis = function(axis, scale) {
+					// get axis extent
+					var ext = scale.domain();
+					ext = ext[1] - ext[0];
+					axis.selectAll("text")
+						.text(function(d) {
+							// d3 time scale displays ms as ".057" for very small scale - use that pattern
+							var msecs = this.textContent.match(/^\..*/);
+							msecs = (msecs ? msecs[0] : "");
+							return(videoTime(d, ext)+msecs);
+						});
+				}
+				// generalize behaviour CURPBR
+
 				var initComp = function() {
 					// init dimensions/margins
 					// height set depending on number of modalities - in updateComp
 					var extWidth = element.parent().width();
-					margin = {top: 10, right: 0, bottom: 60, left: 0.1*extWidth},
-					margin2 = {right: 0, bottom: 20, left: 0.1*extWidth},
+					margin = {top: 20, right: 0, bottom: 60, left: 0.15*extWidth},
+					margin2 = {right: 0, bottom: 20, left: 0.15*extWidth},
 					width = extWidth - margin.left - margin.right,
 					height2 = 30;
 
@@ -189,7 +185,7 @@ angular.module('myApp.directives', ['ui.utils']).
 						}
 					}));
 
-					xAxis = d3.svg.axis().scale(xTimeScale).orient("bottom");
+					xAxis = d3.svg.axis().scale(xTimeScale).orient("top");
 					xAxis2 = d3.svg.axis().scale(x2TimeScale).orient("bottom");
 					yAxis = d3.svg.axis().scale(yBand).orient("left");
 
@@ -201,6 +197,7 @@ angular.module('myApp.directives', ['ui.utils']).
 						xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
 						drawAnnots();
 						focus.select(".x.axis").call(xAxis);
+						filterXAxis();
 					};
 
 					// init elements
@@ -238,10 +235,8 @@ angular.module('myApp.directives', ['ui.utils']).
 					focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 					context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 					yBand.rangeBands([0, height]);
-					//yPoints = d3.scale.ordinal().rangePoints([0, height]);
 
 					yBand.domain(modalities);
-					//yPoints.domain(modalities);
 					yCol.domain(modalities);
 					yFont.domain(modalities);
 
@@ -293,8 +288,10 @@ angular.module('myApp.directives', ['ui.utils']).
 
 					focus.append("g")
 						.attr("class", "x axis")
-						.attr("transform", "translate(0," + height + ")")
+						//.attr("transform", "translate(0," + height + ")")
 						.call(xAxis);
+
+					filterXAxis();
 
 					context.append("g")
 						.attr("class", "x axis")
@@ -304,6 +301,21 @@ angular.module('myApp.directives', ['ui.utils']).
 					focus.append("g")
 						.attr("class", "y axis")
 						.call(yAxis);
+
+					// adjust y axis font size to meet the available space
+					// first, get default max computed text width
+					var maxTickLength=0;
+					focus.select(".y")
+						.selectAll("text")[0]
+						.forEach(function(d) {
+							if(d.getComputedTextLength() > maxTickLength) {
+								maxTickLength = d.getComputedTextLength();
+							}
+						});
+					maxTickLength = maxTickLength * 16 / 12; // approx. points to pixels conversion
+					focus.select(".y")
+						.selectAll("text")
+						.attr("font-size", "" +110*margin.left/maxTickLength +"%");
 
 
 				};
