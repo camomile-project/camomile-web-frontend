@@ -274,7 +274,8 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("height", height2 + 7);
 
 					focus.append("g")
-						.attr("class", "x axis cm-slidable-axis")
+						//.attr("class", "x axis cm-slidable-axis")
+						.attr("class", "x axis")
 						.call(xAxis);
 
 					context.append("g")
