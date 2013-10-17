@@ -74,20 +74,13 @@ angular.module('myApp.directives', ['myApp.filters']).
 			link: function(scope, element, attrs) {
 				var margin = {}, margin2 = {}, width, height, height2;
 				// hack : multiple time scales, to circumvent unsupported date differences in JS
-				var xMsScale, xTimeScale, x2MsScale, x2TimeScale, yBand, yCol, yFont;
+				var xMsScale, xTimeScale, x2MsScale, x2TimeScale;
 				var xAxis, xAxis2, yAxis;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var brush, focus, context;
 
-				// get luminance in [0,255]
-				// used to set appropriate font color
-				var getLuminance = function(colorStr) {
-					// parse R, G and B from string
-					var R = parseInt(colorStr.slice(1,3), 16);
-					var G = parseInt(colorStr.slice(3,5), 16);
-					var B = parseInt(colorStr.slice(5,7), 16);
-					return 0.299*R + 0.587*G + 0.114*B;
-				};
+				var d3layers = [];
+				var colScales = [];
 
 				// for gymnastics with time
 				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
@@ -120,6 +113,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				// readapt annotations to current scale
 				var drawAnnots = function() {
+					// for each in d3layers
 					focus.selectAll(".annot")
 						.data(scope.model.annotations)
 						.enter()
@@ -162,23 +156,12 @@ angular.module('myApp.directives', ['myApp.filters']).
 					height2 = 30;
 
 
-					xTimeScale = d3.time.scale().range([0, width]).clamp(true);
-					x2TimeScale = d3.time.scale().range([0, width]).clamp(true);
-					xMsScale = d3.scale.linear().range([0, width]).clamp(true);
-					x2MsScale = d3.scale.linear().range([0, width]).clamp(true);
-					//yBand = d3.scale.ordinal();
-					yCol = d3.scale.category20();
+					xTimeScale = d3.time.scale().domain([0,0]).range([0, width]).clamp(true);
+					x2TimeScale = d3.time.scale().domain([0,0]).range([0, width]).clamp(true);
+					xMsScale = d3.scale.linear().domain([0,0]).range([0, width]).clamp(true);
+					x2MsScale = d3.scale.linear().domain([0,0]).range([0, width]).clamp(true);
 
-					// adapt font colors to yCol
-					yFont = d3.scale.ordinal().range(yCol.range().map(function(el) {
-						if(getLuminance(el) > 127) {
-							return 'black';
-						} else {
-							return 'white';
-						}
-					}));
-
-					// now no more band domain for the focus view : all in 1 with transparency
+					yAxis = d3.scale.ordinal(); // range is updated at each layer addition
 
 					var customTimeFormat = timeFormat([
 						[d3.time.format("%H:%M:%S"), function(d) { return true; }],
@@ -199,6 +182,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 					context = d3elmt.append("g");
 
 				};
+
+
+				//
 
 
 				var updateComp = function() {
@@ -306,15 +292,47 @@ angular.module('myApp.directives', ['myApp.filters']).
 				};
 
 
-				scope.$watch('model.selected', function(newValue, oldValue, scope) {
-					resetComp();
-					if(newValue !== undefined) {
-						updateComp();
+				var addComp = function(i) {
+					xMsScale.domain([0,
+						d3.max(xMsScale.domain()[1], scope.model.annotations.map(function(d) { return d.fragment.end; }))]);
+					if(brush.empty()) {
+						x2MsScale.domain(xMsScale.domain());
 					}
+
+					xTimeScale.domain([parseDate("00:00:00.000"),
+						d3.max(xTimeScale.domain()[1],
+							scope.model.annotations.map(function(d) { return parseDate(secToTime(d.fragment.end)); }))]);
+					x2TimeScale.domain(xTimeScale.domain());
+
+
+
+
+				};
+
+
+				var removeComp = function(i) {
+
+				};
+
+
+				scope.$watch('model.currentIndex', function(newValue, oldValue, scope) {
+
+					// addition case : find refIndexes minus d3indexes
+					var refIndexes = scope.model.layers.map(function(d) {return d.id;});
+					var d3Indexes = d3layers.map(function(d) {return d.id;});
+					var toAdd = refIndexes.filter(function(i) {return !(d3Indexes.indexOf(i) > -1);});
+
+					toAdd.forEach(function(d){
+						scope.model.layers.forEach(function(ref,i) {
+							if(ref.id === d) {
+								addComp(i);
+							}
+						})
+					});
+
 				});
 
 				initComp();
-
 
 			}
 		}

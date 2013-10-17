@@ -1,7 +1,5 @@
 'use strict';
 
-/* Controllers */
-
 angular.module('myApp.controllers', ['myApp.services'])
 	.controller('CorpusCtrl', ['$scope', 'titles', 'Corpus', function($scope, titles, Corpus) {
 		$scope.model = {
@@ -80,27 +78,48 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 	}])
 	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', 'Annotation', function($scope, Corpus, Media, Layer, Annotation) {
-		$scope.model = {
-			list: [],
-			annotations: [],
-			selected: undefined
-		};
+//		$scope.model = {
+//			list: [],
+//			annotations: [],
+//			selected: undefined
+//		};
 
-		$scope.selectLayer = function(index) {
-			if(index !== undefined) {
-				var selectedElem = $scope.model.list[index];
-				$scope.model.annotations = Annotation.query({corpusId: selectedElem.corpusId,
-					mediaId: selectedElem.mediaId,
-					layerId: selectedElem.layerId
-				}, function() {
-					// update "model.selected" only on effective success
-					$scope.model.selected = index;
-				});
-			} else {
-				$scope.model.annotations = [];
-				$scope.model.selected = undefined;
+		$scope.model.layers = [];
+
+//		$scope.selectLayer = function(index) {
+//			if(index !== undefined) {
+//				var selectedElem = $scope.model.list[index];
+//				$scope.model.annotations = Annotation.query({corpusId: selectedElem.corpusId,
+//					mediaId: selectedElem.mediaId,
+//					layerId: selectedElem.layerId
+//				}, function() {
+//					// update "model.selected" only on effective success
+//					$scope.model.selected = index;
+//				});
+//			} else {
+//				$scope.model.annotations = [];
+//				$scope.model.selected = undefined;
+//			}
+//		};
+
+		var mapping = {
+			colors: {
+				"correct": "green",
+				"miss": "orange",
+				"false alarm": "orange",
+				"confusion": "red"
+			},
+			getKey: function(d) {
+				return d.data[0];
 			}
 		};
+
+		var label;
+
+		var tooltipFunc = function(d) {
+			return d.data[0];
+		};
+
 
 		// nested populating snippet
 		Corpus.query(function(corpuses) {
