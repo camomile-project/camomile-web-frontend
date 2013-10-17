@@ -11,43 +11,33 @@ angular.module('myApp.services', ['ngResource'])
 										Layer: 'Layers',
 										Annotation: 'Annotations'
 	})
-  .value('RESTroot', 'https://flower.limsi.fr/data')// double esc. needed to specify port, see https://github.com/angular/angular.js/issues/1243
-	.factory('Corpus', ['$resource', 'RESTroot', function($resource, RESTroot) {
-			return $resource(RESTroot + '/corpus/:corpusId',
+  .value('DataRoot', 'https://flower.limsi.fr/data')// double esc. needed to specify port, see https://github.com/angular/angular.js/issues/1243
+  .value('ToolRoot', 'https://flower.limsi.fr/tool')// double esc. needed to specify port, see https://github.com/angular/angular.js/issues/1243
+	.factory('Corpus', ['$resource', 'DataRoot', function($resource, DataRoot) {
+			return $resource(DataRoot + '/corpus/:corpusId',
 					{corpusId: '@corpusId'});
 	}])
-	.factory('Media', ['$resource', 'RESTroot', function($resource, RESTroot) {
-			return $resource(RESTroot + '/corpus/:corpusId/media/:mediaId',
+	.factory('Media', ['$resource', 'DataRoot', function($resource, DataRoot) {
+			return $resource(DataRoot + '/corpus/:corpusId/media/:mediaId',
 					{corpusId: '@corpusId', mediaId: '@mediaId'});
 	}])
-	.factory('Layer', ['$resource', 'RESTroot', function($resource, RESTroot) {
-		return $resource(RESTroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId',
+	.factory('Layer', ['$resource', 'DataRoot', function($resource, DataRoot) {
+		return $resource(DataRoot + '/corpus/:corpusId/media/:mediaId/layer/:layerId',
 				{corpusId: '@corpusId', mediaId: '@mediaId', layerId: '@layerId'});
 	}])
-	.factory('Annotation', ['$resource', 'RESTroot', function($resource, RESTroot) {
-		return $resource(RESTroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId',
+	.factory('Annotation', ['$resource', 'DataRoot', function($resource, DataRoot) {
+		return $resource(DataRoot + '/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId',
 				{corpusId: '@corpusId', mediaId: '@mediaId', layerId: '@layerId', annotationId: '@annotationId'});
 	}])
-
-
-
-
-// sample list of elements
-	.value('sampleList', ['carrots',
-		'bananas',
-		'oranges',
-		'apples',
-		'cherries',
-		'bananas',
-		'oranges',
-		'apples',
-		'cherries',
-		'bananas',
-		'oranges',
-		'apples',
-		'cherries',
-		'bananas',
-		'oranges',
-		'apples',
-		'cherries',
-		'potatoes']);
+	.factory('CMError', ['$http', 'ToolRoot', function($http, ToolRoot) {
+		return {
+			diff: function(reference_and_hypothesis) {
+				var url = ToolRoot + '/error/diff';
+				return $http.post(url, reference_and_hypothesis);
+			},
+			regression: function(reference_and_hypotheses) {
+				var url = ToolRoot + '/error/regression';
+				return $http.post(url, reference_and_hypotheses);
+			}
+		}
+	}])

@@ -1,0 +1,31 @@
+
+<div ng-controller="DiffCtrl">
+
+<select ng-model='model.selected_corpus' ng-init="get_corpora()">
+    <option value="">-- select a corpus --</option>
+    <option ng-repeat='corpus in model.corpora' value={{corpus._id}}>{{corpus.name}}</option>
+</select>
+
+<select ng-model='model.selected_medium' ng-show='model.selected_corpus'>
+    <option value="">-- select a medium --</option>
+    <option ng-repeat='medium in model.media' value={{medium._id}}>{{medium.name}}</option>
+</select>
+
+<select ng-model='model.selected_reference' ng-show='model.selected_medium'>
+    <option value="">-- select a reference --</option>
+    <option ng-repeat='layer in model.layers' value={{layer._id}}>{{layer.layer_type}}</option>
+</select>
+
+<select ng-model='model.selected_hypothesis' ng-show='model.selected_medium'>
+    <option value="">-- select an hypothesis --</option>
+    <option ng-repeat='layer in model.layers' value={{layer._id}}>{{layer.layer_type}}</option>
+</select>
+
+<div ng-show='model.selected_reference'>{{model.reference.length}} fragments in reference</div>
+<div ng-show='model.selected_hypothesis'>{{model.hypothesis.length}} fragments in hypothesis</div>
+
+<div ng-show="model.diff" ng-repeat="error in model.diff">
+    <div>{{error | json}}</div>
+</div>
+
+</div>
