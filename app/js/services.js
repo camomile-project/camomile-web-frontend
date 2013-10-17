@@ -11,7 +11,7 @@ angular.module('myApp.services', ['ngResource'])
 										Layer: 'Layers',
 										Annotation: 'Annotations'
 	})
-  .value('RESTroot', 'http://localhost\\:3000')// double esc. needed to specify port, see https://github.com/angular/angular.js/issues/1243
+  .value('RESTroot', 'https://flower.limsi.fr/data')// double esc. needed to specify port, see https://github.com/angular/angular.js/issues/1243
 	.factory('Corpus', ['$resource', 'RESTroot', function($resource, RESTroot) {
 			return $resource(RESTroot + '/corpus/:corpusId',
 					{corpusId: '@corpusId'});
