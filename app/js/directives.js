@@ -92,17 +92,20 @@ angular.module('myApp.directives', ['myApp.filters']).
 				// for gymnastics with time
 				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
 
-				var msToTime = function(s) {
+				var secToTime = function(s) {
 					function addZ(n) {
 						return (n<10? '0':'') + n;
 					}
-					var roundedS = Math.round(s);
-					var ms = roundedS % 1000;
-					roundedS = (roundedS - ms) / 1000;
-					var secs = roundedS % 60;
-					roundedS = (roundedS - secs) / 60;
-					var mins = roundedS % 60;
-					var hrs = (roundedS - mins) / 60;
+
+					var ms = s % 1;
+					s = Math.floor(s);
+					var secs = s % 60;
+					s = (s - secs) / 60;
+					var mins = s % 60;
+					var hrs = (s - mins) / 60;
+
+					// hack to force ms with 3 decimal parts
+					ms = parseFloat("0." + ms.toString()).toFixed(3).slice(2);
 
 					return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
 				};
@@ -187,7 +190,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.tickFormat(customTimeFormat);
 					xAxis2 = d3.svg.axis().scale(x2TimeScale).orient("bottom").ticks(5)
 						.tickFormat(customTimeFormat);
-					//yAxis = d3.svg.axis().scale(yBand).orient("left");
 
 					brush = d3.svg.brush().x(x2MsScale).on("brush", brushed);
 
@@ -204,7 +206,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 					x2MsScale.domain(xMsScale.domain());
 
 					xTimeScale.domain([parseDate("00:00:00.000"),
-							d3.max(scope.model.annotations.map(function(d) { return parseDate(msToTime(d.fragment.end)); }))])
+							d3.max(scope.model.annotations.map(function(d) { return parseDate(secToTime(d.fragment.end)); }))])
 					x2TimeScale.domain(xTimeScale.domain());
 
 					var modalities = [];
@@ -225,9 +227,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 					focus.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 					context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-					//yBand.rangeBands([0, height]);
 
-					//yBand.domain(modalities);
 					yCol.domain(modalities);
 					yFont.domain(modalities);
 
@@ -248,26 +248,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 							return d.y;
 						});
 
-
-					// background rects for lanes
-					// static, and not updated by brushes
-//					focus.selectAll(".lane")
-//						.data(modalities)
-//						.enter()
-//						.append("rect")
-//						.attr("fill", function(d) {
-//							return yCol(d);
-//						})
-//						.attr("opacity", 0.1)
-//						.attr("x", xMsScale.range()[0])
-//						.attr("width", xMsScale.range()[1])
-//						.attr("y", function(d) {
-//							return 0;
-//						})
-//						.attr("height", function(d) {
-//							return height;
-//						})
-//						.attr("class", "lane");
 
 					drawAnnots();
 
@@ -304,26 +284,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("transform", "translate(0," + height2 + ")")
 						.call(xAxis2);
 
-					//focus.append("g")
-					//	.attr("class", "y axis")
-					//	.call(yAxis);
-
-					// adjust y axis font size to meet the available space
-					// first, get default max computed text width
-//					var maxTickLength=0;
-//					focus.select(".y")
-//						.selectAll("text")[0]
-//						.forEach(function(d) {
-//							if(d.getComputedTextLength() > maxTickLength) {
-//								maxTickLength = d.getComputedTextLength();
-//							}
-//						});
-//					maxTickLength = maxTickLength * 16 / 12; // approx. points to pixels conversion
-//					focus.select(".y")
-//						.selectAll("text")
-//						.attr("font-size", "" +110*margin.left/maxTickLength +"%");
-
-
 				};
 
 				var resetComp = function() {
@@ -341,6 +301,8 @@ angular.module('myApp.directives', ['myApp.filters']).
 					context.selectAll(".axis")
 						.remove();
 					brush.clear();
+					d3elmt.selectAll(".label")
+						.remove();
 				};
 
 
@@ -353,49 +315,11 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				initComp();
 
-				// add a model for the focus range - so that other components can modify it
-//				scope.model.xRange = xTimeScale.range();
-//				scope.$watch('model.xRange', function(newValue, oldValue, scope) {
-//					xMsScale.domain(scope.model.xRange.map(x2MsScale.invert));
-//					xTimeScale.domain(scope.model.xRange.map(x2TimeScale.invert));
-//					drawAnnots();
-//					focus.select(".x.axis").call(xAxis);
-//					brush.extent(xMsScale.domain());
-//				});
-
 
 			}
 		}
 	});
 
-//	.directive("cmSlidableAxis", ["$document", function($document) {
-//		return {
-//			restrict: 'C',
-//			link: function(scope, element, attrs) {
-//				var startX;
-//				element.on('mousedown', function(event) {
-//					event.preventDefault();
-//					startX = scope.model.xRange.map(function(d) {
-//						return event.screenX - d;
-//					});
-//					$document.on('mousemove', mousemove);
-//					$document.on('mouseup', mouseup);
-//				});
-//
-//				function mousemove(event) {
-//					scope.$apply(function() {
-//						scope.model.xRange = startX.map(function(d) {
-//							return event.screenX - d;
-//						});
-//					});
-//				};
-//				function mouseup() {
-//					$document.unbind('mousemove', mousemove);
-//					$document.unbind('mouseup', mouseup);
-//				};
-//			}
-//		}
-//	}]);
 
 
 
