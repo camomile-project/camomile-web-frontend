@@ -65,6 +65,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 			}
 		}
 	})
+
 	.directive('cmTimeline', function() {
 		return {
 			restrict: 'E',
@@ -139,6 +140,14 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				};
 
+				var brushed = function() {
+					var brushRange = brush.extent().map(x2MsScale);
+					xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
+					xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
+					drawAnnots();
+					focus.select(".x.axis").call(xAxis);
+				};
+
 				var initComp = function() {
 					// init dimensions/margins
 					// height set depending on number of modalities - in updateComp
@@ -179,20 +188,10 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 					brush = d3.svg.brush().x(x2MsScale).on("brush", brushed);
 
-					function brushed() {
-						var brushRange = brush.extent().map(x2MsScale);
-						xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
-						xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
-						drawAnnots();
-						focus.select(".x.axis").call(xAxis);
-					};
-
 					// init elements
 					focus = d3elmt.append("g");
 
 					context = d3elmt.append("g");
-
-
 
 				};
 
@@ -275,7 +274,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("height", height2 + 7);
 
 					focus.append("g")
-						.attr("class", "x axis")
+						.attr("class", "x axis cm-slidable-axis")
 						.call(xAxis);
 
 					context.append("g")
@@ -332,9 +331,50 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				initComp();
 
+				// add a model for the focus range - so that other components can modify it
+				scope.model.xRange = xTimeScale.range();
+				scope.$watch('model.xRange', function(newValue, oldValue, scope) {
+					xMsScale.domain(scope.model.xRange.map(x2MsScale.invert));
+					xTimeScale.domain(scope.model.xRange.map(x2TimeScale.invert));
+					drawAnnots();
+					focus.select(".x.axis").call(xAxis);
+					brush.extent(xMsScale.domain());
+				});
+
+
 			}
 		}
-	});
+	})
+
+	.directive("cmSlidableAxis", ["$document", function($document) {
+		return {
+			restrict: 'C',
+			link: function(scope, element, attrs) {
+				var startX;
+				element.on('mousedown', function(event) {
+					event.preventDefault();
+					startX = scope.model.xRange.map(function(d) {
+						return event.screenX - d;
+					});
+					$document.on('mousemove', mousemove);
+					$document.on('mouseup', mouseup);
+				});
+
+				function mousemove(event) {
+					scope.$apply(function() {
+						scope.model.xRange = startX.map(function(d) {
+							return event.screenX - d;
+						});
+					});
+				};
+				function mouseup() {
+					$document.unbind('mousemove', mousemove);
+					$document.unbind('mouseup', mouseup);
+				};
+			}
+		}
+	}]);
+
 
 
 

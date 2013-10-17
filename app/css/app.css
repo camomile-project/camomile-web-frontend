@@ -69,3 +69,9 @@ span.label {
     outline: none;
 }
 
+.cm-slidable-axis {
+    cursor: pointer;
+}
+
+
+
