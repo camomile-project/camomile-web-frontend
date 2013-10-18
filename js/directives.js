@@ -112,6 +112,8 @@ angular.module('myApp.directives', ['myApp.filters']).
 				}
 
 				// readapt annotations to current scale
+				// see if example in http://bost.ocks.org/mike/nest/ is straightforwardly adaptable
+				// to our data structure
 				var drawAnnots = function() {
 					// for each in d3layers
 					focus.selectAll(".annot")
@@ -292,9 +294,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 				};
 
 
-				var addComp = function(i) {
+				var addComp = function(l) {
 					xMsScale.domain([0,
-						d3.max(xMsScale.domain()[1], scope.model.annotations.map(function(d) { return d.fragment.end; }))]);
+						d3.max(xMsScale.domain()[1], l.layer.map(function(d) { return d.fragment.end; }))]);
 					if(brush.empty()) {
 						x2MsScale.domain(xMsScale.domain());
 					}
@@ -315,20 +317,34 @@ angular.module('myApp.directives', ['myApp.filters']).
 				};
 
 
-				scope.$watch('model.currentIndex', function(newValue, oldValue, scope) {
+//				scope.$watch('model.currentIndex', function(newValue, oldValue, scope) {
+//
+//					// addition case : find refIndexes minus d3indexes
+//					var refIndexes = scope.model.layers.map(function(d) {return d.id;});
+//					var d3Indexes = d3layers.map(function(d) {return d.id;});
+//					var toAdd = refIndexes.filter(function(i) {return !(d3Indexes.indexOf(i) > -1);});
+//
+//					toAdd.forEach(function(d){
+//						scope.model.layers.forEach(function(ref,i) {
+//							if(ref.id === d) {
+//								addComp(i);
+//							}
+//						})
+//					});
+//
+//				});
 
-					// addition case : find refIndexes minus d3indexes
-					var refIndexes = scope.model.layers.map(function(d) {return d.id;});
-					var d3Indexes = d3layers.map(function(d) {return d.id;});
-					var toAdd = refIndexes.filter(function(i) {return !(d3Indexes.indexOf(i) > -1);});
+				scope.$watchCollection('model.layers', function(newLayers, oldLayers) {
+					// add case : find layers that are in the new object, but not in old
+//					var toAdd = newLayers.filter(function(l) {return !(oldLayers.indexOf(l) > -1);});
+//					toAdd.forEach(function(l){
+//						addLayer(l);
+//					});
+//				});
 
-					toAdd.forEach(function(d){
-						scope.model.layers.forEach(function(ref,i) {
-							if(ref.id === d) {
-								addComp(i);
-							}
-						})
-					});
+					// ideally, no need for add/remove procedures : model.layers shall be mapped to
+					// a set of lanes, and enter/exit mechanism should do the trick
+
 
 				});
 
