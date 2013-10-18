@@ -148,14 +148,15 @@ angular.module('myApp.directives', ['myApp.filters']).
 					focus.select(".x.axis").call(xAxis);
 				};
 
-				var initComp = function() {
+				var init = function() {
 					// init dimensions/margins
 					// height set depending on number of modalities - in updateComp
 					var extWidth = element.parent().width();
-					margin = {top: 20, right: 0, bottom: 60, left: 0.07*extWidth},
-					margin2 = {right: 0, bottom: 20, left: 0.07*extWidth},
-					width = extWidth - margin.left - margin.right,
-					height2 = 30;
+                    height = 0;
+                    height2 = 30;
+					margin = {top: 20, right: 0, bottom: 60, left: 0.07*extWidth};
+					margin2 = {top: height+10, right: 0, bottom: 20, left: 0.07*extWidth};
+					width = extWidth - margin.left - margin.right;
 
 
 					xTimeScale = d3.time.scale().domain([0,0]).range([0, width]).clamp(true);
@@ -170,6 +171,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 						[d3.time.format("%M:%S"), function(d) { return d.getSeconds(); }],
 						[d3.time.format("%S.%L"), function(d) { return d.getMilliseconds(); }]
 					]);
+
+                    d3elmt.attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom);
 
 					xAxis = d3.svg.axis().scale(xTimeScale).orient("top").ticks(5)
 						.tickFormat(customTimeFormat);
@@ -294,27 +298,39 @@ angular.module('myApp.directives', ['myApp.filters']).
 				};
 
 
-				var addComp = function(l) {
-					xMsScale.domain([0,
-						d3.max(xMsScale.domain()[1], l.layer.map(function(d) { return d.fragment.end; }))]);
-					if(brush.empty()) {
-						x2MsScale.domain(xMsScale.domain());
-					}
+				var addLayer = function(l) {
+                };
 
-					xTimeScale.domain([parseDate("00:00:00.000"),
-						d3.max(xTimeScale.domain()[1],
-							scope.model.annotations.map(function(d) { return parseDate(secToTime(d.fragment.end)); }))]);
-					x2TimeScale.domain(xTimeScale.domain());
+                var removeLayer = function(l) {
+                };
 
+                var refresh = function() {
+                    // the adapted content of drawAnnots goes here
+                    // first, (re)adjust scales, with fallback if void
 
+                    var theMax = 0;
+                    scope.model.layers.forEach(function(l) {
+                        theMax = d3.max(theMax, l.layer.map(function(d) { return d.fragment.end; }));
+                    })
+                    x2MsScale.domain([0, theMax]);
+                    if(brush.empty() || scope.model.layers.length === 0) {
+                        xMsScale.domain(x2MsScale.domain());
+                    }
 
+                    x2TimeScale.domain([parseDate("00:00:00.000"),
+                        d3.max(x2TimeScale.domain()[1],
+                            l.layer.map(function(d) { return parseDate(secToTime(d.fragment.end)); }))]);
+                    if(brush.empty()) {
+                        x2TimeScale.domain(xTimeScale.domain());
+                    }
 
-				};
+                    // adapt component dimensions
+                    height = 30 * scope.model.layers.length;
+                    margin2.top = height+10;
 
+                    d3elmt.attr("height", height + margin.top + margin.bottom);
+                }
 
-				var removeComp = function(i) {
-
-				};
 
 
 //				scope.$watch('model.currentIndex', function(newValue, oldValue, scope) {
@@ -340,15 +356,14 @@ angular.module('myApp.directives', ['myApp.filters']).
 //					toAdd.forEach(function(l){
 //						addLayer(l);
 //					});
-//				});
 
 					// ideally, no need for add/remove procedures : model.layers shall be mapped to
 					// a set of lanes, and enter/exit mechanism should do the trick
-
+                    refresh();
 
 				});
 
-				initComp();
+				init();
 
 			}
 		}
