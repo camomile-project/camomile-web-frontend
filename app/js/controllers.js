@@ -79,25 +79,36 @@ angular.module('myApp.controllers', ['myApp.services'])
 	}])
 	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', 'Annotation', function($scope, Corpus, Media, Layer, Annotation) {
 
-        // mock controller for testing timeline component
-        $scope.model = {
-            layers: []
-        };
+		// mock controller for testing timeline component
+		$scope.model = {
+				layers: []
+		};
 
-    	Corpus.query({corpusId: "524c35740ef6bde125000001"}, function(corp) {
-            Media.query({corpusId: corp._id, mediaId: "525bf32fbb9d24dc28000001"}, function(media) {
-                Layer.query({corpusId: corp._id, mediaId: media._id}, function(layers){
-                    layers.forEach(function (l, i) {
-                        $scope.model.layers.push({
-                            id: i,
-                            layer: l,
-                            label: "Test" + i
-                        });
-                    })
-                });
-            });
+		var stockLayers = [];
+		var curId = 0;
+
+		Corpus.get({corpusId: "524c35740ef6bde125000001"}, function(corp) {
+			Media.get({corpusId: corp._id, mediaId: "525bf32fbb9d24dc28000001"}, function(media) {
+				Layer.query({corpusId: corp._id, mediaId: media._id}, function(layers){
+					layers.forEach(function (l, i) {
+						Annotation.query({corpusId: corp._id, mediaId: media._id, layerId: l._id}, function(annots) {
+							var obj = {
+								id: i,
+								layer: annots,
+								label: l.layer_type
+							};
+							//$scope.model.layers.push(obj);
+							stockLayers.push(obj);
+						});
+					});
+				});
+			});
 		});
 
+		$scope.mockLayer = function() {
+			$scope.model.layers.push(stockLayers[curId]);
+			curId++;
+		};
 
 //		var mapping = {
 //			colors: {
