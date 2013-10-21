@@ -160,21 +160,21 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 					context = d3elmt.append("g");
 
-                    context.append("g")
-                        .attr("class", "brush")
-                        .call(brush)
-                        .selectAll("rect")
-                        .attr("y", -6)
-                        .attr("height", height2 + 7);
+					context.append("g")
+							.attr("class", "brush")
+							.call(brush)
+							.selectAll("rect")
+							.attr("y", -6)
+							.attr("height", height2 + 7);
 
-                    focus.append("g")
-                        .attr("class", "x axis")
-                        .call(xAxis);
+					focus.append("g")
+							.attr("class", "x axis")
+							.call(xAxis);
 
-                    context.append("g")
-                        .attr("class", "x axis")
-                        .attr("transform", "translate(0," + height2 + ")")
-                        .call(xAxis2);
+					context.append("g")
+							.attr("class", "x axis")
+							.attr("transform", "translate(0," + height2 + ")")
+							.call(xAxis2);
 
 
 				};
@@ -182,138 +182,138 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 
 				var addLayer = function(newLayers, i) {
-                    // define default mapping if needed
-                    if(newLayers[i].mapping === undefined) {
-                        newLayers[i].mapping = {
-                            getKey: function(d) {
-                                return d.data;
-                            }
-                        };
-                    }
+					// define default mapping if needed
+					if(newLayers[i].mapping === undefined) {
+							newLayers[i].mapping = {
+									getKey: function(d) {
+											return d.data;
+									}
+							};
+					}
 
-                    if(newLayers[i].mapping.colors === undefined){
-                        // use default mapping, or define a custom one
-                        var vals = newLayers[i].layer.map(newLayers[i].mapping.getKey);
-                        vals = $.grep(vals, function(v, k){
-                            return $.inArray(v ,vals) === k;
-                        }); // jQuery hack to get Array of unique values
-                        // and then all that are not already in the scale domain
-                        vals = vals.filter(function(l) {return !(defaultCol.domain().indexOf(l) > -1);});
-                        colScale.domain(defaultCol.domain().push(vals));
-                        vals.forEach(function(d) {
-                            colScale.range(colScale.range().push(colorbrewer.YlGnBu[curColInd]));
-                            curColInd = (curColInd + 1) % colorbrewer.YlGnBu.length;
-                        });
-                    } else {
-                        var keys = [];
-                        var cols = [];
-                        for(var key in newLayers[i].mapping.colors) {
-                            keys.push(key);
-                            cols.push(newLayers[i].mapping.colors[key]);
-                        }
-                        colScale.domain(colScale.domain.push(keys))
-                            .range(colScale.range.push(cols));
-                    }
+					if(newLayers[i].mapping.colors === undefined){
+							// use default mapping, or define a custom one
+							var vals = newLayers[i].layer.map(newLayers[i].mapping.getKey);
+							vals = $.grep(vals, function(v, k){
+									return $.inArray(v ,vals) === k;
+							}); // jQuery hack to get Array of unique values
+							// and then all that are not already in the scale domain
+							vals = vals.filter(function(l) {return !(defaultCol.domain().indexOf(l) > -1);});
+							colScale.domain(defaultCol.domain().push(vals));
+							vals.forEach(function(d) {
+									colScale.range(colScale.range().push(colorbrewer.YlGnBu[curColInd]));
+									curColInd = (curColInd + 1) % colorbrewer.YlGnBu.length;
+							});
+					} else {
+							var keys = [];
+							var cols = [];
+							for(var key in newLayers[i].mapping.colors) {
+									keys.push(key);
+									cols.push(newLayers[i].mapping.colors[key]);
+							}
+							colScale.domain(colScale.domain.push(keys))
+									.range(colScale.range.push(cols));
+					}
 
-                    // adapt reference scales
-                    var theMax = 0;
-                    newLayers.forEach(function(l) {
-                        theMax = d3.max(theMax,
-                            newLayers[i].layer.map(function(d) { return d.fragment.end; }));
-                    })
-                    x2MsScale.domain([0, theMax]);
-                    if(brush.empty() || newLayers.length === 0) {
-                        xMsScale.domain(x2MsScale.domain());
-                    }
+					// adapt reference scales
+					var theMax = 0;
+					newLayers.forEach(function(l) {
+							theMax = d3.max(theMax,
+									newLayers[i].layer.map(function(d) { return d.fragment.end; }));
+					})
+					x2MsScale.domain([0, theMax]);
+					if(brush.empty() || newLayers.length === 0) {
+							xMsScale.domain(x2MsScale.domain());
+					}
 
-                    x2TimeScale.domain([parseDate("00:00:00.000"),
-                        d3.max(x2TimeScale.domain()[1],
-                            newLayers[i].layer.map(function(d) { return parseDate(secToTime(d.fragment.end)); }))]);
-                    if(brush.empty()) {
-                        x2TimeScale.domain(xTimeScale.domain());
-                    }
+					x2TimeScale.domain([parseDate("00:00:00.000"),
+							d3.max(x2TimeScale.domain()[1],
+									newLayers[i].layer.map(function(d) { return parseDate(secToTime(d.fragment.end)); }))]);
+					if(brush.empty()) {
+							x2TimeScale.domain(xTimeScale.domain());
+					}
 
-                    // adapt component dimensions and y axis
-                    height = 30 * newLayers.length;
-                    margin2.top = height+10;
-                    d3elmt.attr("height", height + margin.top + margin.bottom);
-                    context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+					// adapt component dimensions and y axis
+					height = 30 * newLayers.length;
+					margin2.top = height+10;
+					d3elmt.attr("height", height + margin.top + margin.bottom);
+					context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-                    yAxis.domain(yAxis.domain.push(newLayers[i].label));
-                    yAxis.rangeBand([0, height]);
+					yAxis.domain(yAxis.domain.push(newLayers[i].label));
+					yAxis.rangeBand([0, height]);
 
-                    context.selectAll(".layer")
-                        .data(scope.model.layers, function(d) {
-                            return d;
-                        })
-                        .enter()
-                        .append("g")
-                        .attr("class", "layer")
-                        .selectAll(".annot")
-                        .data(function(d) {
-                            return d.layer;
-                        })
-                        .append("rect")
-                        .attr("fill", "#999999")
-                        .attr("opacity", 0.2)
-                        .attr("x", function(d) {
-                            return x2MsScale(d.fragment.start);
-                        })
-                        .attr("width", function(d) {
-                            return x2MsScale(d.fragment.end)-x2MsScale(d.fragment.start);
-                        })
-                        .attr("y", 0)
-                        .attr("height", height2)
-                        .attr("class", "annot");
-
-
-                    focus.selectAll(".layer")
-                        .data(scope.model.layers, function(d) {
-                            return d;
-                        })
-                        .enter()
-                        .append("g")
-                        .attr("class", "layer")
-                        .selectAll(".annot")
-                        .data(function(d) {
-                            return d.layer.map(function(e) {
-                                return {cell: e,
-                                    mapFunc:d.mapping.getKey};
-                            });
-                        }).enter()
-                        .append("rect")
-                        .attr("fill", function(d) {
-                            return colScale(d.mapFunc(d.cell));
-                        })
-                        .attr("opacity", 0.2)
-                        .attr("class", "annot");
-
-                    // update all lane positions
-                    focus.selectAll(".layer")
-                        .attr("transform", function(d,i) {
-                            return "translate(0," + ((i+1) * 30) + ")";
-                        });
+					context.selectAll(".layer")
+							.data(scope.model.layers, function(d) {
+									return d;
+							})
+							.enter()
+							.append("g")
+							.attr("class", "layer")
+							.selectAll(".annot")
+							.data(function(d) {
+									return d.layer;
+							})
+							.append("rect")
+							.attr("fill", "#999999")
+							.attr("opacity", 0.2)
+							.attr("x", function(d) {
+									return x2MsScale(d.fragment.start);
+							})
+							.attr("width", function(d) {
+									return x2MsScale(d.fragment.end)-x2MsScale(d.fragment.start);
+							})
+							.attr("y", 0)
+							.attr("height", height2)
+							.attr("class", "annot");
 
 
-                };
+					focus.selectAll(".layer")
+						.data(scope.model.layers, function(d) {
+								return d;
+						})
+						.enter()
+						.append("g")
+						.attr("class", "layer")
+						.selectAll(".annot")
+						.data(function(d) {
+								return d.layer.map(function(e) {
+										return {cell: e,
+												mapFunc:d.mapping.getKey};
+								});
+						}).enter()
+						.append("rect")
+						.attr("fill", function(d) {
+								return colScale(d.mapFunc(d.cell));
+						})
+						.attr("opacity", 0.2)
+						.attr("class", "annot");
 
-                var removeLayer = function(oldLayers, i) {
-                };
+					// update all lane positions
+					focus.selectAll(".layer")
+						.attr("transform", function(d,i) {
+								return "translate(0," + ((i+1) * 30) + ")";
+						});
+
+
+				};
+
+				var removeLayer = function(oldLayers, i) {
+				};
 
 
 
-                var refresh = function() {
-                    focus.selectAll(".annot")
-                        .attr("x", function(d) {
-                            return xMsScale(d.cell.fragment.start);
-                        })
-                        .attr("width", function(d) {
-                            return xMsScale(d.cell.fragment.end)-xMsScale(d.cell.fragment.start);
-                        })
-                        .attr("y", 0)
-                        .attr("height", 30);
+				var refresh = function() {
+					focus.selectAll(".annot")
+							.attr("x", function(d) {
+									return xMsScale(d.cell.fragment.start);
+							})
+							.attr("width", function(d) {
+									return xMsScale(d.cell.fragment.end)-xMsScale(d.cell.fragment.start);
+							})
+							.attr("y", 0)
+							.attr("height", 30);
 
-                }
+				};
 
 
 
@@ -334,21 +334,22 @@ angular.module('myApp.directives', ['myApp.filters']).
 //
 //				});
 
+				// ideally, we would have used watchCollection, but the feature appears buggy...
+				// instead, use a redundant "currentId", that serves to trigger the notifications
 				scope.$watchCollection('model.layers', function(newLayers, oldLayers) {
 					// add case : find layers that are in the new object, but not in old
-                    // use addLayer and remove layer to handle heavy operations
+					// use addLayer and remove layer to handle heavy operations
 
-                    // use indices of layers for further convenience with any local data
+          // use indices of layers for further convenience with any local data
 					var toAdd = newLayers.filter(function(l) {return !(oldLayers.indexOf(l) > -1);});
-                    var toAddIndexes = toAdd.map(function(d) {return newLayers.indexOf(d); });
+					var toAddIndexes = toAdd.map(function(d) {return newLayers.indexOf(d); });
 
 					toAddIndexes.forEach(function(i){
 						addLayer(newLayers, i);
 					});
 
-                    // for simplification, let us suppose unique lane labels.
-
-                    refresh();
+          // for simplification, let us suppose unique lane labels.
+          refresh();
 
 				});
 
