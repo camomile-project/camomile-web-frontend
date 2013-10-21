@@ -78,69 +78,46 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 	}])
 	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', 'Annotation', function($scope, Corpus, Media, Layer, Annotation) {
-//		$scope.model = {
-//			list: [],
-//			annotations: [],
-//			selected: undefined
-//		};
 
-		$scope.model.layers = [];
+        // mock controller for testing timeline component
+        $scope.model = {
+            layers: []
+        };
 
-//		$scope.selectLayer = function(index) {
-//			if(index !== undefined) {
-//				var selectedElem = $scope.model.list[index];
-//				$scope.model.annotations = Annotation.query({corpusId: selectedElem.corpusId,
-//					mediaId: selectedElem.mediaId,
-//					layerId: selectedElem.layerId
-//				}, function() {
-//					// update "model.selected" only on effective success
-//					$scope.model.selected = index;
-//				});
-//			} else {
-//				$scope.model.annotations = [];
-//				$scope.model.selected = undefined;
+    	Corpus.query({corpusId: "524c35740ef6bde125000001"}, function(corp) {
+            Media.query({corpusId: corp._id, mediaId: "525bf32fbb9d24dc28000001"}, function(media) {
+                Layer.query({corpusId: corp._id, mediaId: media._id}, function(layers){
+                    layers.forEach(function (l, i) {
+                        $scope.model.layers.push({
+                            id: i,
+                            layer: l,
+                            label: "Test" + i
+                        });
+                    })
+                });
+            });
+		});
+
+
+//		var mapping = {
+//			colors: {
+//				"correct": "green",
+//				"miss": "orange",
+//				"false alarm": "orange",
+//				"confusion": "red"
+//			},
+//			getKey: function(d) {
+//				return d.data[0];
 //			}
 //		};
-
-		var mapping = {
-			colors: {
-				"correct": "green",
-				"miss": "orange",
-				"false alarm": "orange",
-				"confusion": "red"
-			},
-			getKey: function(d) {
-				return d.data[0];
-			}
-		};
-
-		var label;
-
-		var tooltipFunc = function(d) {
-			return d.data[0];
-		};
-
-
-		// nested populating snippet
-		Corpus.query(function(corpuses) {
-			corpuses.forEach(function(c) {
-				Media.query({corpusId: c._id}, function(media) {
-					media.forEach(function(m) {
-						Layer.query({corpusId: c._id, mediaId: m._id}, function(layer){
-							layer.forEach(function(l) {
-								$scope.model.list.push({
-									corpusId: c._id,
-									mediaId: m._id,
-									layerId: l._id,
-									mediaName: m.name,
-									layerType: l.layer_type
-								});
-							});
-						});
-					});
-				});
-			});
-		});
+//
+//		var label;
+//
+//		var tooltipFunc = function(d) {
+//			return d.data[0];
+//		};
+//
+//
 
 
 	}]);
