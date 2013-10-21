@@ -75,11 +75,10 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var margin = {}, margin2 = {}, width, height, height2;
 				// hack : multiple time scales, to circumvent unsupported date differences in JS
 				var xMsScale, xTimeScale, x2MsScale, x2TimeScale;
-				var xAxis, xAxis2, yAxis;
+				var xAxis, xAxis2, yAxis, defaultCol;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var brush, focus, context;
 
-				var d3layers = [];
 				var colScales = [];
 
 				// for gymnastics with time
@@ -144,7 +143,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 					var brushRange = brush.extent().map(x2MsScale);
 					xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
 					xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
-					drawAnnots();
+					refresh();
 					focus.select(".x.axis").call(xAxis);
 				};
 
@@ -165,6 +164,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 					x2MsScale = d3.scale.linear().domain([0,0]).range([0, width]).clamp(true);
 
 					yAxis = d3.scale.ordinal(); // range is updated at each layer addition
+                    defaultCol = d3.scale.category20();
 
 					var customTimeFormat = timeFormat([
 						[d3.time.format("%H:%M:%S"), function(d) { return true; }],
@@ -298,15 +298,15 @@ angular.module('myApp.directives', ['myApp.filters']).
 				};
 
 
-				var addLayer = function(l) {
-                };
-
-                var removeLayer = function(l) {
-                };
-
-                var refresh = function() {
-                    // the adapted content of drawAnnots goes here
-                    // first, (re)adjust scales, with fallback if void
+				var addLayer = function(i) {
+                    if(scope.model.layers[i].mapping === undefined) {
+                        // add new modalities to the default color scale
+                        colScales[i] = defaultCol;
+                    } else {
+                        colScales[i] = d3.scale.ordinal()
+                            .domain()
+                            .range(scope.model.layers[i].mapping.colors)
+                    }
 
                     var theMax = 0;
                     scope.model.layers.forEach(function(l) {
@@ -329,6 +329,59 @@ angular.module('myApp.directives', ['myApp.filters']).
                     margin2.top = height+10;
 
                     d3elmt.attr("height", height + margin.top + margin.bottom);
+
+                    yAxis.rangeBand([0, height]);
+
+
+
+                };
+
+                var removeLayer = function(l) {
+                };
+
+
+
+                var refresh = function() {
+                    // the adapted content of drawAnnots goes here
+                    // first, (re)adjust scales, with fallback if void
+
+
+                    focus.selectAll(".lane")
+                        .data(scope.model.layers, function(d) {
+                            return d;
+                        })
+                        .enter()
+                        .append("g")
+                        .append("text")
+                        .text(function(d) {
+                            return d.label;
+                        })
+                        .attr("class", "label")
+                        .attr("y", function(d) {
+                            return d.y;
+                        });
+
+
+
+                    .attr("fill", function(d) {
+                            return yCol(d.data);
+                        })
+                        .attr("opacity", 0.2)
+                        .attr("class", "annot");
+
+                    focus.selectAll(".annot")
+                        .attr("x", function(d) {
+                            return xMsScale(d.fragment.start);
+                        })
+                        .attr("width", function(d) {
+                            return xMsScale(d.fragment.end)-xMsScale(d.fragment.start);
+                        })
+                        .attr("y", function(d) {
+                            return 0;
+                        })
+                        .attr("height", height);
+
+
                 }
 
 
@@ -352,13 +405,18 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				scope.$watchCollection('model.layers', function(newLayers, oldLayers) {
 					// add case : find layers that are in the new object, but not in old
-//					var toAdd = newLayers.filter(function(l) {return !(oldLayers.indexOf(l) > -1);});
-//					toAdd.forEach(function(l){
-//						addLayer(l);
-//					});
+                    // use addLayer and remove layer to handle heavy operations
 
-					// ideally, no need for add/remove procedures : model.layers shall be mapped to
-					// a set of lanes, and enter/exit mechanism should do the trick
+                    // use indices of layers for further convenience with any local data
+					var toAdd = newLayers.filter(function(l) {return !(oldLayers.indexOf(l) > -1);});
+                    var toAddIndexes = toAdd.map(function(d) {return newLayers.indexOf(d); });
+
+					toAddIndexes.forEach(function(i){
+						addLayer(i);
+					});
+
+                    // for simplification, let us suppose unique lane labels.
+
                     refresh();
 
 				});
