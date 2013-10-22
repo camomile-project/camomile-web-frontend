@@ -10,43 +10,95 @@ angular.module('myApp.controllers', ['myApp.services'])
 	    delete $http.defaults.headers.common['X-Requested-With'];
 
 		$scope.model = {};
+
+		// layers[0] is the reference
+		// layers[1] is the hypothesis
+		// layers[2] is their difference
+		$scope.model.show_layers = [
+			{
+				'id': 0,
+				'label': 'Reference',
+				'layer': [],
+				'mapping': null,
+				'tooltipFunc': null,
+			},
+			{
+				'id': 1,
+				'label': 'Hypothesis',
+				'layer': [],
+				'mapping': null,
+				'tooltipFunc': null,
+			},
+			{
+				'id': 2,
+				'label': 'Difference',
+				'layer': [],
+				'mapping': null,
+				'tooltipFunc': null,
+			}
+		];
+
+		// selected corpus ID
 		$scope.model.selected_corpus = "";
+
+		// selected medium ID
 		$scope.model.selected_medium = "";
+
+		// selected reference layer ID
 		$scope.model.selected_reference = "";
+
+		// selected hypothesis layer ID
 		$scope.model.selected_hypothesis = "";
+
+		// list of annotations
 		$scope.model.reference = [];
 		$scope.model.hypothesis = [];
 		$scope.model.diff = [];
 
-		$scope.model.currentIndex = 0;
-		$scope.model.layers = [];
+		$scope.model.currentIndex = 2;
 
+		// get list of corpora
 		$scope.get_corpora = function() {
 			$scope.model.corpora = Corpus.query();
 		};
 
+		// get list of media for a given corpus
 		$scope.get_media = function(corpus_id) {
 			$scope.model.media = Media.query({corpusId: corpus_id});
 		};
 
+		// get list of layers for a given medium
 		$scope.get_layers = function(corpus_id, medium_id) {
 			$scope.model.layers = Layer.query(
 				{corpusId: corpus_id, mediaId: medium_id});
 		};
 
+		// get list of reference annotations from a given layer
+		// and update difference with hypothesis when it's done
 		$scope.get_reference_annotations = function(corpus_id, medium_id, layer_id) {
 			$scope.model.reference = Annotation.query(
 				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
-				$scope.compute_diff);
+				function() {
+					$scope.model.show_layers[0].layer = $scope.model.reference;
+					$scope.model.show_layers[0].id = $scope.model.currentIndex++;
+					$scope.compute_diff();
+				}
+			);
 		};
 
+		// get list of hypothesis annotations from a given layer
+		// and update difference with reference when it's done
 		$scope.get_hypothesis_annotations = function(corpus_id, medium_id, layer_id) {
 			$scope.model.hypothesis = Annotation.query(
 				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
-				$scope.compute_diff);
-
+				function() {
+					$scope.model.show_layers[1].layer = $scope.model.hypothesis;
+					$scope.model.show_layers[1].id = $scope.model.currentIndex++;
+					$scope.compute_diff();
+				});
 		};
 
+		// update difference between reference and hypothesis
 		$scope.compute_diff = function() {
 
 			var reference_and_hypothesis = {
@@ -56,7 +108,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 			CMError.diff(reference_and_hypothesis).success(function(data, status) {
 				$scope.model.diff = data;
-				$scope.model.
+				$scope.model.show_layers[2].layer = $scope.model.diff;
+				$scope.model.show_layers[2].id = $scope.model.currentIndex++;
 			});
 		}
 
