@@ -81,7 +81,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		// mock controller for testing timeline component
 		$scope.model = {
-				layers: []
+				layers: [],
+				latestLayer: {}
 		};
 
 		var stockLayers = [];
@@ -107,28 +108,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		$scope.mockLayer = function() {
 			$scope.model.layers.push(stockLayers[curId]);
+			$scope.model.latestLayer = stockLayers[curId];
 			curId++;
 		};
-
-//		var mapping = {
-//			colors: {
-//				"correct": "green",
-//				"miss": "orange",
-//				"false alarm": "orange",
-//				"confusion": "red"
-//			},
-//			getKey: function(d) {
-//				return d.data[0];
-//			}
-//		};
-//
-//		var label;
-//
-//		var tooltipFunc = function(d) {
-//			return d.data[0];
-//		};
-//
-//
 
 
 	}]);
