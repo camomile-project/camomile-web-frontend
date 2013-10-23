@@ -84,11 +84,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 				layers: [],
 				latestLayer: {},
 				stockLayers: [],
-				curId: 0
+				curId: 0,
+				mediaName: ""
 		};
 
 		Corpus.get({corpusId: "524c35740ef6bde125000001"}, function(corp) {
 			Media.get({corpusId: corp._id, mediaId: "525bf32fbb9d24dc28000001"}, function(media) {
+				$scope.model.mediaName = "- " + media.name;
 				Layer.query({corpusId: corp._id, mediaId: media._id}, function(layers){
 					layers.forEach(function (l, i) {
 						Annotation.query({corpusId: corp._id, mediaId: media._id, layerId: l._id}, function(annots) {
