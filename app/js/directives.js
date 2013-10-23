@@ -73,9 +73,12 @@ angular.module('myApp.directives', ['myApp.filters']).
 			template: '<svg></svg>',
 			link: function(scope, element, attrs) {
 				var margin = {}, margin2 = {}, width, height, height2;
+				var lanePadding = 5;
+				var laneHeight = 30;
+				var contextPadding = 25;
 				// hack : multiple time scales, to circumvent unsupported date differences in JS
-				var xMsScale, xTimeScale, x2MsScale, x2TimeScale;
-				var xAxis, xAxis2, yAxis, colScale;
+				var xMsScale, xTimeScale, x2MsScale, x2TimeScale, yScale, colScale;
+				var xAxis, xAxis2, yAxis;
 				var curColInd = 0;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var refColors = d3.scale.category20().range();
@@ -127,9 +130,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 					// height set depending on number of modalities - in updateComp
 					var extWidth = element.parent().width();
 					height = 0;
-					height2 = 30;
-					margin = {top: 20, right: 0, bottom: 60, left: 0.07*extWidth};
-					margin2 = {top: height+10, right: 0, bottom: 20, left: 0.07*extWidth};
+					height2 = laneHeight;
+					margin = {top: 20, right: 20, bottom: height2+contextPadding+20, left: 0.15*extWidth};
+					margin2 = {top: margin.top+height+contextPadding, right: 20, bottom: 20, left: 0.15*extWidth};
 					width = extWidth - margin.left - margin.right;
 
 
@@ -138,7 +141,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 					xMsScale = d3.scale.linear().domain([0,0]).range([0, width]).clamp(true);
 					x2MsScale = d3.scale.linear().domain([0,0]).range([0, width]).clamp(true);
 
-					yAxis = d3.scale.ordinal(); // range is updated at each layer addition
+					yScale = d3.scale.ordinal().range([0, height]); // range is updated at each layer addition
 					colScale = d3.scale.ordinal(); // custom color scale
 
 					var customTimeFormat = timeFormat([
@@ -152,15 +155,18 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 					xAxis = d3.svg.axis().scale(xTimeScale).orient("top").ticks(5)
 						.tickFormat(customTimeFormat);
-					xAxis2 = d3.svg.axis().scale(x2TimeScale).orient("bottom").ticks(5)
+					xAxis2 = d3.svg.axis().scale(x2TimeScale).orient("top").ticks(5)
 						.tickFormat(customTimeFormat);
+					yAxis = d3.svg.axis().scale(yScale).orient("left");
 
 					brush = d3.svg.brush().x(x2MsScale).on("brush", brushed);
 
 					// init elements
-					focus = d3elmt.append("g");
+					focus = d3elmt.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-					context = d3elmt.append("g");
+					context = d3elmt.append("g")
+						.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
 					context.append("g")
 						.attr("class", "brush")
@@ -173,9 +179,13 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("class", "x axis")
 						.call(xAxis);
 
-					context.append("g")
+					focus.append("g")
+						.attr("class", "y axis")
+						.call(yAxis);
+
+
+					context.insert("g", ".brush")
 						.attr("class", "x axis")
-						.attr("transform", "translate(0," + height2 + ")")
 						.call(xAxis2);
 
 
@@ -240,21 +250,24 @@ angular.module('myApp.directives', ['myApp.filters']).
 					}
 
 					// adapt component dimensions and y axis
-					height = 30 * scope.model.layers.length;
-					margin2.top = height+10;
+					height = (lanePadding+laneHeight) * scope.model.layers.length;
+					margin2.top = margin.top+height+contextPadding;
 					d3elmt.attr("height", height + margin.top + margin.bottom);
 					context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-					yAxis.domain().push(layer.label);
-					yAxis.rangeBand([0, height]);
+					yScale.domain().push(layer.label);
+					yScale.rangeBands([0, height]);
 
+					focus.select(".y.axis").call(yAxis);
+					focus.select(".x.axis").call(xAxis);
+					context.select(".x.axis").call(xAxis);
 
 					context.selectAll(".layer")
 						.data(scope.model.layers, function(d) {
 							return d._id;
 						})
 						.enter()
-						.append("g")
+						.insert("g", ".brush")
 						.attr("class", "layer")
 						.selectAll(".annot")
 						.data(layer.layer, function(d) {
@@ -271,7 +284,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 							return x2MsScale(d.fragment.end)-x2MsScale(d.fragment.start);
 						})
 						.attr("y", 0)
-						.attr("height", height2)
+						.attr("height", laneHeight)
 						.attr("class", "annot");
 
 
@@ -292,21 +305,15 @@ angular.module('myApp.directives', ['myApp.filters']).
 							return colScale(layer.mapping.getKey(d));
 						})
 						.attr("opacity", 0.6)
-						.attr("x", function(d) {
-							return x2MsScale(d.fragment.start);
-						})
-						.attr("width", function(d) {
-							return x2MsScale(d.fragment.end)-x2MsScale(d.fragment.start);
-						})
 						.attr("y", 0)
-						.attr("height", 30)
+						.attr("height", laneHeight)
 
 						.attr("class", "annot");
 
 					// update all lane positions
 					focus.selectAll(".layer")
 						.attr("transform", function(d,i) {
-							return "translate(0," + ((i+1) * 30) + ")";
+							return "translate(0," + (lanePadding+(i*(lanePadding+laneHeight))) + ")";
 						});
 
 
@@ -320,14 +327,11 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var refresh = function() {
 					focus.selectAll(".annot")
 						.attr("x", function(d) {
-							return xMsScale(d.cell.fragment.start);
+							return xMsScale(d.fragment.start);
 						})
 						.attr("width", function(d) {
-							return xMsScale(d.cell.fragment.end)-xMsScale(d.cell.fragment.start);
+							return xMsScale(d.fragment.end)-xMsScale(d.fragment.start);
 						})
-						.attr("y", 0)
-						.attr("height", 30);
-
 				};
 
 
@@ -348,6 +352,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 					} else {
 						removeLayer(scope.model.latestLayer);
 					}
+					refresh();
 
 
 				});

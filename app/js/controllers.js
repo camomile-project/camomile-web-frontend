@@ -82,11 +82,10 @@ angular.module('myApp.controllers', ['myApp.services'])
 		// mock controller for testing timeline component
 		$scope.model = {
 				layers: [],
-				latestLayer: {}
+				latestLayer: {},
+				stockLayers: [],
+				curId: 0
 		};
-
-		var stockLayers = [];
-		var curId = 0;
 
 		Corpus.get({corpusId: "524c35740ef6bde125000001"}, function(corp) {
 			Media.get({corpusId: corp._id, mediaId: "525bf32fbb9d24dc28000001"}, function(media) {
@@ -94,12 +93,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 					layers.forEach(function (l, i) {
 						Annotation.query({corpusId: corp._id, mediaId: media._id, layerId: l._id}, function(annots) {
 							var obj = {
-								id: i,
+								_id: l._id,
 								layer: annots,
 								label: l.layer_type
 							};
-							//$scope.model.layers.push(obj);
-							stockLayers.push(obj);
+							$scope.model.stockLayers.push(obj);
 						});
 					});
 				});
@@ -107,9 +105,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 
 		$scope.mockLayer = function() {
-			$scope.model.layers.push(stockLayers[curId]);
-			$scope.model.latestLayer = stockLayers[curId];
-			curId++;
+			$scope.model.layers.push($scope.model.stockLayers[$scope.model.curId]);
+			$scope.model.latestLayer = $scope.model.stockLayers[$scope.model.curId];
+			$scope.model.curId++;
 		};
 
 

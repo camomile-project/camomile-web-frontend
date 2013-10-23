@@ -1,29 +1,8 @@
 <div class="row">
 	<div class="twelve columns">
-		<h3>Timeline component test page</h3>
-		<!--<div ui-jq="jScrollPane" ui-options="{showArrows: true,autoReinitialise: true, jScrollPane.VERTICAL_SCROLLBAR_ALWAYS: true}"-->
-				 <!--class="scroll-pane layerList" click-anywhere-but-here="selectLayer(undefined)">-->
-			<!--<div>-->
-				<!--<div class="padded" ng-repeat="item in model.list">-->
-				<!--<span class="label clickable cm-clickable" index="$index" ng-click="selectLayer($index)">-->
-					<!--Media: {{item.mediaName}}, Layer: {{item.layerType}}-->
-				<!--</span>-->
-				<!--</div>-->
-			<!--</div>-->
-		<!--</div>-->
-		<!--<div class="filler"></div>-->
-			<!--<div ui-jq="jScrollPane" ui-options="{showArrows: true,autoReinitialise: true, jScrollPane.VERTICAL_SCROLLBAR_ALWAYS: true}"-->
-					 <!--class="scroll-pane annotDisplay" click-anywhere-but-here="selectLayer(undefined)">-->
-				<!--<div>-->
-					<!--<div ng-repeat="item in model.annotations" class="padded">-->
-						<!--{{item}}-->
-					<!--</div>-->
-				<!--</div>-->
-			<!--</div>-->
-		<!--<div class="filler"></div>-->
-		<!--<cm-timeline click-anywhere-but-here="selectLayer(undefined)"></cm-timeline>-->
-		<button ng-click="mockLayer()">Add a layer</button>
-    <cm-timeline></cm-timeline>
+		<h3>Timeline view</h3>
+		<button ng-show="model.curId < model.stockLayers.length" ng-click="mockLayer()">Add a layer</button>
+        <cm-timeline></cm-timeline>
 	</div>
 </div>
 
