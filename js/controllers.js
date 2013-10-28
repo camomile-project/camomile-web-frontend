@@ -14,24 +14,24 @@ angular.module('myApp.controllers', ['myApp.services'])
 		// layers[0] is the reference
 		// layers[1] is the hypothesis
 		// layers[2] is their difference
-		$scope.model.show_layers = [
+		$scope.model.layers = [
 			{
-				'id': 0,
 				'label': 'Reference',
+				'_id': 0,
 				'layer': [],
 				'mapping': null,
 				'tooltipFunc': null,
 			},
 			{
-				'id': 1,
 				'label': 'Hypothesis',
+				'_id': 1,
 				'layer': [],
 				'mapping': null,
 				'tooltipFunc': null,
 			},
 			{
-				'id': 2,
 				'label': 'Difference',
+				'_id': 2,
 				'layer': [],
 				'mapping': null,
 				'tooltipFunc': null,
@@ -55,21 +55,19 @@ angular.module('myApp.controllers', ['myApp.services'])
 		$scope.model.hypothesis = [];
 		$scope.model.diff = [];
 
-		$scope.model.currentIndex = 2;
-
 		// get list of corpora
 		$scope.get_corpora = function() {
-			$scope.model.corpora = Corpus.query();
+			$scope.model.available_corpora = Corpus.query();
 		};
 
 		// get list of media for a given corpus
 		$scope.get_media = function(corpus_id) {
-			$scope.model.media = Media.query({corpusId: corpus_id});
+			$scope.model.available_media = Media.query({corpusId: corpus_id});
 		};
 
 		// get list of layers for a given medium
 		$scope.get_layers = function(corpus_id, medium_id) {
-			$scope.model.layers = Layer.query(
+			$scope.model.available_layers = Layer.query(
 				{corpusId: corpus_id, mediaId: medium_id});
 		};
 
@@ -79,8 +77,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model.reference = Annotation.query(
 				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
 				function() {
-					$scope.model.show_layers[0].layer = $scope.model.reference;
-					$scope.model.show_layers[0].id = $scope.model.currentIndex++;
+					var layer = {
+						'label': 'Reference',
+						'_id': layer_id,
+						'layer': $scope.model.reference,
+						'mapping': null,
+     					'tooltipFunc': null,
+					}
+					$scope.model.layers[0] = layer;
+					$scope.model.latestLayer = layer;
 					$scope.compute_diff();
 				}
 			);
@@ -92,8 +97,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model.hypothesis = Annotation.query(
 				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
 				function() {
-					$scope.model.show_layers[1].layer = $scope.model.hypothesis;
-					$scope.model.show_layers[1].id = $scope.model.currentIndex++;
+					var layer = {
+						'label': 'Hypothesis',
+						'_id': layer_id,
+						'layer': $scope.model.hypothesis,
+						'mapping': null,
+     					'tooltipFunc': null,
+					}
+					$scope.model.layers[1] = layer;
+					$scope.model.latestLayer = layer;
 					$scope.compute_diff();
 				});
 		};
@@ -108,8 +120,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 			CMError.diff(reference_and_hypothesis).success(function(data, status) {
 				$scope.model.diff = data;
-				$scope.model.show_layers[2].layer = $scope.model.diff;
-				$scope.model.show_layers[2].id = $scope.model.currentIndex++;
+				var layer = {
+					'label': 'Difference',
+					'_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
+					'layer': $scope.model.diff,
+					'mapping': null,
+ 					'tooltipFunc': null,
+				}
+				$scope.model.layers[2] = layer;
+				$scope.model.latestLayer = layer;
 			});
 		}
 
@@ -164,15 +183,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 		$scope.model.regression = [];
 
 		$scope.get_corpora = function() {
-			$scope.model.corpora = Corpus.query();
+			$scope.model.available_corpora = Corpus.query();
 		};
 
 		$scope.get_media = function(corpus_id) {
-			$scope.model.media = Media.query({corpusId: corpus_id});
+			$scope.model.available_media = Media.query({corpusId: corpus_id});
 		};
 
 		$scope.get_layers = function(corpus_id, medium_id) {
-			$scope.model.layers = Layer.query(
+			$scope.model.available_layers = Layer.query(
 				{corpusId: corpus_id, mediaId: medium_id});
 		};
 
