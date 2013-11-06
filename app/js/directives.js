@@ -215,13 +215,17 @@ angular.module('myApp.directives', ['myApp.filters']).
 						vals = vals.filter(function(l) {return !(colScale.domain().indexOf(l) > -1);});
 						vals.forEach(function(d) {
 							colScale.domain().push(d);
+							colScale.domain(colScale.domain()); // hack to register changes
 							colScale.range().push(refColors[curColInd]);
+							colScale.range(colScale.range());
 							curColInd = (curColInd + 1) % refColors.length;
 						});
 					} else {
 						for(var key in layer.mapping.colors) {
-							colScale.domain().push(key);
+							colScale.domain().push(d);
+							colScale.domain(colScale.domain());
 							colScale.range().push(layer.mapping.colors[key]);
+							colScale.range(colScale.range());
 						}
 					}
 
@@ -252,6 +256,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 					context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
 					yScale.domain().push(layer.label);
+					yScale.domain(yScale.domain());
 					yScale.rangeBands([0, height]);
 
 					focus.select(".y.axis").call(yAxis);
