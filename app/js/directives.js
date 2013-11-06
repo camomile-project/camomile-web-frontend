@@ -76,7 +76,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var lanePadding = 5;
 				var laneHeight = 30;
 				var contextPadding = 25;
-				// hack : multiple time scales, to circumvent unsupported date differences in JS
+				// hack : multiple time scales, to circumvent unsupported difference for dates in JS
 				var xMsScale, xTimeScale, x2MsScale, x2TimeScale, yScale, colScale;
 				var xAxis, xAxis2, yAxis;
 				var curColInd = 0;
@@ -213,20 +213,16 @@ angular.module('myApp.directives', ['myApp.filters']).
 						}); // jQuery hack to get Array of unique values
 						// and then all that are not already in the scale domain
 						vals = vals.filter(function(l) {return !(colScale.domain().indexOf(l) > -1);});
-						colScale.domain().push(vals);
 						vals.forEach(function(d) {
+							colScale.domain().push(d);
 							colScale.range().push(refColors[curColInd]);
 							curColInd = (curColInd + 1) % refColors.length;
 						});
 					} else {
-						var keys = [];
-						var cols = [];
 						for(var key in layer.mapping.colors) {
-							keys.push(key);
-							cols.push(layer.mapping.colors[key]);
+							colScale.domain().push(key);
+							colScale.range().push(layer.mapping.colors[key]);
 						}
-						colScale.domain().push(keys);
-						colScale.range().push(cols);
 					}
 
 					// adapt reference scales
