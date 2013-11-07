@@ -1,7 +1,10 @@
 <div class="row">
 	<div class="twelve columns">
 		<h3>Timeline view {{model.mediaName}}</h3>
-		<button ng-show="model.curId < model.stockLayers.length" ng-click="mockLayer()">Add a layer</button>
+        <ul class="button-group radius">
+            <li><button class="button radius" ng-show="model.curId < model.stockLayers.length" ng-click="addLayer()">Add a layer</button></li>
+            <li><button class="button radius" ng-show="model.curId > 0" ng-click="removeLayer()">Remove a layer</button></li>
+        </ul>
         <cm-timeline></cm-timeline>
 	</div>
 </div>
