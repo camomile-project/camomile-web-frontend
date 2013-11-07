@@ -116,6 +116,16 @@ angular.module('myApp.directives', ['myApp.filters']).
 					};
 				}
 
+				var tooltip = d3.select("body")
+					.append("div")
+					.style("position", "absolute")
+					.style("z-index", "10")
+					.style("visibility", "hidden")
+					.style("background-color", "yellow")
+					.style("border-style", "solid")
+					.style("border-color", "red");
+
+
 
 				var brushed = function() {
 					var brushRange = brush.extent().map(x2MsScale);
@@ -237,13 +247,23 @@ angular.module('myApp.directives', ['myApp.filters']).
 						curMax = d3.max(l.layer.map(function(d) { return parseDate(secToTime(d.fragment.end)); }));
 						maxDate = d3.max([maxDate, curMax]);
 					});
-					x2MsScale.domain([0, theMax]);
-					if(brush.empty() || scope.model.layers.length === 0) {
-						xMsScale.domain(x2MsScale.domain());
+
+					// adapt brush to new scale
+					var brushExtent = [];
+					if(!brush.empty()) {
+						brushExtent = brush.extent();
 					}
 
+					x2MsScale.domain([0, theMax]);
 					x2TimeScale.domain([parseDate("00:00:00.000"), maxDate]);
+
+					if(!brush.empty()){
+						brush.extent(brushExtent);
+						brush(context.select(".brush"));
+					}
+
 					if(brush.empty()|| scope.model.layers.length === 0) {
+						xMsScale.domain(x2MsScale.domain());
 						xTimeScale.domain(x2TimeScale.domain());
 					}
 
@@ -263,7 +283,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 					focus.select(".y.axis").call(yAxis);
 					focus.select(".x.axis").call(xAxis);
-					context.select(".x.axis").call(xAxis);
+					context.select(".x.axis").call(xAxis2);
 
 					context.selectAll(".layer")
 						.data(scope.model.layers, function(d) {
@@ -291,6 +311,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("class", "annot");
 
 
+
 					focus.selectAll(".layer")
 						.data(scope.model.layers, function(d) {
 							return d._id;
@@ -307,11 +328,21 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("fill", function(d) {
 							return colScale(layer.mapping.getKey(d));
 						})
-						.attr("opacity", 0.6)
+						.attr("opacity", 0.4)
 						.attr("y", 0)
 						.attr("height", laneHeight)
 
-						.attr("class", "annot");
+						.attr("class", "annot")
+						.on("mouseover", function(d){
+							tooltip.text(d.data); return tooltip.style("visibility", "visible");
+						})
+						.on("mousemove", function(){
+							return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
+						})
+						.on("mouseout", function(){
+							return tooltip.style("visibility", "hidden");
+						});
+
 
 					// update all lane positions
 					focus.selectAll(".layer")
@@ -345,15 +376,35 @@ angular.module('myApp.directives', ['myApp.filters']).
 						curMax = d3.max(l.layer.map(function(d) { return parseDate(secToTime(d.fragment.end)); }));
 						maxDate = d3.max([maxDate, curMax]);
 					});
-					x2MsScale.domain([0, theMax]);
-					if(brush.empty() || scope.model.layers.length === 0) {
-						xMsScale.domain(x2MsScale.domain());
+
+					// adapt brush to new scale
+					var brushExtent = [];
+					if(!brush.empty()) {
+						brushExtent = brush.extent();
+						if(brushExtent[1] > theMax) {
+							brushExtent[1] = theMax;
+						}
+						if(brushExtent[0] > theMax) {
+							brush.clear();
+							brush(context.select(".brush"));
+						}
 					}
 
+					x2MsScale.domain([0, theMax]);
 					x2TimeScale.domain([parseDate("00:00:00.000"), maxDate]);
+
+					if(!brush.empty()){
+						brush.extent(brushExtent);
+						brush(context.select(".brush"));
+						brush.event(context.select(".brush")); // force refresh in case of clamping
+					}
+
 					if(brush.empty()|| scope.model.layers.length === 0) {
+						xMsScale.domain(x2MsScale.domain());
 						xTimeScale.domain(x2TimeScale.domain());
 					}
+
+
 
 					// adapt component size
 					height = (lanePadding+laneHeight) * scope.model.layers.length;
@@ -369,7 +420,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 					focus.select(".y.axis").call(yAxis);
 					focus.select(".x.axis").call(xAxis);
-					context.select(".x.axis").call(xAxis);
+					context.select(".x.axis").call(xAxis2);
 
 
 					// remove annotations and lanes
