@@ -331,9 +331,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 						}));
 					});
 					// reorder according to current range
-					vals = colScale.domain().filter(function(l) {return !(vals.indexOf(l) > -1);});
+					vals = colScale.domain().filter(function(l) {return (vals.indexOf(l) > -1);});
 					colScale.domain(vals);
-					colScale.range(colScale(vals));
+					colScale.range(vals.map(colScale));
 
 					// adapt timescales
 					var theMax = 0;
@@ -411,26 +411,49 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 
 
-				// ideally, we would have used watchCollection on model.layers, but the feature appears buggy in 1.2.0...
-				// instead, use a redundant "currentId", that serves to trigger the notifications
-				// or define and use "latestLayer"
-				scope.$watch('model.latestLayer', function() {
+
+				scope.$watch('model.layers.length', function(newValue, oldValue) {
 					// add case : find layers that are in the new object, but not in old
 					// use addLayer and remove layer to handle heavy operations
 
 					// watches are executed at initialization, even if latestLayer is still undefined
 					// -> care with tests
-					var isAdded = (scope.model.layers.indexOf(scope.model.latestLayer) > -1);
+					var isAdded = (newValue - oldValue) === 1;
+					var isRemoved = (newValue - oldValue) === -1;
 
 					if(isAdded) {
 						addLayer(scope.model.latestLayer);
-					} else if(scope.model.latestLayer !== undefined) {
+					}
+					if(isRemoved) {
 						removeLayer(scope.model.latestLayer);
 					}
 					refresh();
 
 
 				});
+
+
+// watchCollection still buggy (see https://github.com/angular/angular.js/issues/2621)
+// alternatively, watch layers length, and use latestLayer for quicker reference
+//				scope.$watchCollection('model.layers', function(newLayers, oldLayers, scope) {
+//					// add case : find layers that are in the new object, but not in old
+//					// use addLayer and remove layer to handle heavy operations
+//
+//					// watches are executed at initialization, even if latestLayer is still undefined
+//					// -> care with tests
+//					console.log("added");
+//					var isAdded = (scope.model.layers.indexOf(scope.model.latestLayer) > -1);
+//
+//					if(isAdded) {
+//						addLayer(scope.model.latestLayer);
+//					} else if(scope.model.latestLayer !== undefined) {
+//						removeLayer(scope.model.latestLayer);
+//					}
+//					refresh();
+//
+//
+//				});
+
 
 				init();
 
