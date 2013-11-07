@@ -194,8 +194,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 
 				var addLayer = function(layer) {
-					var layerIndex = scope.model.layers.indexOf(layer);
-
 					// define default mapping if needed
 					if(layer.mapping === undefined) {
 						layer.mapping = {
@@ -255,7 +253,11 @@ angular.module('myApp.directives', ['myApp.filters']).
 					d3elmt.attr("height", height + margin.top + margin.bottom);
 					context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-					yScale.domain().push(layer.label);
+					yScale.domain().push({id: layer._id,
+																str: layer.label,
+																toString: function() {
+																	return this.str;
+																}});
 					yScale.domain(yScale.domain());
 					yScale.rangeBands([0, height]);
 
@@ -268,7 +270,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 							return d._id;
 						})
 						.enter()
-						.insert("g", ".brush")
+						.insert("g", ".brush")// insert before ".brush"
 						.attr("class", "layer")
 						.selectAll(".annot")
 						.data(layer.layer, function(d) {
@@ -320,7 +322,77 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				};
 
-				var removeLayer = function(oldLayers, i) {
+				var removeLayer = function(layer) {
+					// seek color mapping for unused colors
+					var vals = [];
+					scope.model.layers.forEach(function(l) {
+						vals = vals.concat(l.layer.map(function(d) {
+							return l.mapping.getKey(d);
+						}));
+					});
+					// reorder according to current range
+					vals = colScale.domain().filter(function(l) {return !(vals.indexOf(l) > -1);});
+					colScale.domain(vals);
+					colScale.range(colScale(vals));
+
+					// adapt timescales
+					var theMax = 0;
+					var curMax;
+					var maxDate = parseDate("00:00:00.000");
+					scope.model.layers.forEach(function(l) {
+						curMax = d3.max(l.layer.map(function(d) { return d.fragment.end; }));
+						theMax = d3.max([theMax, curMax]);
+						curMax = d3.max(l.layer.map(function(d) { return parseDate(secToTime(d.fragment.end)); }));
+						maxDate = d3.max([maxDate, curMax]);
+					});
+					x2MsScale.domain([0, theMax]);
+					if(brush.empty() || scope.model.layers.length === 0) {
+						xMsScale.domain(x2MsScale.domain());
+					}
+
+					x2TimeScale.domain([parseDate("00:00:00.000"), maxDate]);
+					if(brush.empty()|| scope.model.layers.length === 0) {
+						xTimeScale.domain(x2TimeScale.domain());
+					}
+
+					// adapt component size
+					height = (lanePadding+laneHeight) * scope.model.layers.length;
+					margin2.top = margin.top+height+contextPadding;
+					d3elmt.attr("height", height + margin.top + margin.bottom);
+					context.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+					// remove from yscale using _id
+					yScale.domain(yScale.domain().filter(function(e) {
+						return e.id !== layer._id;
+					}));
+					yScale.rangeBands([0, height]);
+
+					focus.select(".y.axis").call(yAxis);
+					focus.select(".x.axis").call(xAxis);
+					context.select(".x.axis").call(xAxis);
+
+
+					// remove annotations and lanes
+					context.selectAll(".layer")
+						.data(scope.model.layers, function(d) {
+							return d._id;
+						})
+						.exit()
+						.remove();
+
+					focus.selectAll(".layer")
+						.data(scope.model.layers, function(d) {
+							return d._id;
+						})
+						.exit()
+						.remove();
+
+					// update all lane positions
+					focus.selectAll(".layer")
+						.attr("transform", function(d,i) {
+							return "translate(0," + (lanePadding+(i*(lanePadding+laneHeight))) + ")";
+						});
+
 				};
 
 
@@ -346,11 +418,13 @@ angular.module('myApp.directives', ['myApp.filters']).
 					// add case : find layers that are in the new object, but not in old
 					// use addLayer and remove layer to handle heavy operations
 
+					// watches are executed at initialization, even if latestLayer is still undefined
+					// -> care with tests
 					var isAdded = (scope.model.layers.indexOf(scope.model.latestLayer) > -1);
 
 					if(isAdded) {
 						addLayer(scope.model.latestLayer);
-					} else {
+					} else if(scope.model.latestLayer !== undefined) {
 						removeLayer(scope.model.latestLayer);
 					}
 					refresh();

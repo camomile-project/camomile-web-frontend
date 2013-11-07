@@ -82,7 +82,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 		// mock controller for testing timeline component
 		$scope.model = {
 				layers: [],
-				latestLayer: {},
 				stockLayers: [],
 				curId: 0,
 				mediaName: ""
@@ -106,12 +105,16 @@ angular.module('myApp.controllers', ['myApp.services'])
 			});
 		});
 
-		$scope.mockLayer = function() {
+		$scope.addLayer = function() {
 			$scope.model.layers.push($scope.model.stockLayers[$scope.model.curId]);
 			$scope.model.latestLayer = $scope.model.stockLayers[$scope.model.curId];
 			$scope.model.curId++;
 		};
 
+		$scope.removeLayer = function() {
+			$scope.model.latestLayer = $scope.model.layers.pop();
+			$scope.model.curId--;
+		};
 
 	}]);
 
