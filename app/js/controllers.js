@@ -3,11 +3,10 @@
 angular.module('myApp.controllers', ['myApp.services'])
 
 	.controller('DiffCtrl',
-		[
-			'$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-			function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
+	function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
 
-	    delete $http.defaults.headers.common['X-Requested-With'];
+		delete $http.defaults.headers.common['X-Requested-With'];
 
 		$scope.model = {};
 
@@ -165,11 +164,10 @@ angular.module('myApp.controllers', ['myApp.services'])
 	}])
 
 	.controller('RegressionCtrl',
-		[
-			'$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-			function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
+	function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
 
-	    delete $http.defaults.headers.common['X-Requested-With'];
+	  delete $http.defaults.headers.common['X-Requested-With'];
 
 		$scope.model = {};
 		$scope.model.selected_corpus = "";
@@ -266,7 +264,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 	}])
 
-	.controller('SelectListCtrl', ['$scope', 'Corpus', 'Media', 'Layer', 'Annotation', function($scope, Corpus, Media, Layer, Annotation) {
+	.controller('SelectListCtrl',
+	['$scope', 'Corpus', 'Media', 'Layer', 'Annotation',
+	function($scope, Corpus, Media, Layer, Annotation) {
 
 		// mock controller for testing timeline component
 		$scope.model = {
@@ -305,7 +305,30 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model.curId--;
 		};
 
+	}])
+
+	.controller('AnalysisCtrl',
+	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
+	function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+		$scope.model = {
+			pageSwitch: "select",
+			pageTitle: "Select corpus and media",
+			corpusName: "Select corpus",
+			mediaName: "Select media",
+			methodName: "Method",
+			refName: "Reference",
+			firstHyp: "1st Hypothesis",
+			secondHyp: "2nd Hypothesis"
+		};
+
+		$scope.model.layers = [];
+		$scope.model.latestLayer = {};
+
+
+
+
 	}]);
+
 
 
 

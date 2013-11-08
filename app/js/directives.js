@@ -66,6 +66,42 @@ angular.module('myApp.directives', ['myApp.filters']).
 		}
 	})
 
+.directive('cmDropdown', function() {
+		return {
+			restrict: 'C',
+			replace: false,
+			transclude: false,
+			scope: {
+				dropId: "&dropId",
+				title: "=dropTitle"
+			},
+			link: function(scope, element, attrs) {
+				var ulElmt;
+				scope.toggle = function() {
+					if(ulElmt === undefined) {
+						ulElmt = element.find('#'+scope.dropId());
+						ulElmt.attr("position", "absolute")
+							.css("top", ""+(element.position().top+element.height()/2)+"px")
+							.css("left", "-9999px")
+							.css("max-width", ""+(element.width())+"px");
+					}
+					if(ulElmt.hasClass('open')) {
+						ulElmt.removeClass('open');
+						ulElmt.css("left", "-9999px");
+					} else {
+						ulElmt.addClass('open');
+						ulElmt.css("left", ""+(element.position().left)+"px");
+					}
+				};
+				scope.changeTitle = function(newTitle) {
+					scope.dropTitle=newTitle;
+				}
+			}
+		}
+
+	})
+
+
 	.directive('cmTimeline', function() {
 		return {
 			restrict: 'E',
