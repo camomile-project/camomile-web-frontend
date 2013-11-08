@@ -20,21 +20,21 @@ angular.module('myApp.controllers', ['myApp.services'])
 				'_id': 0,
 				'layer': [],
 				'mapping': null,
-				'tooltipFunc': null,
+				'tooltipFunc': null
 			},
 			{
 				'label': 'Hypothesis',
 				'_id': 1,
 				'layer': [],
 				'mapping': null,
-				'tooltipFunc': null,
+				'tooltipFunc': null
 			},
 			{
 				'label': 'Difference',
 				'_id': 2,
 				'layer': [],
 				'mapping': null,
-				'tooltipFunc': null,
+				'tooltipFunc': null
 			}
 		];
 
@@ -82,7 +82,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 						'_id': layer_id,
 						'layer': $scope.model.reference,
 						'mapping': null,
-     					'tooltipFunc': null,
+     				'tooltipFunc': null
 					}
 					$scope.model.layers[0] = layer;
 					$scope.model.latestLayer = layer;
@@ -102,7 +102,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 						'_id': layer_id,
 						'layer': $scope.model.hypothesis,
 						'mapping': null,
-     					'tooltipFunc': null,
+     				'tooltipFunc': null
 					}
 					$scope.model.layers[1] = layer;
 					$scope.model.latestLayer = layer;
@@ -125,7 +125,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					'_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
 					'layer': $scope.model.diff,
 					'mapping': null,
- 					'tooltipFunc': null,
+ 					'tooltipFunc': null
 				}
 				$scope.model.layers[2] = layer;
 				$scope.model.latestLayer = layer;
@@ -218,7 +218,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 			var reference_and_hypotheses = {
 				'reference': $scope.model.reference,
 				'before': $scope.model.before,
-				'after': $scope.model.after,
+				'after': $scope.model.after
 			};
 
 			CMError.regression(reference_and_hypotheses).success(function(data, status) {
