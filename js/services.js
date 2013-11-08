@@ -40,4 +40,4 @@ angular.module('myApp.services', ['ngResource'])
 				return $http.post(url, reference_and_hypotheses);
 			}
 		}
-	}])
+	}]);
