@@ -213,6 +213,12 @@ angular.module('myApp.directives', ['myApp.filters']).
 						};
 					}
 
+					if(layer.tooltipFunc === undefined) {
+						layer.tooltipFunc = function(d) {
+							return d.data;
+						};
+					}
+
 					if(layer.mapping.colors === undefined){
 						// use default mapping, or define a custom one
 						var vals = layer.layer.map(layer.mapping.getKey);
@@ -334,7 +340,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 						.attr("class", "annot")
 						.on("mouseover", function(d){
-							tooltip.text(d.data); return tooltip.style("visibility", "visible");
+							tooltip.text(layer.tooltipFunc(d)); return tooltip.style("visibility", "visible");
 						})
 						.on("mousemove", function(){
 							return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
