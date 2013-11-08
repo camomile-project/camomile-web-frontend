@@ -1,13 +1,7 @@
 'use strict';
 
-// Demonstrate how to register services
-// In this case it is a simple value service.
+
 angular.module('myApp.services', ['ngResource'])
-	.value('titles', {Corpus: 'Corpuses',
-		Media: 'Media',
-		Layer: 'Layers',
-		Annotation: 'Annotations'
-	})
 	// double esc. if a specific port is needed, see https://github.com/angular/angular.js/issues/1243
 	.value('DataRoot', 'https://flower.limsi.fr/data')
 	.value('ToolRoot', 'https://flower.limsi.fr/tool')
@@ -29,17 +23,16 @@ angular.module('myApp.services', ['ngResource'])
 	}])
 	.factory('CMError', ['$http', 'ToolRoot', function($http, ToolRoot) {
 		return {
-			diff: function(reference_and_hypothesis) {
+			diff: function(hypLayers) {
 				var url = ToolRoot + '/error/diff';
-				return $http.post(url, reference_and_hypothesis);
+				return $http.post(url, hypLayers);
 			},
-			regression: function(reference_and_hypotheses) {
+			regression: function(hypLayers) {
 				var url = ToolRoot + '/error/regression';
-				return $http.post(url, reference_and_hypotheses);
+				return $http.post(url, hypLayers);
 			}
 		}
 	}]);
 
 
-/* Services */
 

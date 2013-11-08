@@ -1,0 +1,30 @@
+<div class="row" ng-controller="AnalysisCtrl">
+    <div class="twelve columns">
+        <h3>{{model.pageTitle}}</h3>
+        <ul class="button-group even-3">
+            <li class="cm-dropdown" drop-id="1" drop-title="model.corpusName">
+                <a ng-click="toggle()" data-dropdown="dropId" class="large button dropdown">{{title}}</a><br/>
+                <ul id="dropId" data-dropdown-content class="f-dropdown">
+                    <li><a href="#">This is a link</a></li>
+                    <li><a href="#">This is another blah blah blah blah</a></li>
+                    <li><a href="#">Yet another</a></li>
+                </ul>
+            </li>
+            <li class="cm-dropdown" drop-id="2" drop-title="model.mediaName">
+                <a ng-click="toggle()" data-dropdown="{{dropId}}" class="large button dropdown">{{title}}</a><br/>
+                <ul id="{{dropId}}" data-dropdown-content class="f-dropdown">
+                    <li><a href="#">This is a link</a></li>
+                    <li><a href="#">This is another</a></li>
+                    <li><a href="#">Yet another</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#" class="large button secondary">Proceed</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+        <!--and then switch to relevant view using ng-switch-->
+
