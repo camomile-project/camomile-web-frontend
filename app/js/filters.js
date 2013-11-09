@@ -9,9 +9,9 @@ angular.module('myApp.filters', [])
     }
   }])
 	.filter('truncate' , function() {
-		return function(text) {
-			if(text.length > 11) {
-				return text.slice(0,11) + '...';
+		return function(text, length) {
+			if(text.length > length) {
+				return text.slice(0,length) + '...';
 			} else {
 				return(text);
 			}

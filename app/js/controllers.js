@@ -1,6 +1,84 @@
 'use strict';
 
 angular.module('myApp.controllers', ['myApp.services'])
+		.controller('CorpusCtrl', ['$scope', 'Corpus', function($scope, Corpus) {
+			$scope.model = {
+				corpusTitle: "Corpora",
+				corpusOpened: false
+			};
+			$scope.$watch('model.corpusOpened', function(newValue, oldValue, scope) {
+				if (newValue) {
+					scope.model.corpuses = Corpus.query();
+				} else {
+					scope.model.corpuses = undefined;
+				}
+			});
+		}])
+
+
+		.controller('MediaCtrl', ['$scope', 'Media', function($scope, Media) {
+			$scope.model = {
+				mediaTitle: "Media",
+				mediaOpened: false
+			};
+
+			$scope.$watch('model.mediaOpened', function(newValue, oldValue, scope) {
+				if (newValue) {
+					scope.model.media = Media.query({corpusId: scope.corpus._id});
+				} else {
+					scope.model.media = undefined;
+				}
+			});
+			$scope.$watch('model.corpusOpened', function(newValue, oldValue, scope) {
+				if (!newValue) {
+					scope.model.mediaOpened = false;
+				}
+			});
+		}])
+
+
+		.controller('LayerCtrl', ['$scope', 'Layer', function($scope, Layer) {
+			$scope.model = {
+				layerTitle: "Layers",
+				layerOpened: false
+			};
+
+			$scope.$watch('model.layerOpened', function(newValue, oldValue, scope) {
+				if (newValue) {
+					scope.model.layers = Layer.query({corpusId: scope.corpus._id, mediaId:scope.media._id});
+				} else {
+					scope.model.layers = undefined;
+				}
+			});
+			$scope.$watch('model.mediaOpened', function(newValue, oldValue, scope) {
+				if (!newValue) {
+					scope.model.layerOpened = false;
+				}
+			});
+		}])
+
+
+		.controller('AnnotationCtrl', ['$scope', 'Annotation', function($scope, Annotation) {
+			$scope.model = {
+				annotationTitle: "Annotations",
+				annotationOpened: false
+			};
+
+			$scope.$watch('model.annotationOpened', function(newValue, oldValue, scope) {
+				if (newValue) {
+					scope.model.annotations = Annotation.query({corpusId: scope.corpus._id, mediaId: scope.media._id, layerId: scope.layer._id});
+				} else {
+					scope.model.annotations = undefined;
+				}
+			});
+			$scope.$watch('model.layerOpened', function(newValue, oldValue, scope) {
+				if (!newValue) {
+					scope.model.annotationOpened = false;
+				}
+			});
+		}])
+
+
 
 	.controller('DiffCtrl',
 	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
@@ -310,20 +388,51 @@ angular.module('myApp.controllers', ['myApp.services'])
 	.controller('AnalysisCtrl',
 	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
 	function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+		delete $http.defaults.headers.common['X-Requested-With'];
+
 		$scope.model = {
-			pageSwitch: "select",
+			pageSwitch: "select", // possible values : "select" and "analysis"
 			pageTitle: "Select corpus and media",
-			corpusName: "Select corpus",
-			mediaName: "Select media",
-			methodName: "Method",
-			refName: "Reference",
-			firstHyp: "1st Hypothesis",
-			secondHyp: "2nd Hypothesis"
+			selectedCorpusName: "Select corpus",
+			selectedMediaName: "Select media",
+			selectedMethodName: "Method",
+			selectedRefName: "Reference",
+			selectedFirstHyp: "1st Hypothesis",
+			selectedSecondHyp: "2nd Hypothesis"
 		};
+
+		$scope.model.selectedCorpusId = undefined;
+		$scope.model.selectedMediaId = undefined;
+
+		$scope.model.corpora = Corpus.query();
+		$scope.model.media = [];
 
 		$scope.model.layers = [];
 		$scope.model.latestLayer = {};
 
+		$scope.model.probe = function() {
+			console.log($scope.model.selectedCorpusId);
+		}
+
+		$scope.$watch('model.selectedCorpusId', function(newValue, oldValue, scope) {
+			if(newValue !== undefined) {
+				$scope.model.selectedCorpusName = $.grep($scope.model.corpora, function(el) {
+					return el._id === newValue;
+				})[0].name;
+				$scope.model.media = Media.query({corpusId: newValue});
+				$scope.model.selectedMediaId = undefined;
+			}
+		});
+
+		$scope.$watch('model.selectedMediaId', function(newValue, oldValue, scope) {
+			if(newValue !== undefined) {
+				$scope.model.selectedMediaName = $.grep($scope.model.media, function(el) {
+					return el._id === newValue;
+				})[0].name;
+			} else {
+				$scope.model.selectedMediaName = "Select media";
+			}
+		});
 
 
 
