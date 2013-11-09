@@ -73,11 +73,17 @@ angular.module('myApp.directives', ['myApp.filters']).
 			transclude: false,
 			scope: {
 				dropId: "&dropId",
-				title: "=dropTitle"
+				title: "=dropTitle",
+				coll: "=coll",
+				selectedId: "=selectedId",
+				enabledRef: "=enabledRef"
 			},
 			link: function(scope, element, attrs) {
 				var ulElmt;
 				scope.toggle = function() {
+					if(!scope.enabledRef) {
+						return;
+					}
 					if(ulElmt === undefined) {
 						ulElmt = element.find('#'+scope.dropId());
 						ulElmt.attr("position", "absolute")
@@ -93,12 +99,13 @@ angular.module('myApp.directives', ['myApp.filters']).
 						ulElmt.css("left", ""+(element.position().left)+"px");
 					}
 				};
-				scope.changeTitle = function(newTitle) {
-					scope.dropTitle=newTitle;
-				}
+				scope.select = function(id) {
+					scope.selectedId=id;
+					scope.toggle();
+				};
+
 			}
 		}
-
 	})
 
 
