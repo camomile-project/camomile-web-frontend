@@ -66,7 +66,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 		}
 	})
 
-.directive('cmDropdown', function() {
+.directive('cmDropdown', ['$document', function($document) {
 		return {
 			restrict: 'C',
 			replace: false,
@@ -76,14 +76,13 @@ angular.module('myApp.directives', ['myApp.filters']).
 				title: "=dropTitle",
 				coll: "=coll",
 				selectedId: "=selectedId",
-				enabledRef: "=enabledRef"
+				enabledRef: "=enabledRef",
+				state: "=stateVar"
 			},
 			link: function(scope, element, attrs) {
 				var ulElmt;
-				scope.toggle = function() {
-					if(!scope.enabledRef) {
-						return;
-					}
+				scope.toggle = function(newState, ev) {
+					scope.state = newState;
 					if(ulElmt === undefined) {
 						ulElmt = element.find('#'+scope.dropId());
 						ulElmt.attr("position", "absolute")
@@ -91,22 +90,30 @@ angular.module('myApp.directives', ['myApp.filters']).
 							.css("left", "-9999px")
 							.css("max-width", ""+(element.width())+"px");
 					}
-					if(ulElmt.hasClass('open')) {
+					if(!newState) {
 						ulElmt.removeClass('open');
 						ulElmt.css("left", "-9999px");
+						if(ev) {
+							$document.unbind('click');
+						}
 					} else {
+						if(ev) {
+							ev.stopPropagation(); // stop prop. of current event, as it may trigger the $document.bind right away
+						}
 						ulElmt.addClass('open');
 						ulElmt.css("left", ""+(element.position().left)+"px");
+						$document.bind('click', function(e) {
+							scope.$apply(scope.toggle(false, e));
+						});
 					}
 				};
 				scope.select = function(id) {
 					scope.selectedId=id;
-					scope.toggle();
+					scope.toggle(false);
 				};
-
 			}
 		}
-	})
+	}])
 
 
 	.directive('cmTimeline', function() {
