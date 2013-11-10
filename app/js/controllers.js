@@ -406,12 +406,19 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		$scope.model.corpora = Corpus.query();
 		$scope.model.media = [];
+		$scope.model.methods = ['Diff', 'Regression'];
+
+		$scope.model.availableLayers = [];
 
 		$scope.model.layers = [];
 		$scope.model.latestLayer = {};
 
 		$scope.model.probe = function() {
 			console.log($scope.model.selectedCorpusId);
+		}
+
+		$scope.model.setSwitch = function(sw) {
+			$scope.model.pageSwitch = sw;
 		}
 
 		$scope.$watch('model.selectedCorpusId', function(newValue, oldValue, scope) {
@@ -434,7 +441,28 @@ angular.module('myApp.controllers', ['myApp.services'])
 			}
 		});
 
+		// add in a availableLayers tab,
+		// layers being what has to be displayed. reference, hypotheses and diff/regress are put to fixed positions, and managed through controller
 
+		$scope.$watch('model.pageSwitch', function(newValue, oldValue, scope) {
+			if(newValue == 'analyze') {
+				Layer.query({corpusId: scope.selectedCorpusId, mediaId: scope.selectedMediaId}, function(layers){
+					layers.forEach(function (l) {
+						Annotation.query({corpusId: scope.selectedCorpusId, mediaId: scope.selectedMediaId, layerId: l._id}, function(annots) {
+							$scope.model.availableLayers.push({
+								'label': l.layer_type,
+								'_id': l._id,
+								'layer': annots,
+								'mapping': null,
+								'tooltipFunc': null
+							});
+						});
+					});
+				});
+			} else {
+				scope.model.availableLayers = [];
+			}
+		});
 
 	}]);
 
