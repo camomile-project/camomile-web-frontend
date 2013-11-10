@@ -395,14 +395,17 @@ angular.module('myApp.controllers', ['myApp.services'])
 			pageTitle: "Select corpus and media",
 			selectedCorpusName: "Select corpus",
 			selectedMediaName: "Select media",
+			selectedCorpusId: undefined,
+			selectedMediaId: undefined,
 			selectedMethodName: "Method",
 			selectedRefName: "Reference",
-			selectedFirstHyp: "1st Hypothesis",
-			selectedSecondHyp: "2nd Hypothesis"
+			selectedFirstHypName: "1st_Hypothesis",
+			selectedSecondHypName: "2nd_Hypothesis",
+			selectedMethodId: undefined,
+			selectedRefId: undefined,
+			selectedFirstHypId: undefined,
+			selectedSecondHypId: undefined
 		};
-
-		$scope.model.selectedCorpusId = undefined;
-		$scope.model.selectedMediaId = undefined;
 
 		$scope.model.corpora = Corpus.query();
 		$scope.model.media = [];
@@ -415,11 +418,22 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		$scope.model.probe = function() {
 			console.log($scope.model.selectedCorpusId);
-		}
+		};
 
 		$scope.model.setSwitch = function(sw) {
 			$scope.model.pageSwitch = sw;
-		}
+			if(sw === "select") {
+				$scope.model.pageTitle = "Select corpus and media";
+				$scope.model.selectedCorpusId = undefined;
+				$scope.model.selectedMediaId = undefined;
+			} else {
+				$scope.model.pageTitle = "Analyze media";
+				$scope.model.selectedMethodId = undefined;
+				$scope.model.selectedRefId = undefined;
+				$scope.model.selectedFirstHypId = undefined;
+				$scope.model.selectedSecondHypId = undefined;
+			}
+		};
 
 		$scope.$watch('model.selectedCorpusId', function(newValue, oldValue, scope) {
 			if(newValue !== undefined) {
@@ -427,7 +441,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					return el._id === newValue;
 				})[0].name;
 				$scope.model.media = Media.query({corpusId: newValue});
-				$scope.model.selectedMediaId = undefined;
+			} else {
+				$scope.model.selectedCorpusName = "Select corpus";
 			}
 		});
 
@@ -441,14 +456,58 @@ angular.module('myApp.controllers', ['myApp.services'])
 			}
 		});
 
+		$scope.$watch('model.selectedMethodId', function(newValue, oldValue, scope) {
+			if(newValue !== undefined) {
+				$scope.model.selectedMethodName = $scope.model.methods[newValue];
+				if(newValue !== 'Regression') {
+					$scope.model.selectedSecondHypId = undefined;
+				}
+			} else {
+				$scope.model.selectedMethodName = "Method";
+			}
+		});
+
+		$scope.$watch('model.selectedRefId', function(newValue, oldValue, scope) {
+			if(newValue !== undefined) {
+				$scope.model.selectedRefName = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === newValue;
+				})[0].label;
+			} else {
+				$scope.model.selectedRefName = "Reference";
+			}
+		});
+
+		$scope.$watch('model.selectedFirstHypId', function(newValue, oldValue, scope) {
+			if(newValue !== undefined) {
+				$scope.model.selectedFirstHypName = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === newValue;
+				})[0].label;
+			} else {
+				$scope.model.selectedFirstHypName = "1st_Hypothesis";
+			}
+		});
+
+		$scope.$watch('model.selectedSecondHypId', function(newValue, oldValue, scope) {
+			if(newValue !== undefined) {
+				$scope.model.selectedSecondHypName = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === newValue;
+				})[0].label;
+			} else {
+				$scope.model.selectedSecondHypName = "2nd_Hypothesis";
+			}
+		});
+
+
+
+
 		// add in a availableLayers tab,
 		// layers being what has to be displayed. reference, hypotheses and diff/regress are put to fixed positions, and managed through controller
 
 		$scope.$watch('model.pageSwitch', function(newValue, oldValue, scope) {
 			if(newValue == 'analyze') {
-				Layer.query({corpusId: scope.selectedCorpusId, mediaId: scope.selectedMediaId}, function(layers){
+				Layer.query({corpusId: scope.model.selectedCorpusId, mediaId: scope.model.selectedMediaId}, function(layers){
 					layers.forEach(function (l) {
-						Annotation.query({corpusId: scope.selectedCorpusId, mediaId: scope.selectedMediaId, layerId: l._id}, function(annots) {
+						Annotation.query({corpusId: scope.model.selectedCorpusId, mediaId: scope.model.selectedMediaId, layerId: l._id}, function(annots) {
 							$scope.model.availableLayers.push({
 								'label': l.layer_type,
 								'_id': l._id,
