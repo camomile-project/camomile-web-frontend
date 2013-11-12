@@ -76,3 +76,8 @@ span.label {
 .cm-dropdown li {
     width: 100% !important; /* override the even-3 behavior */
 }
+
+.inactive {
+    opacity: 0.3;
+}
+
