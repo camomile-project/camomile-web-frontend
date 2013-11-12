@@ -414,6 +414,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 		$scope.model.availableLayers = [];
 
 		$scope.model.layers = [];
+		$scope.model.layerWatch = [];
 		$scope.model.latestLayer = {};
 
 		$scope.model.probe = function() {
@@ -434,6 +435,53 @@ angular.module('myApp.controllers', ['myApp.services'])
 				$scope.model.selectedSecondHypId = undefined;
 			}
 		};
+
+
+		$scope.updateLayerForRole = (function() {
+			var refPos = undefined;
+			var firstPos = undefined;
+			var secondPos = undefined;
+			var computedPos = undefined;
+
+			return function(role, layer) {
+				var curPos, newPos;
+				switch(role) {
+					case 'ref':
+						newPos = 0;
+						curPos = refPos;
+						refPos = (layer === undefined) ? undefined : newPos;
+						break;
+					case 'first':
+						newPos = 0 + (refPos !== undefined);
+						curPos = firstPos;
+						firstPos = (layer === undefined) ? undefined : newPos;
+						break;
+					case 'second':
+						newPos = (0 + (refPos !== undefined)
+							+ (firstPos !== undefined));
+						curPos = secondPos;
+						secondPos = (layer === undefined) ? undefined : newPos;
+						break;
+					case 'computed':
+						newPos = (0 + (refPos !== undefined)
+							+ (firstPos !== undefined)
+							+ (secondPos !== undefined));
+						curPos = computedPos;
+						computedPos = (layer === undefined) ? undefined : newPos;
+						break;
+				}
+
+				if(layer !== undefined) {
+					$scope.model.latestLayer = layer;
+					$scope.model.layers.splice(newPos, 0 + (curPos !== undefined), layer);
+					$scope.model.layerWatch.splice(newPos, 0 + (curPos !== undefined), layer._id);
+				} else {
+					$scope.model.latestLayer = $scope.model.layers.splice(newPos, 0 + (curPos !== undefined));
+					$scope.model.layerWatch.splice(newPos, 0 + (curPos !== undefined));
+				}
+			};
+		}());
+
 
 		$scope.$watch('model.selectedCorpusId', function(newValue, oldValue, scope) {
 			if(newValue !== undefined) {
@@ -459,45 +507,78 @@ angular.module('myApp.controllers', ['myApp.services'])
 		$scope.$watch('model.selectedMethodId', function(newValue, oldValue, scope) {
 			if(newValue !== undefined) {
 				$scope.model.selectedMethodName = $scope.model.methods[newValue];
-				if(newValue !== 'Regression') {
+				if($scope.model.selectedMethodName !== 'Regression') {
 					$scope.model.selectedSecondHypId = undefined;
 				}
 			} else {
 				$scope.model.selectedMethodName = "Method";
 			}
+			scope.updateComputedLayer();
 		});
 
 		$scope.$watch('model.selectedRefId', function(newValue, oldValue, scope) {
 			if(newValue !== undefined) {
-				$scope.model.selectedRefName = $.grep($scope.model.availableLayers, function(el) {
+				var newLayer = $.grep($scope.model.availableLayers, function(el) {
 					return el._id === newValue;
-				})[0].label;
-			} else {
+				})[0];
+				$scope.model.selectedRefName = newLayer.label;
+				$scope.updateLayerForRole('ref', newLayer);
+				newLayer.available = false;
+			} else if(oldValue !== undefined) {
+				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === oldValue;
+				})[0];
 				$scope.model.selectedRefName = "Reference";
+				$scope.updateLayerForRole('ref');
+				oldLayer.available = true;
 			}
+			scope.updateComputedLayer();
 		});
 
 		$scope.$watch('model.selectedFirstHypId', function(newValue, oldValue, scope) {
 			if(newValue !== undefined) {
-				$scope.model.selectedFirstHypName = $.grep($scope.model.availableLayers, function(el) {
+				var newLayer = $.grep($scope.model.availableLayers, function(el) {
 					return el._id === newValue;
-				})[0].label;
-			} else {
+				})[0];
+				$scope.model.selectedFirstHypName = newLayer.label;
+				$scope.updateLayerForRole('first', newLayer);
+				newLayer.available = false;
+			} else if(oldValue !== undefined) {
+				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === oldValue;
+				})[0];
 				$scope.model.selectedFirstHypName = "1st_Hypothesis";
+				$scope.updateLayerForRole('first');
+				oldLayer.available = true;
 			}
+			scope.updateComputedLayer();
 		});
 
 		$scope.$watch('model.selectedSecondHypId', function(newValue, oldValue, scope) {
 			if(newValue !== undefined) {
-				$scope.model.selectedSecondHypName = $.grep($scope.model.availableLayers, function(el) {
+				var newLayer = $.grep($scope.model.availableLayers, function(el) {
 					return el._id === newValue;
-				})[0].label;
-			} else {
+				})[0];
+				$scope.model.selectedSecondHypName = newLayer.label;
+				$scope.updateLayerForRole('second', newLayer);
+				newLayer.available = false;
+			} else if(oldValue !== undefined) {
+				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === oldValue;
+				})[0];
 				$scope.model.selectedSecondHypName = "2nd_Hypothesis";
+				$scope.updateLayerForRole('second');
+				oldLayer.available = true;
 			}
+			scope.updateComputedLayer();
 		});
 
 
+		$scope.updateComputedLayer = function() {
+			// set here the logic to decide when the computed layer has to be updated,
+			// get the layer from http call,
+			// and perform layer model.layers update in the callback.
+		}
 
 
 		// add in a availableLayers tab,
@@ -506,14 +587,16 @@ angular.module('myApp.controllers', ['myApp.services'])
 		$scope.$watch('model.pageSwitch', function(newValue, oldValue, scope) {
 			if(newValue == 'analyze') {
 				Layer.query({corpusId: scope.model.selectedCorpusId, mediaId: scope.model.selectedMediaId}, function(layers){
-					layers.forEach(function (l) {
+					layers.forEach(function (l,i) {
 						Annotation.query({corpusId: scope.model.selectedCorpusId, mediaId: scope.model.selectedMediaId, layerId: l._id}, function(annots) {
 							$scope.model.availableLayers.push({
+								'available': true,
 								'label': l.layer_type,
-								'_id': l._id,
-								'layer': annots,
-								'mapping': null,
-								'tooltipFunc': null
+								'_id': "" + l._id,
+								'layer': annots
+								// do not use null, but undefined for default choices - this allows omission
+//								'mapping': null,
+//								'tooltipFunc': null
 							});
 						});
 					});

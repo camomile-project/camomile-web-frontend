@@ -54,9 +54,10 @@
 							</button><br/>
 							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
 								<li ng-repeat="elem in coll">
-									<a ng-click="select(elem._id)" title="{{elem.label}}">{{elem.label | truncate:30}}</a>
-								</li>
-							</ul>
+                                    <a ng-click="!elem.available || select(elem._id)" title="{{elem.label}}"
+                                       class="{{elem.available ? '' : 'inactive'}}">{{elem.label | truncate:30}}</a>
+                                </li>
+                            </ul>
 						</li>
 						<li class="cm-dropdown" drop-id="5" drop-title="model.selectedFirstHypName" coll="model.availableLayers" selected-id="model.selectedFirstHypId"
 								enabled-ref="model.selectedMethodId !== undefined">
@@ -65,7 +66,8 @@
 							</button><br/>
 							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
 								<li ng-repeat="elem in coll">
-									<a ng-click="select(elem._id)" title="{{elem.label}}">{{elem.label | truncate:30}}</a>
+									<a ng-click="!elem.available || select(elem._id)" title="{{elem.label}}"
+                                       class="{{elem.available ? '' : 'inactive'}}">{{elem.label | truncate:30}}</a>
 								</li>
 							</ul>
 						</li>
@@ -76,7 +78,8 @@
 							</button><br/>
 							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
 								<li ng-repeat="elem in coll">
-									<a ng-click="select(elem._id)" title="{{elem.label}}">{{elem.label | truncate:30}}</a>
+									<a ng-disabled="!elem.available" ng-click="select(elem._id)" title="{{elem.label}}"
+                                       class="{{elem.available ? '' : 'inactive'}}">{{elem.label | truncate:30}}</a>
 								</li>
 							</ul>
 						</li>
@@ -85,6 +88,7 @@
 							<button class="large button secondary" ng-click="model.setSwitch('select')">Back</button>
 						</li>
 					</ul>
+                    <cm-timeline></cm-timeline>
 				</div>
 
 			</div>
