@@ -517,6 +517,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 
 		$scope.$watch('model.selectedRefId', function(newValue, oldValue, scope) {
+			if(oldValue !== undefined) {
+				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === oldValue;
+				})[0];
+				oldLayer.available = true;
+			}
+
 			if(newValue !== undefined) {
 				var newLayer = $.grep($scope.model.availableLayers, function(el) {
 					return el._id === newValue;
@@ -524,18 +531,22 @@ angular.module('myApp.controllers', ['myApp.services'])
 				$scope.model.selectedRefName = newLayer.label;
 				$scope.updateLayerForRole('ref', newLayer);
 				newLayer.available = false;
-			} else if(oldValue !== undefined) {
-				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === oldValue;
-				})[0];
+			} else {
 				$scope.model.selectedRefName = "Reference";
 				$scope.updateLayerForRole('ref');
-				oldLayer.available = true;
 			}
+
 			scope.updateComputedLayer();
 		});
 
 		$scope.$watch('model.selectedFirstHypId', function(newValue, oldValue, scope) {
+			if(oldValue !== undefined) {
+				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === oldValue;
+				})[0];
+				oldLayer.available = true;
+			}
+
 			if(newValue !== undefined) {
 				var newLayer = $.grep($scope.model.availableLayers, function(el) {
 					return el._id === newValue;
@@ -543,18 +554,21 @@ angular.module('myApp.controllers', ['myApp.services'])
 				$scope.model.selectedFirstHypName = newLayer.label;
 				$scope.updateLayerForRole('first', newLayer);
 				newLayer.available = false;
-			} else if(oldValue !== undefined) {
-				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === oldValue;
-				})[0];
+			} else {
 				$scope.model.selectedFirstHypName = "1st_Hypothesis";
 				$scope.updateLayerForRole('first');
-				oldLayer.available = true;
 			}
+
 			scope.updateComputedLayer();
 		});
 
 		$scope.$watch('model.selectedSecondHypId', function(newValue, oldValue, scope) {
+			if(oldValue !== undefined) {
+				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
+					return el._id === oldValue;
+				})[0];
+				oldLayer.available = true;
+			}
 			if(newValue !== undefined) {
 				var newLayer = $.grep($scope.model.availableLayers, function(el) {
 					return el._id === newValue;
@@ -562,22 +576,76 @@ angular.module('myApp.controllers', ['myApp.services'])
 				$scope.model.selectedSecondHypName = newLayer.label;
 				$scope.updateLayerForRole('second', newLayer);
 				newLayer.available = false;
-			} else if(oldValue !== undefined) {
-				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === oldValue;
-				})[0];
+			} else {
 				$scope.model.selectedSecondHypName = "2nd_Hypothesis";
 				$scope.updateLayerForRole('second');
-				oldLayer.available = true;
 			}
+
 			scope.updateComputedLayer();
 		});
 
 
 		$scope.updateComputedLayer = function() {
-			// set here the logic to decide when the computed layer has to be updated,
-			// get the layer from http call,
-			// and perform layer model.layers update in the callback.
+			// logic of when the computed layer is allowed to be computed
+			var condition = (($scope.model.selectedRefId !== undefined) && ($scope.model.selectedFirstHypId !== undefined)) &&
+				(($scope.model.selectedMethodName === 'Diff') || (($scope.model.selectedMethodName === 'Regression') &&
+						($scope.model.selectedSecondHypId !== undefined)));
+
+			if(condition) {
+
+				var cbkFunc, tooltipFunc, _id, label;
+				var mapping = {};
+				var layers = {};
+				switch($scope.model.selectedMethodName) {
+					case 'Diff':
+						cbkFunc = CMError.diff;
+						_id = $scope.model.selectedRefId + '_vs_' + $scope.model.selectedFirstHypId;
+						label = 'Difference';
+						mapping.colors = {
+							"correct": "green",
+							"miss": "orange",
+							"false alarm": "orange",
+							"confusion": "red"
+						};
+						layers.reference = $scope.model.layers[0].layer;
+						layers.hypothesis = $scope.model.layers[1].layer;
+						break;
+					case 'Regression':
+						cbkFunc = CMError.regression;
+						_id = $scope.model.selectedRefId + '_vs_' + $scope.model.selectedFirstHypId + '_and_' + $scope.model.selectedSecondHypId;
+						label = 'Regression';
+						mapping.colors = {
+							"both_correct": "green",
+							"both_incorrect": "red",
+							"improvement": "yellow",
+							"regression": "blue"
+						};
+						layers.reference = $scope.model.layers[0].layer;
+						layers.before = $scope.model.layers[1].layer;
+						layers.after = $scope.model.layers[2].layer;
+						break;
+				};
+
+				mapping.getKey = function(d) {
+					return d.data[0];
+				};
+
+				cbkFunc(layers).success(function(data,status) {
+					$scope.model.latestLayer = data;
+					$scope.updateLayerForRole('computed', {
+						'label': label,
+						'_id': _id,
+						'layer': data,
+						'mapping': mapping,
+						'tooltipFunc': function(d) {
+							return d.data[0];
+						}
+					});
+				});
+
+			} else {
+				$scope.updateLayerForRole('computed');
+			}
 		}
 
 

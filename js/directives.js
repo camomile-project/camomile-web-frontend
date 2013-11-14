@@ -253,12 +253,12 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var updateLayers = function(addedLayerId, removedLayerId) {
 					var addedLayer, removedLayer;
 					if(addedLayerId !== undefined) {
-						addedLayer = scope.model.availableLayers.filter(function(l) {
+						addedLayer = scope.model.layers.filter(function(l) {
 							return(l._id === addedLayerId);
 						})[0];
 					}
 					if(removedLayerId !== undefined) {
-						removedLayer = scope.model.availableLayers.filter(function(l) {
+						removedLayer = scope.model.layers.filter(function(l) {
 							return(l._id === removedLayerId);
 						})[0];
 					}
@@ -424,6 +424,30 @@ angular.module('myApp.directives', ['myApp.filters']).
 					layerSel.attr("transform", function(d,i) {
 						return "translate(0," + (lanePadding+(i*(lanePadding+laneHeight))) + ")";
 					});
+
+					// refresh all annotations in case of rescale
+					focus.selectAll(".annot")
+						.attr("x", function(d) {
+							return xMsScale(d.fragment.start);
+						})
+						.attr("width", function(d) {
+							return xMsScale(d.fragment.end)-xMsScale(d.fragment.start);
+						});
+
+					// adjust font size to available space in left margin
+					var maxTickLength=0;
+					focus.select(".y")
+						.selectAll("text")[0]
+						.forEach(function(d) {
+							if(d.getComputedTextLength() > maxTickLength) {
+								maxTickLength = d.getComputedTextLength();
+							}
+						});
+					maxTickLength = maxTickLength * 16 / 12; // approx. points to pixels conversion
+					focus.select(".y")
+						.selectAll("text")
+						.attr("font-size", "" +110*margin.left/maxTickLength +"%");
+
 
 				};
 
