@@ -9,6 +9,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 			elm.text(version);
 		};
 	}])
+
 	// toggable panel for nested display
 	.directive('cmToggable', function() {
 		return {
