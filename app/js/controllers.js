@@ -1,84 +1,6 @@
 'use strict';
 
 angular.module('myApp.controllers', ['myApp.services'])
-		.controller('CorpusCtrl', ['$scope', 'Corpus', function($scope, Corpus) {
-			$scope.model = {
-				corpusTitle: "Corpora",
-				corpusOpened: false
-			};
-			$scope.$watch('model.corpusOpened', function(newValue, oldValue, scope) {
-				if (newValue) {
-					scope.model.corpuses = Corpus.query();
-				} else {
-					scope.model.corpuses = undefined;
-				}
-			});
-		}])
-
-
-		.controller('MediaCtrl', ['$scope', 'Media', function($scope, Media) {
-			$scope.model = {
-				mediaTitle: "Media",
-				mediaOpened: false
-			};
-
-			$scope.$watch('model.mediaOpened', function(newValue, oldValue, scope) {
-				if (newValue) {
-					scope.model.media = Media.query({corpusId: scope.corpus._id});
-				} else {
-					scope.model.media = undefined;
-				}
-			});
-			$scope.$watch('model.corpusOpened', function(newValue, oldValue, scope) {
-				if (!newValue) {
-					scope.model.mediaOpened = false;
-				}
-			});
-		}])
-
-
-		.controller('LayerCtrl', ['$scope', 'Layer', function($scope, Layer) {
-			$scope.model = {
-				layerTitle: "Layers",
-				layerOpened: false
-			};
-
-			$scope.$watch('model.layerOpened', function(newValue, oldValue, scope) {
-				if (newValue) {
-					scope.model.layers = Layer.query({corpusId: scope.corpus._id, mediaId:scope.media._id});
-				} else {
-					scope.model.layers = undefined;
-				}
-			});
-			$scope.$watch('model.mediaOpened', function(newValue, oldValue, scope) {
-				if (!newValue) {
-					scope.model.layerOpened = false;
-				}
-			});
-		}])
-
-
-		.controller('AnnotationCtrl', ['$scope', 'Annotation', function($scope, Annotation) {
-			$scope.model = {
-				annotationTitle: "Annotations",
-				annotationOpened: false
-			};
-
-			$scope.$watch('model.annotationOpened', function(newValue, oldValue, scope) {
-				if (newValue) {
-					scope.model.annotations = Annotation.query({corpusId: scope.corpus._id, mediaId: scope.media._id, layerId: scope.layer._id});
-				} else {
-					scope.model.annotations = undefined;
-				}
-			});
-			$scope.$watch('model.layerOpened', function(newValue, oldValue, scope) {
-				if (!newValue) {
-					scope.model.annotationOpened = false;
-				}
-			});
-		}])
-
-
 
 	.controller('DiffCtrl',
 	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
@@ -502,346 +424,192 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 	}])
 
-	.controller('SelectListCtrl',
-	['$scope', 'Corpus', 'Media', 'Layer', 'Annotation',
-	function($scope, Corpus, Media, Layer, Annotation) {
-
-		// mock controller for testing timeline component
-		$scope.model = {
-				layers: [],
-				stockLayers: [],
-				curId: 0,
-				mediaName: ""
-		};
-
-		Corpus.get({corpusId: "524c35740ef6bde125000001"}, function(corp) {
-			Media.get({corpusId: corp._id, mediaId: "525bf32fbb9d24dc28000001"}, function(media) {
-				$scope.model.mediaName = "- " + media.name;
-				Layer.query({corpusId: corp._id, mediaId: media._id}, function(layers){
-					layers.forEach(function (l, i) {
-						Annotation.query({corpusId: corp._id, mediaId: media._id, layerId: l._id}, function(annots) {
-							var obj = {
-								_id: l._id,
-								layer: annots,
-								label: l.layer_type
-							};
-							$scope.model.stockLayers.push(obj);
-						});
-					});
-				});
-			});
-		});
-
-		$scope.addLayer = function() {
-			$scope.model.layers.push($scope.model.stockLayers[$scope.model.curId]);
-			$scope.model.latestLayer = $scope.model.stockLayers[$scope.model.curId];
-			$scope.model.curId++;
-		};
-
-		$scope.removeLayer = function() {
-			$scope.model.latestLayer = $scope.model.layers.pop();
-			$scope.model.curId--;
-		};
-
-	}])
-
-	.controller('AnalysisCtrl',
+	.controller('FusionCtrl',
 	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
 	function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
-		delete $http.defaults.headers.common['X-Requested-With'];
 
-		$scope.model = {
-			pageSwitch: "select", // possible values : "select" and "analysis"
-			pageTitle: "Select corpus and media",
-			selectedCorpusName: "Select corpus",
-			selectedMediaName: "Select media",
-			selectedCorpusId: undefined,
-			selectedMediaId: undefined,
-			selectedMethodName: "Method",
-			selectedRefName: "Reference",
-			selectedFirstHypName: "1st_Hypothesis",
-			selectedSecondHypName: "2nd_Hypothesis",
-			selectedMethodId: undefined,
-			selectedRefId: undefined,
-			selectedFirstHypId: undefined,
-			selectedSecondHypId: undefined
-		};
+	  	delete $http.defaults.headers.common['X-Requested-With'];
 
-		$scope.model.corpora = Corpus.query();
-		$scope.model.media = [];
-		$scope.model.methods = ['Diff', 'Regression'];
+		$scope.model = {};
 
-		$scope.model.availableLayers = [];
-
+		// timeline layers (and their IDs)
 		$scope.model.layers = [];
 		$scope.model.layerWatch = [];
-		$scope.model.latestLayer = {};
 
-		$scope.model.probe = function() {
-			console.log($scope.model.selectedCorpusId);
+		// watch selected corpus ID
+		$scope.model.selected_corpus = "";
+
+		// watch selected medium ID
+		$scope.model.selected_medium = "";
+
+		$scope.model.annotations = {
+			'reference': [],
+			'multimodal': []
 		};
 
-		$scope.model.setSwitch = function(sw) {
-			$scope.model.pageSwitch = sw;
-			if(sw === "select") {
-				$scope.model.pageTitle = "Select corpus and media";
-				$scope.model.selectedCorpusId = undefined;
-				$scope.model.selectedMediaId = undefined;
-			} else {
-				$scope.model.pageTitle = "Analyze media";
-				$scope.model.selectedMethodId = undefined;
-				$scope.model.selectedRefId = undefined;
-				$scope.model.selectedFirstHypId = undefined;
-				$scope.model.selectedSecondHypId = undefined;
+		// watch selected reference ID
+		$scope.model.selected_reference = "";
+
+		// selected multimodal layer ID
+		$scope.model.selected_multimodal = "";
+
+		// obtain list of corpora
+		$scope.get_corpora = function() {
+			$scope.model.available_corpora = Corpus.query();
+		};
+
+		// obtain list of media for given corpus
+		$scope.get_media = function(corpus_id) {
+			$scope.model.available_media = Media.query({corpusId: corpus_id});
+		};
+
+		// obtain list of layers for given medium
+		$scope.get_layers = function(corpus_id, medium_id) {
+			$scope.model.available_layers = Layer.query(
+				{corpusId: corpus_id, mediaId: medium_id});
+		};
+
+		$scope.get_mapping = function(type) {
+
+			if (type == 'label') {
+				console.log('type == label');
+				return {
+					'getKey': function(d) {
+						return d.data;
+					}
+				};
+			}
+
+			if (type == 'diff') {
+				console.log('type == diff');
+				return {
+					'colors': {
+						"correct": "green",
+						"miss": "orange",
+						"false alarm": "orange",
+						"confusion": "red"
+					},
+					'getKey': function(d) {
+						return d.data[0];
+					}
+				};
+			}
+
+		};
+
+		$scope.get_tooltipFunc = function(t) {
+			if (t == "label") {
+				return function(d) {return d.data;};
+			}
+			else {
+				return function(d) {return d.data[0];};
 			}
 		};
 
+		$scope.new_layer = function(label, id, data, type) {
 
-		$scope.updateLayerForRole = (function() {
-			var refPos = undefined;
-			var firstPos = undefined;
-			var secondPos = undefined;
-			var computedPos = undefined;
+			var mapping = $scope.get_mapping(type);
 
-			return function(role, layer) {
-				var curPos, newPos;
-				switch(role) {
-					case 'ref':
-						newPos = 0;
-						curPos = refPos;
-						refPos = (layer === undefined) ? undefined : newPos;
-						break;
-					case 'first':
-						newPos = 0 + (refPos !== undefined);
-						curPos = firstPos;
-						firstPos = (layer === undefined) ? undefined : newPos;
-						break;
-					case 'second':
-						newPos = (0 + (refPos !== undefined)
-							+ (firstPos !== undefined));
-						curPos = secondPos;
-						secondPos = (layer === undefined) ? undefined : newPos;
-						break;
-					case 'computed':
-						newPos = (0 + (refPos !== undefined)
-							+ (firstPos !== undefined)
-							+ (secondPos !== undefined));
-						curPos = computedPos;
-						computedPos = (layer === undefined) ? undefined : newPos;
-						break;
-				}
+			var tooltipFunc = $scope.get_tooltipFunc(type);
 
-				if(layer !== undefined) {
-					$scope.model.latestLayer = layer;
-					$scope.model.layers.splice(newPos, 0 + (curPos !== undefined), layer);
-					$scope.model.layerWatch.splice(newPos, 0 + (curPos !== undefined), layer._id);
-				} else {
-					$scope.model.latestLayer = $scope.model.layers.splice(newPos, 0 + (curPos !== undefined));
-					$scope.model.layerWatch.splice(newPos, 0 + (curPos !== undefined));
-				}
+			var layer = {
+				'label': label,
+				'_id': id,
+				'layer': data,
+				'mapping': mapping,
+				'tooltipFunc': tooltipFunc,
 			};
-		}());
+			return layer;
+		};
 
+		$scope.update_layers = function() {
 
-		$scope.$watch('model.selectedCorpusId', function(newValue, oldValue, scope) {
-			if(newValue !== undefined) {
-				$scope.model.selectedCorpusName = $.grep($scope.model.corpora, function(el) {
-					return el._id === newValue;
-				})[0].name;
-				$scope.model.media = Media.query({corpusId: newValue});
-			} else {
-				$scope.model.selectedCorpusName = "Select corpus";
+			var reference_and_hypothesis = {
+				'reference': $scope.model.annotations['reference'],
+				'hypothesis': $scope.model.annotations['multimodal']
+			};
+
+			CMError.diff(reference_and_hypothesis).success(function(data, status) {
+
+				$scope.model.annotations['diff'] = data;
+
+				console.log($scope.model.annotations);
+
+				var layers = [];
+				var layerWatch = [];
+
+				var layer = $scope.new_layer(
+					'Reference',
+					$scope.model.selected_reference,
+					$scope.model.annotations['reference'],
+					'label');
+				layers.push(layer);
+				layerWatch.push($scope.model.selected_reference);
+
+				var layer = $scope.new_layer(
+					'Multimodal',
+					$scope.model.selected_multimodal,
+					$scope.model.annotations['multimodal'],
+					'label');
+				layers.push(layer);
+				layerWatch.push($scope.model.selected_multimodal);
+
+				var layer = $scope.new_layer(
+					'Diff',
+					$scope.model.selected_reference + '_vs_' + $scope.model.selected_multimodal,
+					$scope.model.annotations['diff'],
+					'diff');
+				layers.push(layer);
+				layerWatch.push($scope.model.selected_reference + '_vs_' + $scope.model.selected_multimodal);
+
+				$scope.model.layers = layers;
+				$scope.model.layerWatch = layerWatch;
+				console.log($scope.model.layers);
+				console.log($scope.model.layerWatch);
+
+			});
+		};
+
+		$scope.$watch('model.selected_corpus', function(newValue, oldValue, scope) {
+			if (newValue) {
+				scope.get_media(scope.model.selected_corpus);
 			}
 		});
 
-		$scope.$watch('model.selectedMediaId', function(newValue, oldValue, scope) {
-			if(newValue !== undefined) {
-				$scope.model.selectedMediaName = $.grep($scope.model.media, function(el) {
-					return el._id === newValue;
-				})[0].name;
-			} else {
-				$scope.model.selectedMediaName = "Select media";
+		$scope.$watch('model.selected_medium', function(newValue, oldValue, scope) {
+			if (newValue) {
+				scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
 			}
 		});
 
-		$scope.$watch('model.selectedMethodId', function(newValue, oldValue, scope) {
-			if(newValue !== undefined) {
-				$scope.model.selectedMethodName = $scope.model.methods[newValue];
-				if($scope.model.selectedMethodName !== 'Regression') {
-					$scope.model.selectedSecondHypId = undefined;
+		$scope.get_annotations = function(corpus_id, medium_id, layer_id, key) {
+			$scope.model.annotations[key] = Annotation.query(
+				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
+				function() {
+					$scope.update_layers();
 				}
-			} else {
-				$scope.model.selectedMethodName = "Method";
+			);
+		};
+
+		$scope.$watch('model.selected_reference', function(newValue, oldValue, scope) {
+			if (newValue) {
+				scope.get_annotations(
+					scope.model.selected_corpus,
+					scope.model.selected_medium,
+					scope.model.selected_reference,
+					'reference'
+					);
 			}
-			scope.updateComputedLayer();
 		});
 
-		$scope.$watch('model.selectedRefId', function(newValue, oldValue, scope) {
-			if(oldValue !== undefined) {
-				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === oldValue;
-				})[0];
-				oldLayer.available = true;
-			}
-
-			if(newValue !== undefined) {
-				var newLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === newValue;
-				})[0];
-				$scope.model.selectedRefName = newLayer.label;
-				$scope.updateLayerForRole('ref', newLayer);
-				newLayer.available = false;
-			} else {
-				$scope.model.selectedRefName = "Reference";
-				$scope.updateLayerForRole('ref');
-			}
-
-			scope.updateComputedLayer();
-		});
-
-		$scope.$watch('model.selectedFirstHypId', function(newValue, oldValue, scope) {
-			if(oldValue !== undefined) {
-				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === oldValue;
-				})[0];
-				oldLayer.available = true;
-			}
-
-			if(newValue !== undefined) {
-				var newLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === newValue;
-				})[0];
-				$scope.model.selectedFirstHypName = newLayer.label;
-				$scope.updateLayerForRole('first', newLayer);
-				newLayer.available = false;
-			} else {
-				$scope.model.selectedFirstHypName = "1st_Hypothesis";
-				$scope.updateLayerForRole('first');
-			}
-
-			scope.updateComputedLayer();
-		});
-
-		$scope.$watch('model.selectedSecondHypId', function(newValue, oldValue, scope) {
-			if(oldValue !== undefined) {
-				var oldLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === oldValue;
-				})[0];
-				oldLayer.available = true;
-			}
-			if(newValue !== undefined) {
-				var newLayer = $.grep($scope.model.availableLayers, function(el) {
-					return el._id === newValue;
-				})[0];
-				$scope.model.selectedSecondHypName = newLayer.label;
-				$scope.updateLayerForRole('second', newLayer);
-				newLayer.available = false;
-			} else {
-				$scope.model.selectedSecondHypName = "2nd_Hypothesis";
-				$scope.updateLayerForRole('second');
-			}
-
-			scope.updateComputedLayer();
-		});
-
-
-		$scope.updateComputedLayer = function() {
-			// logic of when the computed layer is allowed to be computed
-			var condition = (($scope.model.selectedRefId !== undefined) && ($scope.model.selectedFirstHypId !== undefined)) &&
-				(($scope.model.selectedMethodName === 'Diff') || (($scope.model.selectedMethodName === 'Regression') &&
-						($scope.model.selectedSecondHypId !== undefined)));
-
-			if(condition) {
-
-				var cbkFunc, tooltipFunc, _id, label;
-				var mapping = {};
-				var layers = {};
-				switch($scope.model.selectedMethodName) {
-					case 'Diff':
-						cbkFunc = CMError.diff;
-						_id = $scope.model.selectedRefId + '_vs_' + $scope.model.selectedFirstHypId;
-						label = 'Difference';
-						mapping.colors = {
-							"correct": "green",
-							"miss": "orange",
-							"false alarm": "orange",
-							"confusion": "red"
-						};
-						layers.reference = $scope.model.layers[0].layer;
-						layers.hypothesis = $scope.model.layers[1].layer;
-						break;
-					case 'Regression':
-						cbkFunc = CMError.regression;
-						_id = $scope.model.selectedRefId + '_vs_' + $scope.model.selectedFirstHypId + '_and_' + $scope.model.selectedSecondHypId;
-						label = 'Regression';
-						mapping.colors = {
-							"both_correct": "green",
-							"both_incorrect": "red",
-							"improvement": "yellow",
-							"regression": "blue"
-						};
-						layers.reference = $scope.model.layers[0].layer;
-						layers.before = $scope.model.layers[1].layer;
-						layers.after = $scope.model.layers[2].layer;
-						break;
-				};
-
-				mapping.getKey = function(d) {
-					return d.data[0];
-				};
-
-				cbkFunc(layers).success(function(data,status) {
-					$scope.model.latestLayer = data;
-					$scope.updateLayerForRole('computed', {
-						'label': label,
-						'_id': _id,
-						'layer': data,
-						'mapping': mapping,
-						'tooltipFunc': function(d) {
-							return d.data[0];
-						}
-					});
-				});
-
-			} else {
-				$scope.updateLayerForRole('computed');
-			}
-		}
-
-
-		// add in a availableLayers tab,
-		// layers being what has to be displayed. reference, hypotheses and diff/regress are put to fixed positions, and managed through controller
-
-		$scope.$watch('model.pageSwitch', function(newValue, oldValue, scope) {
-			if(newValue == 'analyze') {
-				Layer.query({corpusId: scope.model.selectedCorpusId, mediaId: scope.model.selectedMediaId}, function(layers){
-					layers.forEach(function (l,i) {
-						Annotation.query({corpusId: scope.model.selectedCorpusId, mediaId: scope.model.selectedMediaId, layerId: l._id}, function(annots) {
-							$scope.model.availableLayers.push({
-								'available': true,
-								'label': l.layer_type,
-								'_id': "" + l._id,
-								'layer': annots
-								// do not use null, but undefined for default choices - this allows omission
-//								'mapping': null,
-//								'tooltipFunc': null
-							});
-						});
-					});
-				});
-			} else {
-				scope.model.availableLayers = [];
+		$scope.$watch('model.selected_multimodal', function(newValue, oldValue, scope) {
+			if (newValue) {
+				scope.get_annotations(
+					scope.model.selected_corpus,
+					scope.model.selected_medium,
+					scope.model.selected_multimodal,
+					'multimodal');
 			}
 		});
 
 	}]);
-
-
-
-
-
-
-
-
-
-
