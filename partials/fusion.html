@@ -1,0 +1,59 @@
+
+<div ng-controller="FusionCtrl">
+
+    <div class="form-group container">
+
+        <div class="container">
+
+            <!-- Corpus selection -->
+            <div class="col-xs-6">
+                <select class="form-control" ng-model='model.selected_corpus' ng-init="get_corpora()">
+                    <option value=''>-- select a corpus --</option>
+                    <option ng-repeat='corpus in model.available_corpora' value={{corpus._id}}>{{corpus.name}}</option>
+                </select>
+            </div>
+
+            <!-- Medium selection -->
+            <div class="col-xs-6">
+                <select class="form-control" ng-model='model.selected_medium' ng-show='model.selected_corpus'>
+                    <option value=''>-- select a medium --</option>
+                    <option ng-repeat='medium in model.available_media' value={{medium._id}}>{{medium.name}}</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="container" ng-show='model.selected_medium'>
+
+            <!-- Reference selection -->
+            <div class="col-xs-3">Reference</div>
+            <div class="col-xs-9">
+                <select class="form-control" ng-model='model.selected_reference' >
+                    <option value=''>-- select a reference --</option>
+                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
+                </select>
+            </div>
+
+            <!-- Multimodal system -->
+            <div class="col-xs-3">Fusion</div>
+            <div class="col-xs-9">
+                <select class="form-control" ng-model='model.selected_multimodal' >
+                    <option value=''>-- select a multimodal system --</option>
+                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
+                </select>
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <div class="container">
+        <cm-timeline></cm-timeline>
+    </div>
+
+</div>
+
+
+
