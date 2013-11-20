@@ -29,7 +29,7 @@
             <div class="col-xs-3">Reference</div>
             <div class="col-xs-9">
                 <select class="form-control" ng-model='model.selected_reference' >
-                    <option value=''>-- select a reference --</option>
+                    <option value=''>-- select reference --</option>
                     <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
                 </select>
             </div>
@@ -37,8 +37,30 @@
             <!-- Multimodal system -->
             <div class="col-xs-3">Fusion</div>
             <div class="col-xs-9">
-                <select class="form-control" ng-model='model.selected_multimodal' >
-                    <option value=''>-- select a multimodal system --</option>
+                <select class="form-control" ng-model='model.selected_hypothesis' >
+                    <option value=''>-- select fusion hypothesis --</option>
+                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
+                </select>
+            </div>
+
+            <div ng-repeat='layerId in model.selected_monomodal'>
+                <div class="col-xs-3">Component #{{$index+1}}</div>
+                <div class="col-xs-9">
+                    <select
+                        class="form-control"
+                        ng-model='layerId._id'
+                        ng-options='layer._id as layer.layer_type for layer in model.available_layers'
+                    ></select>
+
+<!--                     <select class="form-control" ng-model='model.selected_monomodal[$index]._id' >
+                        <option ng-repeat='layer in model.available_layers' {{selected if layer._id == layerId._id}} value={{layer._id}}>{{layer.layer_type}}</option>
+                    </select>
+ -->                </div>
+            </div>
+            <div class="col-xs-3">Show component</div>
+            <div class="col-xs-9">
+                <select class="form-control" ng-model='model.selected_monomodal_add' >
+                    <option value=''>-- select a component --</option>
                     <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
                 </select>
             </div>
