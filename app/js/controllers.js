@@ -167,6 +167,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 			}
 		});
 
+
+
 		$scope.$watch('model.selected_medium', function(newValue, oldValue, scope) {
 			if (newValue) {
 				scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
@@ -466,6 +468,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		// selected medium ID
 		$scope.model.selected_medium = "";
+		$scope.model.video = "";
 
 		// selected reference layer ID
 		$scope.model.selected_reference = "";
@@ -497,6 +500,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		// get list of layers for a given medium
 		$scope.get_layers = function(corpus_id, medium_id) {
+			$scope.model.video = "https://flower.limsi.fr/data/corpus/" + corpus_id + "/media/" + medium_id + "/video";
+			console.log($scope.model.video);
+
 			$scope.model.available_layers = Layer.query(
 				{corpusId: corpus_id, mediaId: medium_id},
 				function() {

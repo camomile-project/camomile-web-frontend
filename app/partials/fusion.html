@@ -70,8 +70,17 @@
 
     </div>
 
-
     <div class="container">
+        <video id="player"
+               class="video-js vjs-default-skin"
+               controls
+               preload="auto"
+               width="640"
+               height="400"
+               data-setup='{}'>
+            <source src="{{model.video}}" type='video/webm' />
+        </video>
+
         <cm-timeline></cm-timeline>
     </div>
 
