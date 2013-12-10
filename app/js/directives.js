@@ -122,7 +122,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var curColInd = 0;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var refColors = d3.scale.category20().range();
-				var brush, focus, context;
+			        var brush, focus, context;
+
+			        var player = $( "#player" )[0];
 
 				// for gymnastics with time
 				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
@@ -216,18 +218,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 					// init elements
 
-					// var foreign = d3elmt.append("foreignobject")
-					// 	.attr("width", "640")
-					// 	.attr("heigh", "400");
-
-					// player = foreign.append("video")
-					// 	.attr("id", "player")
-					// 	.attr("class", "video-js vjs-default-skin")
-					// 	.attr("id", "player")
-					// 	.attr("preload", "auto")
-					// 	.attr("width", "640")
-					// 	.attr("height", "400");
-
 					focus = d3elmt.append("g")
 						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -256,8 +246,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 
 				};
-
-
 
 				var updateLayers = function(addedLayerId, removedLayerId) {
 					var addedLayer, removedLayer;
@@ -427,11 +415,8 @@ angular.module('myApp.directives', ['myApp.filters']).
 							return tooltip.style("visibility", "hidden");
 						})
 						.on("click", function(d) {
-							var player = $( "#player" );
-							console.log(player);
-							player.currentTime = d.fragment.start;
-							console.log("go to " + d.fragment.start);
-							// playAtAnOffset(d.fragment.start);
+						    player.currentTime = d.fragment.start;
+						    player.play();
 						});
 
 					layerSel.exit().remove();
