@@ -124,9 +124,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var refColors = d3.scale.category20().range();
 				var brush, focus, context;
 
-
-
-
 				// for gymnastics with time
 				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
 
@@ -164,8 +161,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 					.style("background-color", "yellow")
 					.style("border-style", "solid")
 					.style("border-color", "red");
-
-
 
 				var brushed = function() {
 					var brushRange = brush.extent().map(x2MsScale);
@@ -220,6 +215,19 @@ angular.module('myApp.directives', ['myApp.filters']).
 					brush = d3.svg.brush().x(x2MsScale).on("brush", brushed);
 
 					// init elements
+
+					// var foreign = d3elmt.append("foreignobject")
+					// 	.attr("width", "640")
+					// 	.attr("heigh", "400");
+
+					// player = foreign.append("video")
+					// 	.attr("id", "player")
+					// 	.attr("class", "video-js vjs-default-skin")
+					// 	.attr("id", "player")
+					// 	.attr("preload", "auto")
+					// 	.attr("width", "640")
+					// 	.attr("height", "400");
+
 					focus = d3elmt.append("g")
 						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -417,6 +425,13 @@ angular.module('myApp.directives', ['myApp.filters']).
 						})
 						.on("mouseout", function(){
 							return tooltip.style("visibility", "hidden");
+						})
+						.on("click", function(d) {
+							var player = $( "#player" );
+							console.log(player);
+							player.currentTime = d.fragment.start;
+							console.log("go to " + d.fragment.start);
+							// playAtAnOffset(d.fragment.start);
 						});
 
 					layerSel.exit().remove();
@@ -457,6 +472,10 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				// instead, updating layer function
 				// updateLayers(newLayer, oldLayer)
+
+				// scope.$watch('model.video', function(newValue, oldValue) {
+				// 	player.attr("src", scope.model.video);
+				// });
 
 				scope.$watch('model.layerWatch', function(newValue, oldValue) {
 					// watches are executed at initialization, even if latestLayer is still undefined
