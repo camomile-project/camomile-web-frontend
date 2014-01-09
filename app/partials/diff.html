@@ -1,28 +1,62 @@
 
 <div ng-controller="DiffCtrl">
 
-<select ng-model='model.selected_corpus' ng-init="get_corpora()">
-    <option value=''>-- select a corpus --</option>
-    <option ng-repeat='corpus in model.available_corpora' value={{corpus._id}}>{{corpus.name}}</option>
-</select>
+    <div class="form-group container">
 
-<select ng-model='model.selected_medium' ng-show='model.selected_corpus'>
-    <option value=''>-- select a medium --</option>
-    <option ng-repeat='medium in model.available_media' value={{medium._id}}>{{medium.name}}</option>
-</select>
+        <div class="container">
 
-<select ng-model='model.selected_reference' ng-show='model.selected_medium'>
-    <option value=''>-- select a reference --</option>
-    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
-</select>
+            <!-- Corpus selection -->
+            <div class="col-xs-6">
+                <select class="form-control" ng-model='model.selected_corpus' ng-init="get_corpora()">
+                    <option value=''>-- select a corpus --</option>
+                    <option ng-repeat='corpus in model.available_corpora' value={{corpus._id}}>{{corpus.name}}</option>
+                </select>
+            </div>
 
-<select ng-model='model.selected_hypothesis' ng-show='model.selected_medium'>
-    <option value=''>-- select an hypothesis --</option>
-    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
-</select>
+            <!-- Medium selection -->
+            <div class="col-xs-6">
+                <select class="form-control" ng-model='model.selected_medium' ng-show='model.selected_corpus'>
+                    <option value=''>-- select a medium --</option>
+                    <option ng-repeat='medium in model.available_media' value={{medium._id}}>{{medium.name}}</option>
+                </select>
+            </div>
 
-<div ng-repeat="layer in model.layers">
-    {{ layer.layer.length }} fragments in {{ layer.label }} (id = {{ layer._id }})
+        </div>
+
+        <div class="container">
+
+            <!-- Reference selection -->
+            <div class="col-xs-6" ng-show='model.selected_medium'>
+                <select class="form-control" ng-model='model.selected_reference' >
+                    <option value=''>-- select a reference --</option>
+                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
+                </select>
+            </div>
+
+            <!-- Hypothesis selection -->
+            <div class="col-xs-6" ng-show='model.selected_medium'>
+                <select class="form-control" ng-model='model.selected_hypothesis' >
+                    <option value=''>-- select an hypothesis --</option>
+                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
+                </select>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="container">
+        <cm-timeline></cm-timeline>
+    </div>
+
+<!--
+    <div ng-repeat="layer in model.layers">
+        {{ layer.layer.length }} fragments in {{ layer.label }} (id = {{ layer._id }})
+    </div>
+-->
+
 </div>
 
-</div>
+
+
