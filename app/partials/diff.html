@@ -45,16 +45,17 @@
 
     </div>
 
+    <div class="text-center container">
 
-    <div class="container">
+        <video id="player"
+               preload="auto"
+               width="1000"
+               height="600"
+               src="{{model.video}}">
+        </video>
+
         <cm-timeline></cm-timeline>
     </div>
-
-<!--
-    <div ng-repeat="layer in model.layers">
-        {{ layer.layer.length }} fragments in {{ layer.label }} (id = {{ layer._id }})
-    </div>
--->
 
 </div>
 

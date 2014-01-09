@@ -52,33 +52,16 @@
 
     </div>
 
-        <div class="container">
-            <cm-timeline></cm-timeline>
-        </div>
+    <div class="text-center container">
 
+        <video id="player"
+               preload="auto"
+               width="1000"
+               height="600"
+               src="{{model.video}}">
+        </video>
 
+        <cm-timeline></cm-timeline>
+    </div>
 
-<!-- <select ng-model='model.selected_reference' ng-show='model.selected_medium'>
-    <option value="">-- select a reference --</option>
-    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
-</select>
-
-<select ng-model='model.selected_before' ng-show='model.selected_medium'>
-    <option value="">-- select first hypothesis --</option>
-    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
-</select>
-
-<select ng-model='model.selected_after' ng-show='model.selected_medium'>
-    <option value="">-- select second hypothesis --</option>
-    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
-</select>
-
-<div ng-show='model.selected_reference'>{{model.reference.length}} fragments in reference</div>
-<div ng-show='model.selected_before'>{{model.before.length}} fragments in first hypothesis</div>
-<div ng-show='model.selected_after'>{{model.after.length}} fragments in second hypothesis</div>
-
-<div ng-show="model.regression" ng-repeat="regression in model.regression">
-    <div>{{regression | json}}</div>
-</div>
- -->
 </div>

@@ -51,11 +51,7 @@
                         ng-model='layerId._id'
                         ng-options='layer._id as layer.layer_type for layer in model.available_layers'
                     ></select>
-
-<!--                     <select class="form-control" ng-model='model.selected_monomodal[$index]._id' >
-                        <option ng-repeat='layer in model.available_layers' {{selected if layer._id == layerId._id}} value={{layer._id}}>{{layer.layer_type}}</option>
-                    </select>
- -->                </div>
+                </div>
             </div>
             <div class="col-xs-3">Show component</div>
             <div class="col-xs-9">
@@ -70,8 +66,15 @@
 
     </div>
 
+    <div class="text-center container">
+        
+        <video id="player"
+               preload="auto"
+               width="1000"
+               height="600"
+               src="{{model.video}}">
+        </video>
 
-    <div class="container">
         <cm-timeline></cm-timeline>
     </div>
 

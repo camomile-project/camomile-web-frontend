@@ -122,10 +122,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var curColInd = 0;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var refColors = d3.scale.category20().range();
-				var brush, focus, context;
+			        var brush, focus, context;
 
-
-
+			        var player = $( "#player" )[0];
 
 				// for gymnastics with time
 				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
@@ -164,8 +163,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 					.style("background-color", "yellow")
 					.style("border-style", "solid")
 					.style("border-color", "red");
-
-
 
 				var brushed = function() {
 					var brushRange = brush.extent().map(x2MsScale);
@@ -220,6 +217,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 					brush = d3.svg.brush().x(x2MsScale).on("brush", brushed);
 
 					// init elements
+
 					focus = d3elmt.append("g")
 						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -248,8 +246,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 
 				};
-
-
 
 				var updateLayers = function(addedLayerId, removedLayerId) {
 					var addedLayer, removedLayer;
@@ -417,6 +413,10 @@ angular.module('myApp.directives', ['myApp.filters']).
 						})
 						.on("mouseout", function(){
 							return tooltip.style("visibility", "hidden");
+						})
+						.on("click", function(d) {
+						    player.currentTime = d.fragment.start;
+						    player.play();
 						});
 
 					layerSel.exit().remove();
@@ -457,6 +457,10 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				// instead, updating layer function
 				// updateLayers(newLayer, oldLayer)
+
+				// scope.$watch('model.video', function(newValue, oldValue) {
+				// 	player.attr("src", scope.model.video);
+				// });
 
 				scope.$watch('model.layerWatch', function(newValue, oldValue) {
 					// watches are executed at initialization, even if latestLayer is still undefined
