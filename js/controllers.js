@@ -615,10 +615,10 @@ angular.module('myApp.controllers', ['myApp.services'])
 						_id = $scope.model.selectedRefId + '_vs_' + $scope.model.selectedFirstHypId + '_and_' + $scope.model.selectedSecondHypId;
 						label = 'Regression';
 						mapping.colors = {
-							"both_correct": "green",
-							"both_incorrect": "red",
-							"improvement": "yellow",
-							"regression": "blue"
+							"both_correct": "yellow",
+							"both_incorrect": "#333333",
+							"improvement": "green",
+							"regression": "red"
 						};
 						layers.reference = $scope.model.layers[0].layer;
 						layers.before = $scope.model.layers[1].layer;
