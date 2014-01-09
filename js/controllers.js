@@ -3,8 +3,8 @@
 angular.module('myApp.controllers', ['myApp.services'])
 
 	.controller('DiffCtrl',
-	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-	function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
+	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError) {
 
 		delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -44,6 +44,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		// selected medium ID
 		$scope.model.selected_medium = "";
+	        $scope.model.video = "";
 
 		// selected reference layer ID
 		$scope.model.selected_reference = "";
@@ -167,10 +168,14 @@ angular.module('myApp.controllers', ['myApp.services'])
 			}
 		});
 
+
+
 		$scope.$watch('model.selected_medium', function(newValue, oldValue, scope) {
-			if (newValue) {
-				scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
-			}
+		    if (newValue) {
+			scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
+			scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/"
+                + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
+		    }
 		});
 
 		$scope.$watch('model.selected_reference', function(newValue, oldValue, scope) {
@@ -194,8 +199,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 	}])
 
 	.controller('RegressionCtrl',
-	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-	function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
+	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError) {
 
 	  delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -244,6 +249,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		// selected medium ID
 		$scope.model.selected_medium = "";
+	        $scope.model.video = "";
 
 		// selected reference layer ID
 		$scope.model.selected_reference = "";
@@ -390,11 +396,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 			}
 		});
 
-		$scope.$watch('model.selected_medium', function(newValue, oldValue, scope) {
-			if (newValue) {
-				scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
-			}
-		});
+	    $scope.$watch('model.selected_medium', function(newValue, oldValue, scope) {
+		if (newValue) {
+		    scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
+		    scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/"
+                + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
+		}
+	    });
 
 		$scope.$watch('model.selected_reference', function(newValue, oldValue, scope) {
 			if (newValue) {
@@ -425,8 +433,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 	}])
 
 	.controller('FusionCtrl',
-	['$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-	function($scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
+	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError) {
 
 		delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -466,6 +474,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		// selected medium ID
 		$scope.model.selected_medium = "";
+		$scope.model.video = "";
 
 		// selected reference layer ID
 		$scope.model.selected_reference = "";
@@ -497,6 +506,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		// get list of layers for a given medium
 		$scope.get_layers = function(corpus_id, medium_id) {
+
 			$scope.model.available_layers = Layer.query(
 				{corpusId: corpus_id, mediaId: medium_id},
 				function() {
@@ -644,6 +654,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 			function(newValue, oldValue, scope) {
 				if (newValue) {
 					scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
+				        scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/"
+                            + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
 				}
 			}
 		);
