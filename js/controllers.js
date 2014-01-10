@@ -1,5 +1,40 @@
 'use strict';
 
+var defaultKeyFunc = function(d) {
+    return d.data[0];
+};
+
+var defaultTooltip = function(d) {
+    return d.data[0];
+};
+
+var defaultDiffMapping = {
+    'colors': {
+        "correct": "green",
+        "miss": "yellow",
+        "false alarm": "yellow",
+        "confusion": "red"
+    },
+    'getKey': defaultKeyFunc
+};
+
+var defaultRegressionMapping = {
+    'colors': {
+        "both_correct": "yellow",
+        "both_incorrect": "#666666",
+        "improvement": "green",
+        "regression": "red"
+    },
+    'getKey': defaultKeyFunc
+};
+
+
+// !!!!! GENERAL NOTE
+// In cases where missing values are permitted (e.g. model.layers), undefined should be used
+// as explicit placeholders - so that further testing is facilitated (null and undefined are handled
+// differently, and relying on the default "falsy" behaviour can lead to unpredictable errors,
+// see Crockford "Javascript, the good parts" for reference.
+
 angular.module('myApp.controllers', ['myApp.services'])
 
 	.controller('DiffCtrl',
@@ -10,56 +45,57 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		$scope.model = {};
 
+
 		// layers[0] is the reference
 		// layers[1] is the hypothesis
 		// layers[2] is their difference
 		$scope.model.layers = [
 			{
 				'label': 'Reference',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
+                '_id': 'Reference_init',
+                'layer': []
 			},
 			{
 				'label': 'Hypothesis',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
+                '_id': 'Hypothesis_init',
+                'layer': []
 			},
 			{
 				'label': 'Difference',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
-			}
+                '_id': 'Difference_init',
+                'layer': []
+            }
 		];
 
-		$scope.model.layerWatch = [null, null, null];
+		$scope.model.layerWatch = [];
 
 		// selected corpus ID
-		$scope.model.selected_corpus = "";
+		$scope.model.selected_corpus = undefined;
 
 		// selected medium ID
-		$scope.model.selected_medium = "";
-	        $scope.model.video = "";
+		$scope.model.selected_medium = undefined;
+	    $scope.model.video = "";
 
 		// selected reference layer ID
-		$scope.model.selected_reference = "";
+		$scope.model.selected_reference = undefined;
 
 		// selected hypothesis layer ID
-		$scope.model.selected_hypothesis = "";
+		$scope.model.selected_hypothesis = undefined;
 
-		// list of annotations
-		$scope.model.reference = [];
-		$scope.model.hypothesis = [];
-		$scope.model.diff = [];
+		// list of annotations // redundant with model.layers
+		//$scope.model.reference = [];
+		//$scope.model.hypothesis = [];
+		//$scope.model.diff = [];
 
 		// get list of corpora
 		$scope.get_corpora = function() {
-			$scope.model.available_corpora = Corpus.query();
+			$scope.model.available_corpora = Corpus.query(function() {
+                // initializing layerWatch after corpora are loaded
+                // Adds empty layers as border effect
+                $scope.model.layerWatch = [$scope.model.layers[0]._id,
+                    $scope.model.layers[1]._id,
+                    $scope.model.layers[2]._id];
+            });
 		};
 
 		// get list of media for a given corpus
@@ -76,26 +112,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 		// get list of reference annotations from a given layer
 		// and update difference with hypothesis when it's done
 		$scope.get_reference_annotations = function(corpus_id, medium_id, layer_id) {
-			$scope.model.reference = Annotation.query(
+			$scope.model.layers[0] = {
+                'label': 'Reference',
+                '_id': layer_id
+            };
+            $scope.model.layers[0].layer = Annotation.query(
 				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
 				function() {
-					var layer = {
-						'label': 'Reference',
-						'_id': layer_id,
-						'layer': $scope.model.reference,
-						'mapping': {
-							'getKey': function(d) {
-								return d.data;
-							}
-						},
-     					'tooltipFunc': function(d) {
-     						return d.data;
-     					}
-					}
-					$scope.model.layers[0] = layer;
 					$scope.model.layerWatch[0] = layer_id;
-					$scope.model.latestLayer = layer;
-					$scope.compute_diff();
+                    $scope.compute_diff();
 				}
 			);
 		};
@@ -103,25 +128,14 @@ angular.module('myApp.controllers', ['myApp.services'])
 		// get list of hypothesis annotations from a given layer
 		// and update difference with reference when it's done
 		$scope.get_hypothesis_annotations = function(corpus_id, medium_id, layer_id) {
-			$scope.model.hypothesis = Annotation.query(
+            $scope.model.layers[1] = {
+                'label': 'Hypothesis',
+                '_id': layer_id
+            };
+			$scope.model.layers[1].layer = Annotation.query(
 				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
 				function() {
-					var layer = {
-						'label': 'Hypothesis',
-						'_id': layer_id,
-						'layer': $scope.model.hypothesis,
-						'mapping': {
-							'getKey': function(d) {
-								return d.data;
-							}
-						},
-     					'tooltipFunc': function(d) {
-     						return d.data;
-     					}
-					}
-					$scope.model.layers[1] = layer;
 					$scope.model.layerWatch[1] = layer_id;
-					$scope.model.latestLayer = layer;
 					$scope.compute_diff();
 				});
 		};
@@ -130,35 +144,20 @@ angular.module('myApp.controllers', ['myApp.services'])
 		$scope.compute_diff = function() {
 
 			var reference_and_hypothesis = {
-				'hypothesis': $scope.model.hypothesis,
-				'reference': $scope.model.reference
+				'hypothesis': $scope.model.layers[1].layer,
+				'reference': $scope.model.layers[0].layer
 			};
 
 			CMError.diff(reference_and_hypothesis).success(function(data, status) {
-				$scope.model.diff = data;
-				var layer_id = $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id;
-				var layer = {
-					'label': 'Difference',
-					'_id': layer_id,
-					'layer': $scope.model.diff,
-					'mapping': {
-						'colors': {
-							"correct": "green",
-							"miss": "orange",
-							"false alarm": "orange",
-							"confusion": "red"
-						},
-						'getKey': function(d) {
-							return d.data[0];
-						}
-					},
-  					'tooltipFunc': function(d) {
-     						return d.data[0];
-   					}
-				}
-				$scope.model.layers[2] = layer;
-				$scope.model.layerWatch[2] = layer_id;
-				$scope.model.latestLayer = layer;
+                $scope.model.layers[2] = {
+                    'label': 'Difference',
+                    '_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
+                    'mapping': defaultDiffMapping,
+                    'tooltipFunc': defaultTooltip
+                };
+
+                $scope.model.layers[2].layer = data;
+ 				$scope.model.layerWatch[2] = $scope.model.layers[2]._id;
 			});
 		}
 
@@ -211,63 +210,57 @@ angular.module('myApp.controllers', ['myApp.services'])
 		// layers[2] is the second hypothesis
 		// layers[3] is the regression layer
 
-		$scope.model.layers = [
-			{
-				'label': 'Reference',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
-			},
-			{
-				'label': 'Hypothesis 1',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
-			},
-			{
-				'label': 'Hypothesis 2',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
-			},
-			{
-				'label': 'Regression',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
-			}
-		];
+        $scope.model.layers = [
+            {
+                'label': 'Reference',
+                '_id': 'Reference_init',
+                'layer': []
+            },
+            {
+                'label': 'Hypothesis 1',
+                '_id': 'Hypothesis_1_init',
+                'layer': []
+            },
+            {
+                'label': 'Hypothesis 2',
+                '_id': 'Hypothesis_2_init',
+                'layer': []
+            },
+            {
+                'label': 'Regression',
+                '_id': 'Regression_init',
+                'layer': []
+            }
 
-		$scope.model.layerWatch = [null, null, null, null];
+        ];
+
+
+        $scope.model.layerWatch = [];
 
 		// selected corpus ID
-		$scope.model.selected_corpus = "";
+		$scope.model.selected_corpus = undefined;
 
 		// selected medium ID
-		$scope.model.selected_medium = "";
-	        $scope.model.video = "";
+		$scope.model.selected_medium = undefined;
+	    $scope.model.video = "";
 
 		// selected reference layer ID
-		$scope.model.selected_reference = "";
+		$scope.model.selected_reference = undefined;
 
 		// selected first hypothesis layer ID
-		$scope.model.selected_before = "";
+		$scope.model.selected_before = undefined;
 
 		// selected second hypothesis layer ID
-		$scope.model.selected_after = "";
+		$scope.model.selected_after = undefined;
 
-		// list of annotations
-		$scope.model.reference = [];
-		$scope.model.before = [];
-		$scope.model.after = [];
-		$scope.model.regression = [];
 
 		$scope.get_corpora = function() {
-			$scope.model.available_corpora = Corpus.query();
+			$scope.model.available_corpora = Corpus.query(function() {
+                $scope.model.layerWatch = [$scope.model.layers[0]._id,
+                    $scope.model.layers[1]._id,
+                    $scope.model.layers[2]._id,
+                    $scope.model.layers[3]._id];
+            });
 		};
 
 		$scope.get_media = function(corpus_id) {
@@ -280,115 +273,69 @@ angular.module('myApp.controllers', ['myApp.services'])
 		};
 
 		$scope.get_reference_annotations = function(corpus_id, medium_id, layer_id) {
-			$scope.model.reference = Annotation.query(
-				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
-				function() {
-					var layer = {
-						'label': 'Reference',
-						'_id': layer_id,
-						'layer': $scope.model.reference,
-						'mapping': {
-							'getKey': function(d) {
-								return d.data;
-							}
-						},
-     					'tooltipFunc': function(d) {
-     						return d.data;
-     					}
-					}
-					$scope.model.layers[0] = layer;
-					$scope.model.layerWatch[0] = layer_id;
-					$scope.model.latestLayer = layer;
-					$scope.compute_regression();
-				}
-			);
+            $scope.model.layers[0] = {
+                'label': 'Reference',
+                '_id': layer_id
+            };
+            $scope.model.layers[0].layer = Annotation.query(
+                {corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
+                function() {
+                    $scope.model.layerWatch[0] = layer_id;
+                    $scope.compute_regression();
+                }
+            );
 		};
 
 		$scope.get_before_annotations = function(corpus_id, medium_id, layer_id) {
-			$scope.model.before = Annotation.query(
-				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
-				function() {
-					var layer = {
-						'label': 'Hypothesis 1',
-						'_id': layer_id,
-						'layer': $scope.model.before,
-						'mapping': {
-							'getKey': function(d) {
-								return d.data;
-							}
-						},
-     					'tooltipFunc': function(d) {
-     						return d.data;
-     					}
-					}
-					$scope.model.layers[1] = layer;
-					$scope.model.layerWatch[1] = layer_id;
-					$scope.model.latestLayer = layer;
-					$scope.compute_regression();
-				}
-			);
+            $scope.model.layers[1] = {
+                'label': 'Hypothesis 1',
+                '_id': layer_id
+            };
+            $scope.model.layers[1].layer = Annotation.query(
+                {corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
+                function() {
+                    $scope.model.layerWatch[1] = layer_id;
+                    $scope.compute_regression();
+                }
+            );
 		};
 
 		$scope.get_after_annotations = function(corpus_id, medium_id, layer_id) {
-			$scope.model.after = Annotation.query(
-				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
-				function() {
-					var layer = {
-						'label': 'Hypothesis 2',
-						'_id': layer_id,
-						'layer': $scope.model.after,
-						'mapping': {
-							'getKey': function(d) {
-								return d.data;
-							}
-						},
-     					'tooltipFunc': function(d) {
-     						return d.data;
-     					}
-					}
-					$scope.model.layers[2] = layer;
-					$scope.model.layerWatch[2] = layer_id;
-					$scope.model.latestLayer = layer;
-					$scope.compute_regression();
-				}
-			);
+            $scope.model.layers[2] = {
+                'label': 'Hypothesis 2',
+                '_id': layer_id
+            };
+            $scope.model.layers[2].layer = Annotation.query(
+                {corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
+                function() {
+                    $scope.model.layerWatch[2] = layer_id;
+                    $scope.compute_regression();
+                }
+            );
 		};
 
 		$scope.compute_regression = function() {
 
 			var reference_and_hypotheses = {
-				'reference': $scope.model.reference,
-				'before': $scope.model.before,
-				'after': $scope.model.after
+				'reference': $scope.model.layers[0].layer,
+				'before': $scope.model.layers[1].layer,
+				'after': $scope.model.layers[2].layer
 			};
 
 			CMError.regression(reference_and_hypotheses).success(function(data, status) {
 				$scope.model.regression = data;
-				var layer_id = $scope.model.layers[1]._id + '_vs_' + $scope.model.layers[2]._id;
-				var layer = {
-					'label': 'Regression',
-					'_id': layer_id,
-					'layer': $scope.model.regression,
-					'mapping': {
-						'colors': {
-							"both_correct": "white",
-							"both_incorrect": "black",
-							"improvement": "green",
-							"regression": "red"
-						},
-						'getKey': function(d) {
-							return d.data[0];
-						}
-					},
- 					'tooltipFunc': function(d) {
- 						return d.data[0];
- 					}
-				}
-				$scope.model.layers[3] = layer;
-				$scope.model.layerWatch[3] = layer_id;
-				$scope.model.latestLayer = layer;
+                $scope.model.layers[3] = {
+                    'label': 'Regression',
+                    '_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id +
+                                        '_and_' + $scope.model.layers[2]._id,
+                    'mapping': defaultRegressionMapping,
+                    'tooltipFunc': defaultTooltip
+                };
+
+                $scope.model.layers[3].layer = data;
+                $scope.model.layerWatch[3] = $scope.model.layers[3]._id;
 			});
-		}
+		};
 
 		$scope.$watch('model.selected_corpus', function(newValue, oldValue, scope) {
 			if (newValue) {
@@ -443,60 +390,52 @@ angular.module('myApp.controllers', ['myApp.services'])
 		// layers[0] is the reference
 		// layers[1] is the hypothesis
 		// layers[2] is their difference
-		$scope.model.layers = [
-			{
-				'label': 'Reference',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
-			},
-			{
-				'label': 'Hypothesis',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
-			},
-			{
-				'label': 'Difference',
-				'_id': null,
-				'layer': [],
-				'mapping': null,
-				'tooltipFunc': null
-			}
-		];
+        $scope.model.layers = [
+            {
+                'label': 'Reference',
+                '_id': 'Reference_init',
+                'layer': []
+            },
+            {
+                'label': 'Fusion',
+                '_id': 'Hypothesis_init',
+                'layer': []
+            },
+            {
+                'label': 'Difference',
+                '_id': 'Difference_init',
+                'layer': []
+            }
 
-		$scope.model.layerWatch = [null, null, null];
+        ];
+
+		$scope.model.layerWatch = [];
 
 		// selected corpus ID
-		$scope.model.selected_corpus = "";
+		$scope.model.selected_corpus = undefined;
 
 		// selected medium ID
-		$scope.model.selected_medium = "";
+		$scope.model.selected_medium = undefined;
 		$scope.model.video = "";
 
 		// selected reference layer ID
-		$scope.model.selected_reference = "";
+		$scope.model.selected_reference = undefined;
 
 		// selected hypothesis layer ID
-		$scope.model.selected_hypothesis = "";
+		$scope.model.selected_hypothesis = undefined;
 
 		// array of selected monomodal layer IDs
 		$scope.model.selected_monomodal = [];
 
-		// list of reference annotations
-		$scope.model.reference = [];
-		// list of hypothesis annotations
-		$scope.model.hypothesis = [];
-		// their difference
-		$scope.model.diff = [];
-		// list of just added
-		$scope.model.monomodal_add = [];
 
 		// get list of corpora
 		$scope.get_corpora = function() {
-			$scope.model.available_corpora = Corpus.query();
+			$scope.model.available_corpora = Corpus.query(function() {
+                $scope.model.layerWatch = [$scope.model.layers[0]._id,
+                    $scope.model.layers[1]._id,
+                    $scope.model.layers[2]._id];
+
+            });
 		};
 
 		// get list of media for a given corpus
@@ -508,136 +447,80 @@ angular.module('myApp.controllers', ['myApp.services'])
 		$scope.get_layers = function(corpus_id, medium_id) {
 
 			$scope.model.available_layers = Layer.query(
-				{corpusId: corpus_id, mediaId: medium_id},
-				function() {
-					$scope.model.layersIdToLabel = {};
-					for (var i = $scope.model.available_layers.length - 1; i >= 0; i--) {
-						var layer = $scope.model.available_layers[i];
-						$scope.model.layersIdToLabel[layer._id] = layer.layer_type;
-					};
-				}
+				{corpusId: corpus_id, mediaId: medium_id}
 			);
 		};
 
 		// get list of reference annotations from a given layer
 		// and update difference with hypothesis when it's done
 		$scope.get_reference_annotations = function(corpus_id, medium_id, layer_id) {
-			$scope.model.reference = Annotation.query(
-				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
-				function() {
-					var layer = {
-						'label': 'Reference',
-						'_id': layer_id,
-						'layer': $scope.model.reference,
-						'mapping': {
-							'getKey': function(d) {
-								return d.data;
-							}
-						},
-     					'tooltipFunc': function(d) {
-     						return d.data;
-     					}
-					}
-					$scope.model.layers[0] = layer;
-					$scope.model.layerWatch[0] = layer_id;
-					$scope.model.latestLayer = layer;
-					$scope.compute_diff();
-				}
-			);
+            $scope.model.layers[0] = {
+                'label': 'Reference',
+                '_id': layer_id
+            };
+            $scope.model.layers[0].layer = Annotation.query(
+                {corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
+                function() {
+                    $scope.model.layerWatch[0] = layer_id;
+                    $scope.compute_diff();
+                }
+            );
 		};
 
 		// get list of hypothesis annotations from a given layer
 		// and update difference with reference when it's done
 		$scope.get_hypothesis_annotations = function(corpus_id, medium_id, layer_id) {
-			$scope.model.hypothesis = Annotation.query(
-				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
-				function() {
-					var layer = {
-						'label': 'Fusion',
-						'_id': layer_id,
-						'layer': $scope.model.hypothesis,
-						'mapping': {
-							'getKey': function(d) {
-								return d.data;
-							}
-						},
-     					'tooltipFunc': function(d) {
-     						return d.data;
-     					}
-					}
-					$scope.model.layers[1] = layer;
-					$scope.model.layerWatch[1] = layer_id;
-					$scope.model.latestLayer = layer;
-					$scope.compute_diff();
-				});
+            $scope.model.layers[1] = {
+                'label': 'Fusion',
+                '_id': layer_id
+            };
+            $scope.model.layers[1].layer = Annotation.query(
+                {corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
+                function() {
+                    $scope.model.layerWatch[1] = layer_id;
+                    $scope.compute_diff();
+                }
+            );
 		};
 
-		$scope.add_monomodal_annotations = function(corpus_id, medium_id, layer_id) {
-			console.log('add monomodal ' + layer_id);
-
-			$scope.model.monomodal_add = Annotation.query(
-				{corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
-				function() {
-					var layer = {
-						'label': $scope.model.layersIdToLabel[layer_id],
-						'_id': layer_id,
-						'layer': $scope.model.monomodal_add,
-						'mapping': {
-							'getKey': function(d) {
-								return d.data;
-							}
-						},
-     					'tooltipFunc': function(d) {
-     						return d.data;
-     					}
-					}
-					$scope.model.layers.push(layer);
-					$scope.model.layerWatch.push(layer_id);
-
-					// console.log('push monomodal ' + layer_id);
-					$scope.model.selected_monomodal.push({'_id': layer_id});
-					// console.log($scope.model.selected_monomodal);
-					$scope.model.selected_monomodal_add = '';
-					// $scope.model.latestLayer = layer;
-					// $scope.compute_diff();
-				}
-			)
-		};
+		$scope.get_monomodal_annotations = function(corpus_id, medium_id, layer_id) {
+            var index = $scope.model.selected_monomodal.indexOf(layer_id);
+            var aIndex = $scope.model.available_layers.map(function(d) {
+                return d._id;
+            }).indexOf(layer_id);
+            var name = $scope.model.available_layers[aIndex].layer_type;
+			$scope.model.layers[3+index] = {
+                '_id': layer_id,
+                'label': name
+            };
+            $scope.model.layers[3+index].layer = Annotation.query(
+                {corpusId: corpus_id, mediaId: medium_id, layerId: layer_id},
+                function() {
+                    $scope.model.layerWatch[3+index] = layer_id;
+                    $scope.compute_diff();
+                }
+            );
+        };
 
 		// update difference between reference and hypothesis
 		$scope.compute_diff = function() {
 
-			var reference_and_hypothesis = {
-				'hypothesis': $scope.model.hypothesis,
-				'reference': $scope.model.reference
-			};
+            var reference_and_hypothesis = {
+                'hypothesis': $scope.model.layers[1].layer,
+                'reference': $scope.model.layers[0].layer
+            };
 
-			CMError.diff(reference_and_hypothesis).success(function(data, status) {
-				$scope.model.diff = data;
-				var layer_id = $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id;
-				var layer = {
-					'label': 'Difference',
-					'_id': layer_id,
-					'layer': $scope.model.diff,
-					'mapping': {
-						'colors': {
-							"correct": "green",
-							"miss": "orange",
-							"false alarm": "orange",
-							"confusion": "red"
-						},
-						'getKey': function(d) {
-							return d.data[0];
-						}
-					},
-  					'tooltipFunc': function(d) {
-     						return d.data[0];
-   					}
-				}
-				$scope.model.layers[2] = layer;
-				$scope.model.layerWatch[2] = layer_id;
-				$scope.model.latestLayer = layer;
-			});
+            CMError.diff(reference_and_hypothesis).success(function(data, status) {
+                $scope.model.layers[2] = {
+                    'label': 'Difference',
+                    '_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
+                    'mapping': defaultDiffMapping,
+                    'tooltipFunc': defaultTooltip
+                };
+
+                $scope.model.layers[2].layer = data;
+                $scope.model.layerWatch[2] = $scope.model.layers[2]._id;
+            });
 		};
 
 		$scope.$watch(
@@ -685,18 +568,25 @@ angular.module('myApp.controllers', ['myApp.services'])
 		);
 
 		$scope.$watch(
-			'model.selected_monomodal_add',
+			'model.selected_monomodal',
 			function(newValue, oldValue, scope) {
-				if (newValue) {
-					if (scope.model.selected_monomodal_add != '')
-					{
-						scope.add_monomodal_annotations(
-							scope.model.selected_corpus,
-							scope.model.selected_medium,
-							scope.model.selected_monomodal_add);
-					}
-				}
-			}
+                var newMonomodals = newValue.filter(function(l) {
+                    return !(oldValue.indexOf(l) > -1);
+                });
+                newMonomodals.forEach(function(d) {
+                    scope.get_monomodal_annotations(
+                        scope.model.selected_corpus,
+                        scope.model.selected_medium,
+                        d);
+                });
+			}, true
 		);
+
+
+
+        $scope.addMonomodal = function() {
+            $scope.model.selected_monomodal.push($scope.model.monomodal_id);
+        };
+
 
 	}]);

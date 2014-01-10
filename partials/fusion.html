@@ -6,17 +6,16 @@
         <div class="container">
 
             <!-- Corpus selection -->
-            <div class="col-xs-6">
+            <div class="col-xs-6 cm-selector">
+                <label>Corpus: </label>
                 <select class="form-control" ng-model='model.selected_corpus' ng-init="get_corpora()">
-                    <option value=''>-- select a corpus --</option>
                     <option ng-repeat='corpus in model.available_corpora' value={{corpus._id}}>{{corpus.name}}</option>
                 </select>
             </div>
 
             <!-- Medium selection -->
-            <div class="col-xs-6">
-                <select class="form-control" ng-model='model.selected_medium' ng-show='model.selected_corpus'>
-                    <option value=''>-- select a medium --</option>
+            <div class="col-xs-6 cm-selector" ng-show='model.selected_corpus'>
+                <select class="form-control" ng-model='model.selected_medium'>
                     <option ng-repeat='medium in model.available_media' value={{medium._id}}>{{medium.name}}</option>
                 </select>
             </div>
@@ -26,37 +25,35 @@
         <div class="container" ng-show='model.selected_medium'>
 
             <!-- Reference selection -->
-            <div class="col-xs-3">Reference</div>
-            <div class="col-xs-9">
+            <div class="col-xs-6 cm-selector">
+                <label>Reference: </label>
                 <select class="form-control" ng-model='model.selected_reference' >
-                    <option value=''>-- select reference --</option>
                     <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
                 </select>
             </div>
 
             <!-- Multimodal system -->
-            <div class="col-xs-3">Fusion</div>
-            <div class="col-xs-9">
+            <div class="col-xs-6 cm-selector">
+                <label>Fusion: </label>
                 <select class="form-control" ng-model='model.selected_hypothesis' >
-                    <option value=''>-- select fusion hypothesis --</option>
                     <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
                 </select>
             </div>
 
+            <!-- LayerId not used, as we want to bind to the parent scope -->
             <div ng-repeat='layerId in model.selected_monomodal'>
-                <div class="col-xs-3">Component #{{$index+1}}</div>
-                <div class="col-xs-9">
+                <div class="col-xs-12 cm-selector">
+                    <label>Component #{{$index+1}}: </label>
                     <select
                         class="form-control"
-                        ng-model='layerId._id'
+                        ng-model='model.selected_monomodal[$index]'
                         ng-options='layer._id as layer.layer_type for layer in model.available_layers'
                     ></select>
                 </div>
             </div>
-            <div class="col-xs-3">Show component</div>
-            <div class="col-xs-9">
-                <select class="form-control" ng-model='model.selected_monomodal_add' >
-                    <option value=''>-- select a component --</option>
+            <div class="col-xs-12 cm-selector">
+                <label>Show Component: </label>
+                <select class="form-control" ng-model='model.monomodal_id' ng-change='addMonomodal()'>
                     <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
                 </select>
             </div>
@@ -70,8 +67,7 @@
         
         <video id="player"
                preload="auto"
-               width="1000"
-               height="600"
+               width="50%"
                src="{{model.video}}">
         </video>
 

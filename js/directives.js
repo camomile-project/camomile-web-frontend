@@ -122,9 +122,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var curColInd = 0;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
 				var refColors = d3.scale.category20().range();
-			        var brush, focus, context;
+			    var brush, focus, context;
 
-			        var player = $( "#player" )[0];
+			    var player = $( "#player" )[0];
 
 				// for gymnastics with time
 				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
@@ -247,16 +247,11 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 				};
 
-				var updateLayers = function(addedLayerId, removedLayerId) {
-					var addedLayer, removedLayer;
+				var updateLayers = function(addedLayerId) {
+					var addedLayer;
 					if(addedLayerId !== undefined) {
 						addedLayer = scope.model.layers.filter(function(l) {
 							return(l._id === addedLayerId);
-						})[0];
-					}
-					if(removedLayerId !== undefined) {
-						removedLayer = scope.model.layers.filter(function(l) {
-							return(l._id === removedLayerId);
 						})[0];
 					}
 
@@ -362,7 +357,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.data(function(d) {
 							return d.layer;
 						})
-						// derive simple example to understand clearly why it does not work (example.html)
 						.enter()
 						.append("rect")
 						.attr("fill", "#999999")
@@ -377,12 +371,13 @@ angular.module('myApp.directives', ['myApp.filters']).
 						.attr("height", laneHeight)
 						.attr("class", "annot");
 
-					layerSel.exit().remove();
+                    layerSel.exit().remove();
 
 					layerSel = focus.selectAll(".layer")
 						.data(scope.model.layers, function(d) {
 							return d._id;
 						});
+
 
 					layerSel.enter()
 						.append("g")
@@ -419,9 +414,9 @@ angular.module('myApp.directives', ['myApp.filters']).
 						    player.play();
 						});
 
-					layerSel.exit().remove();
+                    layerSel.exit().remove();
 
-					// update positions of new selection
+                    // update positions of new selection
 					layerSel.attr("transform", function(d,i) {
 						return "translate(0," + (lanePadding+(i*(lanePadding+laneHeight))) + ")";
 					});
@@ -447,37 +442,27 @@ angular.module('myApp.directives', ['myApp.filters']).
 					maxTickLength = maxTickLength * 16 / 12; // approx. points to pixels conversion
 					focus.select(".y")
 						.selectAll("text")
-						.attr("font-size", "" +110*margin.left/maxTickLength +"%");
-
+						.attr("transform", function() {
+                           return "scale(" + margin.left/maxTickLength + "," + margin.left/maxTickLength + ")";
+                        });
 
 				};
 
 
 
 
-				// instead, updating layer function
-				// updateLayers(newLayer, oldLayer)
-
-				// scope.$watch('model.video', function(newValue, oldValue) {
-				// 	player.attr("src", scope.model.video);
-				// });
+                // BUG #8946 : handle multiple additions/deletions
 
 				scope.$watch('model.layerWatch', function(newValue, oldValue) {
-					// watches are executed at initialization, even if latestLayer is still undefined
-					// -> care with tests
 
-					var addedLayerId = newValue.filter(function(l) {
+					var addedLayersId = newValue.filter(function(l) {
 						return !(oldValue.indexOf(l) > -1);
 					});
-					addedLayerId = (addedLayerId.length > 0) ? addedLayerId[0] : undefined;
 
+                    addedLayersId.forEach(function(d) {
+                       updateLayers(d) ;
+                    });
 
-					var removedLayerId = oldValue.filter(function(l) {
-						return !(newValue.indexOf(l) > -1);
-					});
-					removedLayerId = (removedLayerId.length > 0) ? removedLayerId[0] : undefined;
-
-					updateLayers(addedLayerId, removedLayerId);
 
 				}, true);
 
