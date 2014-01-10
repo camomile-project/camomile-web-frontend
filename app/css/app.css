@@ -81,3 +81,17 @@ span.label {
     opacity: 0.3;
 }
 
+.cm-selector {
+    display: table;
+}
+
+.cm-selector label {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.cm-selector select {
+    display: table-cell;
+}
+
+

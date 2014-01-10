@@ -5,17 +5,17 @@
         <div class="container">
 
             <!-- Corpus selection -->
-            <div class="col-xs-6">
+            <div class="col-xs-6 cm-selector">
+                <label>Corpus: </label>
                 <select class="form-control" ng-model='model.selected_corpus' ng-init="get_corpora()">
-                    <option value=''>-- select a corpus --</option>
                     <option ng-repeat='corpus in model.available_corpora' value={{corpus._id}}>{{corpus.name}}</option>
                 </select>
             </div>
 
             <!-- Medium selection -->
-            <div class="col-xs-6">
-                <select class="form-control" ng-model='model.selected_medium' ng-show='model.selected_corpus'>
-                    <option value=''>-- select a medium --</option>
+            <div class="col-xs-6 cm-selector" ng-show='model.selected_corpus'>
+                <label>Media: </label>
+                <select class="form-control" ng-model='model.selected_medium'>
                     <option ng-repeat='medium in model.available_media' value={{medium._id}}>{{medium.name}}</option>
                 </select>
             </div>
@@ -25,25 +25,25 @@
         <div class="container">
 
             <!-- Reference selection -->
-            <div class="col-xs-4" ng-show='model.selected_medium'>
+            <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
+                <label>Reference: </label>
                 <select class="form-control" ng-model='model.selected_reference' >
-                    <option value=''>-- select a reference --</option>
                     <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
                 </select>
             </div>
 
             <!-- First hypothesis selection -->
-            <div class="col-xs-4" ng-show='model.selected_medium'>
+            <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
+                <label>1st Hypothesis: </label>
                 <select class="form-control" ng-model='model.selected_before'>
-                    <option value="">-- select first hypothesis --</option>
                     <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
                 </select>
             </div>
 
             <!-- Second hypothesis selection -->
-            <div class="col-xs-4" ng-show='model.selected_medium'>
+            <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
+                <label>2nd Hypothesis: </label>
                 <select class="form-control" ng-model='model.selected_after'>
-                    <option value="">-- select second hypothesis --</option>
                     <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
                 </select>
             </div>
@@ -56,8 +56,7 @@
 
         <video id="player"
                preload="auto"
-               width="1000"
-               height="600"
+               width="50%"
                src="{{model.video}}">
         </video>
 
