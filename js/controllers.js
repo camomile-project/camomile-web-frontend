@@ -1,33 +1,5 @@
 'use strict';
 
-var defaultKeyFunc = function(d) {
-    return d.data[0];
-};
-
-var defaultTooltip = function(d) {
-    return d.data[0];
-};
-
-var defaultDiffMapping = {
-    'colors': {
-        "correct": "green",
-        "miss": "yellow",
-        "false alarm": "yellow",
-        "confusion": "red"
-    },
-    'getKey': defaultKeyFunc
-};
-
-var defaultRegressionMapping = {
-    'colors': {
-        "both_correct": "yellow",
-        "both_incorrect": "#666666",
-        "improvement": "green",
-        "regression": "red"
-    },
-    'getKey': defaultKeyFunc
-};
-
 
 // !!!!! GENERAL NOTE
 // In cases where missing values are permitted (e.g. model.layers), undefined should be used
@@ -38,8 +10,8 @@ var defaultRegressionMapping = {
 angular.module('myApp.controllers', ['myApp.services'])
 
 	.controller('DiffCtrl',
-	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults',
+	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults) {
 
 		delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -49,24 +21,32 @@ angular.module('myApp.controllers', ['myApp.services'])
 		// layers[0] is the reference
 		// layers[1] is the hypothesis
 		// layers[2] is their difference
+
+        var defaultReferenceLayer = {
+            'label': 'Reference',
+            '_id': 'Reference_init',
+            'layer': []
+        };
+
+        var defaultHypothesisLayer = {
+            'label': 'Hypothesis',
+            '_id': 'Hypothesis_init',
+            'layer': []
+        };
+
+        var defaultDiffLayer = {
+            'label': 'Difference',
+            '_id': 'Difference_init',
+            'layer': []
+        };
+
 		$scope.model.layers = [
-			{
-				'label': 'Reference',
-                '_id': 'Reference_init',
-                'layer': []
-			},
-			{
-				'label': 'Hypothesis',
-                '_id': 'Hypothesis_init',
-                'layer': []
-			},
-			{
-				'label': 'Difference',
-                '_id': 'Difference_init',
-                'layer': []
-            }
+			defaultReferenceLayer,
+			defaultHypothesisLayer,
+            defaultDiffLayer
 		];
 
+        // No need for model.latestLayer any more
 		$scope.model.layerWatch = [];
 
 		// selected corpus ID
@@ -152,8 +132,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $scope.model.layers[2] = {
                     'label': 'Difference',
                     '_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
-                    'mapping': defaultDiffMapping,
-                    'tooltipFunc': defaultTooltip
+                    'mapping': defaults.diffMapping,
+                    'tooltipFunc': defaults.tooltip
                 };
 
                 $scope.model.layers[2].layer = data;
@@ -164,21 +144,29 @@ angular.module('myApp.controllers', ['myApp.services'])
 		$scope.$watch('model.selected_corpus', function(newValue, oldValue, scope) {
 			if (newValue) {
 				scope.get_media(scope.model.selected_corpus);
+                // causes reinit of media
+                scope.model.selected_medium = undefined;
 			}
 		});
 
 
 
 		$scope.$watch('model.selected_medium', function(newValue, oldValue, scope) {
-		    if (newValue) {
-			scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
-			scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/"
-                + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
+            // when the media changes, the viz is reinit
+            scope.model.selected_reference = undefined;
+            scope.model.selected_hypothesis = undefined;
+            if(newValue) {
+                scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
+                scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/"
+                    + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
 		    }
 		});
 
 		$scope.$watch('model.selected_reference', function(newValue, oldValue, scope) {
-			if (newValue) {
+            if (newValue === undefined) {
+                scope.model.layers[0] = defaultReferenceLayer;
+                scope.compute_diff();
+            } else {
 				scope.get_reference_annotations(
 					scope.model.selected_corpus,
 					scope.model.selected_medium,
@@ -187,7 +175,10 @@ angular.module('myApp.controllers', ['myApp.services'])
 		});
 
 		$scope.$watch('model.selected_hypothesis', function(newValue, oldValue, scope) {
-			if (newValue) {
+            if (newValue === undefined) {
+                scope.model.layers[1] = defaultHypothesisLayer;
+                scope.compute_diff();
+            } else {
 				scope.get_hypothesis_annotations(
 					scope.model.selected_corpus,
 					scope.model.selected_medium,
@@ -198,8 +189,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 	}])
 
 	.controller('RegressionCtrl',
-	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults',
+	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults) {
 
 	  delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -328,8 +319,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                     'label': 'Regression',
                     '_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id +
                                         '_and_' + $scope.model.layers[2]._id,
-                    'mapping': defaultRegressionMapping,
-                    'tooltipFunc': defaultTooltip
+                    'mapping': defaults.regressionMapping,
+                    'tooltipFunc': defaults.tooltip
                 };
 
                 $scope.model.layers[3].layer = data;
@@ -380,8 +371,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 	}])
 
 	.controller('FusionCtrl',
-	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError) {
+	['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults',
+	function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults) {
 
 		delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -514,8 +505,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $scope.model.layers[2] = {
                     'label': 'Difference',
                     '_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
-                    'mapping': defaultDiffMapping,
-                    'tooltipFunc': defaultTooltip
+                    'mapping': defaults.diffMapping,
+                    'tooltipFunc': defaults.tooltip
                 };
 
                 $scope.model.layers[2].layer = data;

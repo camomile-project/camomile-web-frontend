@@ -15,6 +15,7 @@
 
             <!-- Medium selection -->
             <div class="col-xs-6 cm-selector" ng-show='model.selected_corpus'>
+                <label>Media: </label>
                 <select class="form-control" ng-model='model.selected_medium'>
                     <option ng-repeat='medium in model.available_media' value={{medium._id}}>{{medium.name}}</option>
                 </select>

@@ -3,7 +3,7 @@
 /* Directives */
 
 
-angular.module('myApp.directives', ['myApp.filters']).
+angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 	directive('appVersion', ['version', function(version) {
 		return function(scope, elm, attrs) {
 			elm.text(version);
@@ -106,7 +106,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 	})
 
 
-	.directive('cmTimeline', function() {
+	.directive('cmTimeline', ['palette', function(palette) {
 		return {
 			restrict: 'E',
 			replace: true,
@@ -121,7 +121,6 @@ angular.module('myApp.directives', ['myApp.filters']).
 				var xAxis, xAxis2, yAxis;
 				var curColInd = 0;
 				var d3elmt = d3.select(element[0]); // d3 wrapper
-				var refColors = d3.scale.category20().range();
 			    var brush, focus, context;
 
 			    var player = $( "#player" )[0];
@@ -282,17 +281,22 @@ angular.module('myApp.directives', ['myApp.filters']).
 							vals.forEach(function(d) {
 								colScale.domain().push(d);
 								colScale.domain(colScale.domain()); // hack to register changes
-								colScale.range().push(refColors[curColInd]);
+								colScale.range().push(palette[curColInd]);
 								colScale.range(colScale.range());
-								curColInd = (curColInd + 1) % refColors.length;
+								curColInd = (curColInd + 1) % palette.length;
 							});
 						} else {
-							for(var key in addedLayer.mapping.colors) {
-								colScale.domain().push(key);
-								colScale.domain(colScale.domain());
-								colScale.range().push(addedLayer.mapping.colors[key]);
-								colScale.range(colScale.range());
-							}
+                            // check that not already added
+                            var newKeys = Object.keys(addedLayer.mapping.colors).filter(function(l) {
+                                return !(colScale.domain().indexOf(l) > -1);
+                            });
+							//for(var key in addedLayer.mapping.colors) {
+                            newKeys.forEach(function(k) {
+                                colScale.domain().push(k);
+                                colScale.domain(colScale.domain());
+                                colScale.range().push(addedLayer.mapping.colors[k]);
+                                colScale.range(colScale.range());
+                            });
 						}
 
 					}
@@ -471,7 +475,7 @@ angular.module('myApp.directives', ['myApp.filters']).
 
 			}
 		}
-	});
+	}]);
 
 
 
