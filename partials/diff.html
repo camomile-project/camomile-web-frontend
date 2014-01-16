@@ -3,11 +3,13 @@
 
     <div class="form-group container">
 
+        <!-- http://stackoverflow.com/questions/8605516/default-select-option-as-blank
+        for not having a selectable "dummy option" -->
+        <!-- cm-selector allows the inline display of the selector and its associated label -->
+
         <div class="container">
 
             <!-- Corpus selection -->
-            <!-- http://stackoverflow.com/questions/8605516/default-select-option-as-blank
-                for not having a selectable "dummy option" -->
             <div class="col-xs-6 cm-selector">
                 <label>Corpus: </label>
                 <select class="form-control" ng-model='model.selected_corpus' ng-init="get_corpora()">
