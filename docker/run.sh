@@ -2,4 +2,4 @@
 npm install /app
 
 # start NodeJS app
-node web-server.js 
+node /app/web-server.js 
