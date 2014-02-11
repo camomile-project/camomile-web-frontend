@@ -3,7 +3,7 @@
 
 angular.module('myApp.services', ['ngResource'])
 
-.value('DataRoot', 'https://flower.limsi.fr/dev')
+.value('DataRoot', 'https://flower.limsi.fr/data')
 
 .value('ToolRoot', 'https://flower.limsi.fr/tool')
 
