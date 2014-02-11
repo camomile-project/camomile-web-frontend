@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<!-- Latest compiled and minified CSS -->
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css">
 
 	<link rel="stylesheet" href="css/app.css"/>
 	<link rel="stylesheet" href="css/sticky-footer-navbar.css"/>
@@ -24,27 +24,52 @@
   	<!-- Wrap all page content here -->
   	<div id="wrap">
 
-  		<!-- Fixed navbar -->
-  		<div class="navbar navbar-default navbar-fixed-top" role="navigation">
-  			<div class="container">
-  				<div class="navbar-header">
-  					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-  						<span class="sr-only">Toggle navigation</span>
-  						<span class="icon-bar"></span>
-  						<span class="icon-bar"></span>
-  						<span class="icon-bar"></span>
-  					</button>
-  					<a class="navbar-brand" href="#">Camomile</a>
-  				</div>
-  				<div class="collapse navbar-collapse">
-  					<ul class="nav navbar-nav">
-  						<li><a href="#/diff">Difference</a></li>
-  						<li><a href="#/regression">Regression</a></li>
-                        <li><a href="#/fusion">Fusion</a></li>
-  					</ul>
-  				</div><!--/.nav-collapse -->
-  			</div>
-  		</div>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Camomile</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li><a href="#/diff">Corpus</a></li>
+              <li><a href="#/regression">Regression</a></li>
+              <li><a href="#/fusion">Fusion</a></li>
+            </ul>
+
+            <div ng-controller="SessionCtrl">
+
+                <div ng-if="isLogged()">
+                  <form ng-submit="logout()" class="navbar-form navbar-right">
+                      <div class="form-group">
+                        <p class="form-control-static">Logged as {{ getUserName() }} </p>
+                      </div>
+                      <button type="submit" class="btn btn-danger" >Logout</button>
+                  </form>
+                </div>
+
+                <div ng-if="!isLogged()">
+                  <form ng-submit="login(username, password)" class="navbar-form navbar-right">
+                      <div class="form-group">
+                          <input ng-model="username" name="username" type="text" placeholder="Login" class="form-control">
+                      </div>
+                      <div class="form-group">
+                          <input ng-model="password" name="password" type="password" placeholder="Password" class="form-control">
+                      </div>
+                      <button type="submit" class="btn btn-success" >Sign in</button>
+                  </form>
+                </div>
+
+            </div>
+
+        </div><!--/.navbar-collapse -->
+      </div>
+    </div>
 
   		<!-- Begin page content -->
   		<div class="container">
@@ -66,7 +91,7 @@
   	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
   	<script src="https://code.jquery.com/jquery.js"></script>
   	<!-- Latest compiled and minified JavaScript -->
-  	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
+  	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
   	<script src="lib/angular/angular.js"></script>
   	<script src="lib/angular/angular-resource.js"></script>
   	<script src="lib/angular/angular-route.min.js"></script>
