@@ -8,6 +8,5 @@ angular.module(
     $routeProvider.when('/diff', {templateUrl: 'partials/diff.html'});
     $routeProvider.when('/regression', {templateUrl: 'partials/regression.html'});
     $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
-    // $routeProvider.when('/errare', {templateUrl: 'partials/errare.html'});
     $routeProvider.otherwise({redirectTo: '/'});
 }]);
