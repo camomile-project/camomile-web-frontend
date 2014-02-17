@@ -17,6 +17,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 .controller('SessionCtrl', ['$sce', '$scope', '$http', 'Session',
     function($sce, $scope, $http, Session) {
 
+        $scope.model = {};
+        $scope.model.message = undefined;
         $scope.login = function(username, password) {
 
             Session.login({
@@ -27,10 +29,13 @@ angular.module('myApp.controllers', ['myApp.services'])
                     console.log('logged in as ' + username);
                     Session.isLogged = true;
                     Session.username = username;
+                    $scope.model.message = "Connected as " + Session.username;
+
                 })
                 .error(function(data, status) {
                     Session.isLogged = false;
                     Session.username = undefined;
+                    $scope.model.message = "Connection error";
                 });
         };
 
@@ -39,6 +44,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 .success(function(data, status) {
                     Session.isLogged = false;
                     Session.username = undefined;
+                    $scope.model.message = undefined;
                 });
         };
 
@@ -53,10 +59,12 @@ angular.module('myApp.controllers', ['myApp.services'])
     }
 ])
 
-.controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults',
+.controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+    'CMError', 'defaults',
     function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults) {
 
         delete $http.defaults.headers.common['X-Requested-With'];
+
 
         $scope.model = {};
 
@@ -109,6 +117,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.layers[1]._id,
                     $scope.model.layers[2]._id
                 ];
+                console.log($cookieStore.get('camomile.sid'));
             });
         };
 
@@ -116,6 +125,8 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.get_media = function(corpus_id) {
             $scope.model.available_media = Media.query({
                 corpusId: corpus_id
+            }, function() {
+              console.log($cookieStore.get('camomile.sid'));
             });
         };
 
