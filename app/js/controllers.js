@@ -117,7 +117,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.layers[1]._id,
                     $scope.model.layers[2]._id
                 ];
-                console.log($cookieStore.get('camomile.sid'));
             });
         };
 
@@ -126,7 +125,6 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.available_media = Media.query({
                 corpusId: corpus_id
             }, function() {
-              console.log($cookieStore.get('camomile.sid'));
             });
         };
 
