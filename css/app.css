@@ -94,4 +94,11 @@ span.label {
     display: table-cell;
 }
 
+.cm-infomsg {
+    color: white;
+}
+
+.cm-errmsg {
+    color: red;
+}
 
