@@ -1,6 +1,5 @@
 /* app css stylesheet */
 
-
 .whiteclr {
     background-color: #ffffff;
 }
@@ -22,12 +21,13 @@
 .opened > .title:before {
     content: '▼ ';
 }
+
 .closed > .title:before {
     content: '► ';
 }
 
 .filler {
-    height:100px;
+    height: 100px;
 }
 
 .layerList {
@@ -102,3 +102,21 @@ span.label {
     color: red;
 }
 
+div.piechartTooltip {
+    position: absolute;
+    text-align: left;
+    padding: 2px;
+    font: 12px sans-serif;
+    /*background: lightsteelblue;*/
+    /*border: 0px;*/
+    /*border-radius: 8px;*/
+    stroke: black;
+    fill: white;
+    background: white;
+    border: solid 1px;
+    pointer-events: none;
+}
+
+g.slice {
+    cursor: pointer;
+}

@@ -18,6 +18,7 @@ angular.module('myApp.controllers', ['myApp.services'])
     function($sce, $scope, $http, Session) {
 
         $scope.model = {};
+        $scope.model.display_piechart = false;
         $scope.model.message = undefined;
         $scope.login = function(username, password) {
 
@@ -50,18 +51,18 @@ angular.module('myApp.controllers', ['myApp.services'])
 
         $scope.isLogged = function() {
             return Session.isLogged;
-        }
+        };
 
         $scope.getUserName = function() {
             return Session.username;
-        }
+        };
 
     }
 ])
 
 .controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-    'CMError', 'defaults',
-    function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults) {
+    'CMError', 'defaults', 'palette',
+    function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette) {
 
         delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -87,6 +88,9 @@ angular.module('myApp.controllers', ['myApp.services'])
             'layer': []
         };
 
+        // init color index
+        var curColInd=0;
+
         // model.layers is mapped in cm-timeline using the defaults
         $scope.model.layers = [
             defaultReferenceLayer,
@@ -99,11 +103,71 @@ angular.module('myApp.controllers', ['myApp.services'])
         // as soon as the corpora are loaded - ie sufficiently "late" in the angular init loop.
         $scope.model.layerWatch = [];
 
+        $scope.model.colScale =  d3.scale.ordinal();// custom color scale
+
+        $scope.model.selected_slice = -1;
+
+        $scope.updateColorScale = function(addedLayerId)
+        {
+            // get layer actual object from ID
+            var addedLayer = $scope.model.layers.filter(function (l) {
+            return(l._id === addedLayerId);
+            })[0];
+
+            // set up defaults for mapping and tooltipFunc
+            if (addedLayer.mapping === undefined) {
+                addedLayer.mapping = {
+                    getKey: function (d) {
+                        return d.data;
+                    }
+                };
+            }
+
+            if (addedLayer.tooltipFunc === undefined) {
+                addedLayer.tooltipFunc = function (d) {
+                    return d.data;
+                };
+            }
+
+            if (addedLayer.mapping.colors === undefined) {
+                // increment the color mapping using the default palette,
+                // according to the observed values
+                var vals = addedLayer.layer.map(addedLayer.mapping.getKey);
+                vals = $.grep(vals, function (v, k) {
+                    return $.inArray(v, vals) === k;
+                }); // jQuery hack to get Array of unique values
+                // and then all that are not already in the scale domain
+                vals = vals.filter(function (l) {
+                    return !($scope.model.colScale.domain().indexOf(l) > -1);
+                });
+                vals.forEach(function (d) {
+                    $scope.model.colScale.domain().push(d);
+                    $scope.model.colScale.domain($scope.model.colScale.domain()); // hack to register changes
+                    $scope.model.colScale.range().push(palette[curColInd]);
+                    $scope.model.colScale.range($scope.model.colScale.range());
+                    curColInd = (curColInd + 1) % palette.length;
+                });
+            } else {
+                // check that explicit mapping is not already defined in the color scale
+                var newKeys = Object.keys(addedLayer.mapping.colors).filter(function (l) {
+                    return !($scope.model.colScale.domain().indexOf(l) > -1);
+                });
+                newKeys.forEach(function (k) {
+                    $scope.model.colScale.domain().push(k);
+                    $scope.model.colScale.domain($scope.model.colScale.domain());
+                    $scope.model.colScale.range().push(addedLayer.mapping.colors[k]);
+                    $scope.model.colScale.range($scope.model.colScale.range());
+                });
+            }
+
+        };
+
         // IDs selected in the interface
         $scope.model.selected_corpus = undefined;
         $scope.model.selected_medium = undefined;
         $scope.model.selected_reference = undefined;
         $scope.model.selected_hypothesis = undefined;
+        $scope.model.selected_layer = undefined;
 
         // URL for video
         $scope.model.video = "";
@@ -195,7 +259,46 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $scope.model.layers[2].layer = data;
                 $scope.model.layerWatch[2] = $scope.model.layers[2]._id;
             });
-        }
+        };
+
+        // Action on button "display piechart"
+        $scope.displayPiechart = function()
+        {
+            $scope.model.display_piechart = ! $scope.model.display_piechart;
+        };
+
+        $scope.clickOnAPiechartSlice = function(sliceId)
+        {
+            if ($scope.model.selected_slice == sliceId) {
+                $scope.model.selected_slice = -1;
+            }
+            else {
+
+                $scope.model.selected_slice = sliceId;
+            }
+        };
+
+        $scope.computeSlices = function()
+        {
+            $scope.slices = [];
+            var data = $scope.model.layers[$scope.model.selected_layer].layer;
+
+            data.forEach(function(d,i) {
+                var addElement= true;
+                for(var i = 0, max = $scope.slices.length; i<max; i++){
+                    if($scope.slices[i].speakerName == d.data)
+                    {
+                        addElement = false;
+                        $scope.slices[i].spokenTime+= (d.fragment.end- d.fragment.start);
+                    }
+                }
+
+                if(addElement)
+                {
+                    $scope.slices.push({"speakerName": d.data, "spokenTime": (d.fragment.end- d.fragment.start)});
+                }
+            });
+        };
 
         // the selected corpus has changed
         $scope.$watch('model.selected_corpus', function(newValue, oldValue, scope) {
@@ -247,13 +350,16 @@ angular.module('myApp.controllers', ['myApp.services'])
     }
 ])
 
-.controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults',
-    function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults) {
+.controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults','palette',
+    function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette) {
 
         delete $http.defaults.headers.common['X-Requested-With'];
 
         $scope.model = {};
+        $scope.model.display_piechart = false;
+        $scope.model.selected_slice = -1;
 
+        var curColInd = 0;
 
         // placeholder definitions
         var defaultReferenceLayer = {
@@ -299,6 +405,7 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.model.selected_reference = undefined;
         $scope.model.selected_before = undefined;
         $scope.model.selected_after = undefined;
+        $scope.model.selected_layer = undefined;
 
         // video URL
         $scope.model.video = "";
@@ -403,6 +510,101 @@ angular.module('myApp.controllers', ['myApp.services'])
             });
         };
 
+        // Action on button "display piechart"
+        $scope.displayPiechart = function()
+        {
+            $scope.model.display_piechart = ! $scope.model.display_piechart;
+        };
+
+        $scope.clickOnAPiechartSlice = function(sliceId)
+        {
+            if ($scope.model.selected_slice == sliceId) {
+                $scope.model.selected_slice = -1;
+            }
+            else {
+
+                $scope.model.selected_slice = sliceId;
+            }
+        };
+
+        $scope.computeSlices = function()
+        {
+            $scope.slices = [];
+            var data = $scope.model.layers[$scope.model.selected_layer].layer;
+
+            data.forEach(function(d,i) {
+                var addElement= true;
+                for(var i = 0, max = $scope.slices.length; i<max; i++){
+                    if($scope.slices[i].speakerName == d.data)
+                    {
+                        addElement = false;
+                        $scope.slices[i].spokenTime+= (d.fragment.end- d.fragment.start);
+                    }
+                }
+
+                if(addElement)
+                {
+                    $scope.slices.push({"speakerName": d.data, "spokenTime": (d.fragment.end- d.fragment.start)});
+                }
+            });
+        };
+
+        $scope.model.colScale =  d3.scale.ordinal();// custom color scale
+
+        $scope.updateColorScale = function(addedLayerId)
+        {
+            // get layer actual object from ID
+            var addedLayer = $scope.model.layers.filter(function (l) {
+                return(l._id === addedLayerId);
+            })[0];
+
+            // set up defaults for mapping and tooltipFunc
+            if (addedLayer.mapping === undefined) {
+                addedLayer.mapping = {
+                    getKey: function (d) {
+                        return d.data;
+                    }
+                };
+            }
+
+            if (addedLayer.tooltipFunc === undefined) {
+                addedLayer.tooltipFunc = function (d) {
+                    return d.data;
+                };
+            }
+
+            if (addedLayer.mapping.colors === undefined) {
+                // increment the color mapping using the default palette,
+                // according to the observed values
+                var vals = addedLayer.layer.map(addedLayer.mapping.getKey);
+                vals = $.grep(vals, function (v, k) {
+                    return $.inArray(v, vals) === k;
+                }); // jQuery hack to get Array of unique values
+                // and then all that are not already in the scale domain
+                vals = vals.filter(function (l) {
+                    return !($scope.model.colScale.domain().indexOf(l) > -1);
+                });
+                vals.forEach(function (d) {
+                    $scope.model.colScale.domain().push(d);
+                    $scope.model.colScale.domain($scope.model.colScale.domain()); // hack to register changes
+                    $scope.model.colScale.range().push(palette[curColInd]);
+                    $scope.model.colScale.range($scope.model.colScale.range());
+                    curColInd = (curColInd + 1) % palette.length;
+                });
+            } else {
+                // check that explicit mapping is not already defined in the color scale
+                var newKeys = Object.keys(addedLayer.mapping.colors).filter(function (l) {
+                    return !($scope.model.colScale.domain().indexOf(l) > -1);
+                });
+                newKeys.forEach(function (k) {
+                    $scope.model.colScale.domain().push(k);
+                    $scope.model.colScale.domain($scope.model.colScale.domain());
+                    $scope.model.colScale.range().push(addedLayer.mapping.colors[k]);
+                    $scope.model.colScale.range($scope.model.colScale.range());
+                });
+            }
+
+        };
         $scope.$watch('model.selected_corpus', function(newValue, oldValue, scope) {
             if (newValue) {
                 scope.get_media(scope.model.selected_corpus);
@@ -463,12 +665,14 @@ angular.module('myApp.controllers', ['myApp.services'])
     }
 ])
 
-.controller('FusionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults',
-    function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults) {
+.controller('FusionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults','palette',
+    function($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette) {
 
         delete $http.defaults.headers.common['X-Requested-With'];
 
         $scope.model = {};
+
+        var curColInd = 0;
 
         // placeholder definitions
         var defaultReferenceLayer = {
@@ -622,6 +826,63 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $scope.model.layers[2].layer = data;
                 $scope.model.layerWatch[2] = $scope.model.layers[2]._id;
             });
+        };
+
+        $scope.model.colScale =  d3.scale.ordinal();// custom color scale
+
+        $scope.updateColorScale = function(addedLayerId)
+        {
+            // get layer actual object from ID
+            var addedLayer = $scope.model.layers.filter(function (l) {
+                return(l._id === addedLayerId);
+            })[0];
+
+            // set up defaults for mapping and tooltipFunc
+            if (addedLayer.mapping === undefined) {
+                addedLayer.mapping = {
+                    getKey: function (d) {
+                        return d.data;
+                    }
+                };
+            }
+
+            if (addedLayer.tooltipFunc === undefined) {
+                addedLayer.tooltipFunc = function (d) {
+                    return d.data;
+                };
+            }
+
+            if (addedLayer.mapping.colors === undefined) {
+                // increment the color mapping using the default palette,
+                // according to the observed values
+                var vals = addedLayer.layer.map(addedLayer.mapping.getKey);
+                vals = $.grep(vals, function (v, k) {
+                    return $.inArray(v, vals) === k;
+                }); // jQuery hack to get Array of unique values
+                // and then all that are not already in the scale domain
+                vals = vals.filter(function (l) {
+                    return !($scope.model.colScale.domain().indexOf(l) > -1);
+                });
+                vals.forEach(function (d) {
+                    $scope.model.colScale.domain().push(d);
+                    $scope.model.colScale.domain($scope.model.colScale.domain()); // hack to register changes
+                    $scope.model.colScale.range().push(palette[curColInd]);
+                    $scope.model.colScale.range($scope.model.colScale.range());
+                    curColInd = (curColInd + 1) % palette.length;
+                });
+            } else {
+                // check that explicit mapping is not already defined in the color scale
+                var newKeys = Object.keys(addedLayer.mapping.colors).filter(function (l) {
+                    return !($scope.model.colScale.domain().indexOf(l) > -1);
+                });
+                newKeys.forEach(function (k) {
+                    $scope.model.colScale.domain().push(k);
+                    $scope.model.colScale.domain($scope.model.colScale.domain());
+                    $scope.model.colScale.range().push(addedLayer.mapping.colors[k]);
+                    $scope.model.colScale.range($scope.model.colScale.range());
+                });
+            }
+
         };
 
         $scope.$watch('model.selected_corpus', function(newValue, oldValue, scope) {
