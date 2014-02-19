@@ -57,10 +57,24 @@
         <video id="player"
                preload="auto"
                width="50%"
-               src="{{model.video}}">
+               src="{{model.video}}"
+               controls
+               ng-show="model.selected_medium">
         </video>
 
         <cm-timeline></cm-timeline>
+        <div id="detailedView">
+            <button ng-click="displayPiechart()" ng-show='model.selected_after'>Display piechart</button>
+
+            <select class="form-control" ng-model='model.selected_layer' ng-show='model.display_piechart' style="width: 200px;">
+                <option value='' disabled>-- Select a layer --</option>
+                <option ng-repeat='layer in model.layers' value={{$index}}>{{layer.label}}</option>
+            </select>
+
+            <cm-piechart ng-show="model.display_piechart"></cm-piechart>
+            <cm-piechart-legend ng-show="model.display_piechart"></cm-piechart-legend>
+
+        </div>
     </div>
 
 </div>
