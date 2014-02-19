@@ -69,7 +69,9 @@
         <video id="player"
                preload="auto"
                width="50%"
-               src="{{model.video}}">
+               src="{{model.video}}"
+               controls
+               ng-show="model.selected_medium">
         </video>
 
         <cm-timeline></cm-timeline>
