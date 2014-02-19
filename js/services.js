@@ -120,15 +120,11 @@ angular.module('myApp.services', ['ngResource'])
 // palette of categorical colors for use throughout the application.
 // was especially thought to avoid confusion with green, red and yellow,
 // reserved for other usages (see diff and regressionMapping
-.value('palette', ["#0000F0", "#00EAC5", "#FFB91E", "#9EFFFF", "#969800",
-    "#50CFFF", "#00FFFF", "#007F5D", "#B400A9", "#DA7700",
-    "#FFD1F2", "#A8BFFF", "#E554DA", "#AC3413", "#00AECC",
-    "#007D9A", "#E76A58", "#0C3D00", "#0049CA", "#FFDACB",
-    "#636500", "#6D89FB", "#DEFF66", "#C88300", "#8F5200",
-    "#B61A51", "#00FFD9", "#DEAEFF", "#0069C5", "#00E4FF",
-    "#FFAD63", "#81001F", "#9F00C6", "#492E00", "#7400EF",
-    "#FF97BA", "#A975F9", "#671200", "#00B16A", "#005775",
-    "#009AF4", "#F05E84", "#00502F", "#FFE8FF"
+.value('palette', ["#377EB8","#4DAF4A","#984EA3","#FF7F00","#A65628","#F781BF","#66C2A5","#FC8D62",
+    "#E78AC3","#A6D854","#E5C494","#8DD3C7","#FFFFB3","#BEBADA","#FB8072","#80B1D3","#FDB462",
+    "#B3DE69","#FCCDE5","#D9D9D9","#BC80BD","#CCEBC5","#FBB4AE","#B3CDE3","#CCEBC5","#DECBE4",
+    "#FED9A6","#FFFFCC","#E5D8BD","#FDDAEC","#F2F2F2","#B3E2CD","#FDCDAC","#CBD5E8","#F4CAE4",
+    "#E6F5C9","#FFF2AE","#F1E2CC","#CCCCCC"
 ])
 
 // default values and functions for the application
@@ -143,19 +139,19 @@ angular.module('myApp.services', ['ngResource'])
         'tooltip': keyFunc,
         'diffMapping': {
             'colors': {
-                "correct": "green",
-                "miss": "yellow",
-                "false alarm": "yellow",
-                "confusion": "red"
+                "correct": "#00FF00",
+                "miss": "#FFFF00",
+                "false alarm": "#FFFF00",
+                "confusion": "#FF0000"
             },
             'getKey': keyFunc
         },
         'regressionMapping': {
             'colors': {
-                "both_correct": "yellow",
+                "both_correct": "#FFFF00",
                 "both_incorrect": "#666666",
-                "improvement": "green",
-                "regression": "red"
+                "improvement": "#00FF00",
+                "regression": "#FF0000"
             },
             'getKey': keyFunc
         }
