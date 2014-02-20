@@ -140,7 +140,7 @@ angular.module('myApp.services', ['ngResource'])
         'diffMapping': {
             'colors': {
                 "correct": "#00FF00",
-                "miss": "#FFFF00",
+                "miss": "#ffef99",
                 "false alarm": "#FFFF00",
                 "confusion": "#FF0000"
             },
