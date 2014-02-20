@@ -206,7 +206,7 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.get_reference_annotations = function(corpus_id, medium_id, layer_id) {
             $scope.model.layers[0] = {
                 'label': 'Reference',
-                '_id': layer_id
+                '_id': layer_id + "0"
             };
             $scope.model.layers[0].layer = Annotation.query({
                     corpusId: corpus_id,
@@ -214,7 +214,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     layerId: layer_id
                 },
                 function() {
-                    $scope.model.layerWatch[0] = layer_id;
+                    $scope.model.layerWatch[0] = layer_id + "0";
                     $scope.compute_diff();
                 }
             );
@@ -226,7 +226,7 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.get_hypothesis_annotations = function(corpus_id, medium_id, layer_id) {
             $scope.model.layers[1] = {
                 'label': 'Hypothesis',
-                '_id': layer_id
+                '_id': layer_id + "1"
             };
             $scope.model.layers[1].layer = Annotation.query({
                     corpusId: corpus_id,
@@ -234,7 +234,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     layerId: layer_id
                 },
                 function() {
-                    $scope.model.layerWatch[1] = layer_id;
+                    $scope.model.layerWatch[1] = layer_id + "1";
                     $scope.compute_diff();
                 });
         };
@@ -445,7 +445,7 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.get_reference_annotations = function(corpus_id, medium_id, layer_id) {
             $scope.model.layers[0] = {
                 'label': 'Reference',
-                '_id': layer_id
+                '_id': layer_id + "0"
             };
             $scope.model.layers[0].layer = Annotation.query({
                     corpusId: corpus_id,
@@ -453,7 +453,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     layerId: layer_id
                 },
                 function() {
-                    $scope.model.layerWatch[0] = layer_id;
+                    $scope.model.layerWatch[0] = layer_id + "0";
                     $scope.compute_regression();
                 }
             );
@@ -462,7 +462,7 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.get_before_annotations = function(corpus_id, medium_id, layer_id) {
             $scope.model.layers[1] = {
                 'label': 'Hypothesis 1',
-                '_id': layer_id
+                '_id': layer_id + "1"
             };
             $scope.model.layers[1].layer = Annotation.query({
                     corpusId: corpus_id,
@@ -470,7 +470,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     layerId: layer_id
                 },
                 function() {
-                    $scope.model.layerWatch[1] = layer_id;
+                    $scope.model.layerWatch[1] = layer_id + "1";
                     $scope.compute_regression();
                 }
             );
@@ -479,7 +479,7 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.get_after_annotations = function(corpus_id, medium_id, layer_id) {
             $scope.model.layers[2] = {
                 'label': 'Hypothesis 2',
-                '_id': layer_id
+                '_id': layer_id + "2"
             };
             $scope.model.layers[2].layer = Annotation.query({
                     corpusId: corpus_id,
@@ -487,7 +487,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     layerId: layer_id
                 },
                 function() {
-                    $scope.model.layerWatch[2] = layer_id;
+                    $scope.model.layerWatch[2] = layer_id + "2";
                     $scope.compute_regression();
                 }
             );
@@ -764,7 +764,7 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.get_reference_annotations = function(corpus_id, medium_id, layer_id) {
             $scope.model.layers[0] = {
                 'label': 'Reference',
-                '_id': layer_id
+                '_id': layer_id + "0"
             };
             $scope.model.layers[0].layer = Annotation.query({
                     corpusId: corpus_id,
@@ -772,7 +772,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     layerId: layer_id
                 },
                 function() {
-                    $scope.model.layerWatch[0] = layer_id;
+                    $scope.model.layerWatch[0] = layer_id + "0";
                     $scope.compute_diff();
                 }
             );
@@ -783,7 +783,7 @@ angular.module('myApp.controllers', ['myApp.services'])
         $scope.get_hypothesis_annotations = function(corpus_id, medium_id, layer_id) {
             $scope.model.layers[1] = {
                 'label': 'Fusion',
-                '_id': layer_id
+                '_id': layer_id + "1"
             };
             $scope.model.layers[1].layer = Annotation.query({
                     corpusId: corpus_id,
@@ -791,7 +791,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     layerId: layer_id
                 },
                 function() {
-                    $scope.model.layerWatch[1] = layer_id;
+                    $scope.model.layerWatch[1] = layer_id + "1";
                     $scope.compute_diff();
                 }
             );
@@ -804,7 +804,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             }).indexOf(layer_id);
             var name = $scope.model.available_layers[aIndex].layer_type;
             $scope.model.layers[3 + index] = {
-                '_id': layer_id,
+                '_id': layer_id + "" + (3+index),
                 'label': name
             };
             $scope.model.layers[3 + index].layer = Annotation.query({
@@ -813,7 +813,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     layerId: layer_id
                 },
                 function() {
-                    $scope.model.layerWatch[3 + index] = layer_id;
+                    $scope.model.layerWatch[3 + index] = layer_id + "" + (3+index);
                     $scope.compute_diff();
                 }
             );
