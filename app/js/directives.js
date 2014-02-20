@@ -458,7 +458,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         });
 
                     // Get the correct svg tag to append the chart
-                    var vis = d3.select("#piechart").attr("width", 410).attr("height", 410);
+                    var vis = d3.select("#piechart").attr("width", 410 + "px").attr("height", 410 + "px");
 
 
                     // Remove old existing piechart
