@@ -278,6 +278,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             }
         };
 
+        // Method used to compute slices of the piechart.
         $scope.computeSlices = function()
         {
             $scope.slices = [];
@@ -285,8 +286,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             data.forEach(function(d,i) {
                 var addElement= true;
+
+               var addedLayer = $scope.model.layers.filter(function (l) {
+                    return(l._id === $scope.model.layerWatch[$scope.model.selected_layer]);
+                })[0];
+
                 for(var i = 0, max = $scope.slices.length; i<max; i++){
-                    if($scope.slices[i].speakerName == d.data)
+                    if($scope.slices[i].element == addedLayer.mapping.getKey(d))
                     {
                         addElement = false;
                         $scope.slices[i].spokenTime+= (d.fragment.end- d.fragment.start);
@@ -295,7 +301,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                 if(addElement)
                 {
-                    $scope.slices.push({"speakerName": d.data, "spokenTime": (d.fragment.end- d.fragment.start)});
+                    $scope.slices.push({"element": addedLayer.mapping.getKey(d), "spokenTime": (d.fragment.end- d.fragment.start)});
                 }
             });
         };
@@ -527,6 +533,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             }
         };
 
+        // Method used to compute slices of the piechart.
         $scope.computeSlices = function()
         {
             $scope.slices = [];
@@ -534,8 +541,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             data.forEach(function(d,i) {
                 var addElement= true;
+
+                var addedLayer = $scope.model.layers.filter(function (l) {
+                    return(l._id === $scope.model.layerWatch[$scope.model.selected_layer]);
+                })[0];
+
                 for(var i = 0, max = $scope.slices.length; i<max; i++){
-                    if($scope.slices[i].speakerName == d.data)
+                    if($scope.slices[i].element == addedLayer.mapping.getKey(d))
                     {
                         addElement = false;
                         $scope.slices[i].spokenTime+= (d.fragment.end- d.fragment.start);
@@ -544,7 +556,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                 if(addElement)
                 {
-                    $scope.slices.push({"speakerName": d.data, "spokenTime": (d.fragment.end- d.fragment.start)});
+                    $scope.slices.push({"element": addedLayer.mapping.getKey(d), "spokenTime": (d.fragment.end- d.fragment.start)});
                 }
             });
         };

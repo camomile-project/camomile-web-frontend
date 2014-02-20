@@ -504,7 +504,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             div.transition()
                                 .duration(200)
                                 .style("opacity", 1);
-                            div.html(scope.slices[i].speakerName + '<br/>' + 'speech time: ' + Math.floor(scope.slices[i].spokenTime / sum * 100) + "%")
+                            div.html(scope.slices[i].element + '<br/>' + 'speech time: ' + Math.floor(scope.slices[i].spokenTime / sum * 100) + "%")
                                 .style("left", (d3.event.pageX) + "px")
                                 .style("top", (d3.event.pageY - 18) + "px");
                         })
@@ -513,7 +513,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 .duration(200)
                                 .attr("dy", ".3em")
                                 .style("opacity", 0)
-                                .style("width", (scope.slices[i].speakerName * 10));
+                                .style("width", (scope.slices[i].element * 10));
                         })
                         .on("click", function (d, i) {
                             scope.clickOnAPiechartSlice(i);
@@ -529,7 +529,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 return "purple";
                             }
                             else {
-                                return scope.model.colScale(scope.slices[i].speakerName);
+                                return scope.model.colScale(scope.slices[i].element);
                             }
                         }) //set the color for each slice to be chosen from the color function defined above
                         .attr("d", arc)                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
@@ -603,7 +603,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     scope.computeSlices();
 
                     var maxLength = d3.max(scope.slices, function (d) {
-                        return parseInt(d.speakerName.length);
+                        return parseInt(d.element.length);
                     });
 
                     var rectHeight = 20,
@@ -650,7 +650,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 return "purple";
                             }
                             else {
-                                return scope.model.colScale(d.speakerName);
+                                return scope.model.colScale(d.element);
                             }
                         })
                         .style("opacity", 0.4)
@@ -668,7 +668,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             return rectHeight * (i + 1) + i * legendMargin - 5;
                         })
                         .text(function (d, i) {
-                            return scope.slices[i].speakerName + '   (' + parseInt(scope.slices[i].spokenTime).toFixed(0) + 's)';
+                            return scope.slices[i].element + '   (' + parseInt(scope.slices[i].spokenTime).toFixed(0) + 's)';
                         })
                         .attr("font-family", "sans-serif")
                         .attr("font-size", "16px")
