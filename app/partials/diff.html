@@ -69,12 +69,14 @@
                 <option ng-repeat='layer in model.layers' value={{$index}}>{{layer.label}}</option>
             </select>
 
-            <cm-piechart ng-show="model.display_piechart"></cm-piechart>
-            <cm-piechart-legend ng-show="model.display_piechart"></cm-piechart-legend>
+            <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
+            <cm-piechart-legend ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart-legend>
 
         </div>
 
     </div>
+
+
 
 
 </div>

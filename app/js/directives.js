@@ -550,7 +550,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             })
             .on("click", function (d, i) {
               scope.clickOnAPiechartSlice(i);
-
 //                            scope.selectASlice();
 
             }); //allow us to style things in the slices (like text)
