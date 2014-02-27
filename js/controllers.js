@@ -277,40 +277,40 @@ angular.module('myApp.controllers', ['myApp.services'])
             // Method used to compute slices of the piechart.
             $scope.computeSlices = function () {
                 $scope.slices = [];
-                var data = $scope.model.layers[$scope.model.selected_layer].layer;
+                if ($scope.model.selected_layer != undefined) {
+                    var data = $scope.model.layers[$scope.model.selected_layer].layer;
 
-                data.forEach(function (d, i) {
-                    var addElement = true;
-                    if ((d.fragment.end <= $scope.model.maximalXDisplayedValue && d.fragment.end >= $scope.model.minimalXDisplayedValue)
-                        || (d.fragment.start <= $scope.model.maximalXDisplayedValue && d.fragment.start >= $scope.model.minimalXDisplayedValue)
-                        || (($scope.model.maximalXDisplayedValue <= d.fragment.end && $scope.model.maximalXDisplayedValue >= d.fragment.start)
-                        || ($scope.model.minimalXDisplayedValue <= d.fragment.end && $scope.model.minimalXDisplayedValue >= d.fragment.start)))
-                    {
-                        var addedLayer = $scope.model.layers.filter(function (l) {
-                            return(l._id === $scope.model.layerWatch[$scope.model.selected_layer]);
-                        })[0];
+                    data.forEach(function (d, i) {
+                        var addElement = true;
+                        if ((d.fragment.end <= $scope.model.maximalXDisplayedValue && d.fragment.end >= $scope.model.minimalXDisplayedValue)
+                            || (d.fragment.start <= $scope.model.maximalXDisplayedValue && d.fragment.start >= $scope.model.minimalXDisplayedValue)
+                            || (($scope.model.maximalXDisplayedValue <= d.fragment.end && $scope.model.maximalXDisplayedValue >= d.fragment.start)
+                            || ($scope.model.minimalXDisplayedValue <= d.fragment.end && $scope.model.minimalXDisplayedValue >= d.fragment.start))) {
+                            var addedLayer = $scope.model.layers.filter(function (l) {
+                                return(l._id === $scope.model.layerWatch[$scope.model.selected_layer]);
+                            })[0];
 
-                        for (var i = 0, max = $scope.slices.length; i < max; i++) {
-                            if ($scope.slices[i].element == addedLayer.mapping.getKey(d)) {
-                                addElement = false;
-                                $scope.slices[i].spokenTime += (d.fragment.end - d.fragment.start);
+                            for (var i = 0, max = $scope.slices.length; i < max; i++) {
+                                if ($scope.slices[i].element == addedLayer.mapping.getKey(d)) {
+                                    addElement = false;
+                                    $scope.slices[i].spokenTime += (d.fragment.end - d.fragment.start);
+                                }
+                            }
+
+                            if (addElement) {
+                                console.log("aaaaaaaaaaaaaaaaaaah" + addedLayer.mapping.getKey(d));
+                                $scope.slices.push({"element": addedLayer.mapping.getKey(d), "spokenTime": (d.fragment.end - d.fragment.start)});
                             }
                         }
-
-                        if (addElement) {
-                            $scope.slices.push({"element": addedLayer.mapping.getKey(d), "spokenTime": (d.fragment.end - d.fragment.start)});
-                        }
-                    }
-                });
+                    });
+                }
             };
 
-            $scope.setMinimalXDisplayedValue = function(value)
-            {
+            $scope.setMinimalXDisplayedValue = function (value) {
                 $scope.model.minimalXDisplayedValue = value;
             }
 
-            $scope.setMaximalXDisplayedValue = function(value)
-            {
+            $scope.setMaximalXDisplayedValue = function (value) {
                 $scope.model.maximalXDisplayedValue = value;
             }
 
@@ -322,9 +322,12 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                 // Remove old existing piechart
                 var oldGraph = vis.selectAll("g");
+
+
                 if (oldGraph) {
                     oldGraph.remove();
                 }
+
 
                 // Remove old existing tooltips
                 var detailedView = d3.select("#detailedView").attr("width", 0).attr("height", 0);
@@ -332,6 +335,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if (oldTooltip) {
                     oldTooltip.remove();
                 }
+
 
                 var svgContainer = d3.select("#legend");
 
@@ -347,6 +351,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 }
 
                 if (resetSelection) {
+                    $scope.model.selected_slice = undefined;
                     $scope.model.selected_layer = undefined;
                     $scope.model.display_piechart = false;
                 }
@@ -358,7 +363,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     scope.get_media(scope.model.selected_corpus);
                     // blank the medium selection
                     scope.model.selected_medium = undefined;
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
 
@@ -370,7 +375,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if (newValue) {
                     scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
                     scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
 
@@ -384,7 +389,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_reference);
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
 
@@ -398,7 +403,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_hypothesis);
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
 
@@ -583,35 +588,40 @@ angular.module('myApp.controllers', ['myApp.services'])
             // Method used to compute slices of the piechart.
             $scope.computeSlices = function () {
                 $scope.slices = [];
-                var data = $scope.model.layers[$scope.model.selected_layer].layer;
+                if ($scope.model.selected_layer != undefined) {
+                    var data = $scope.model.layers[$scope.model.selected_layer].layer;
 
-                data.forEach(function (d, i) {
-                    var addElement = true;
+                    data.forEach(function (d, i) {
+                        var addElement = true;
 
-                    var addedLayer = $scope.model.layers.filter(function (l) {
-                        return(l._id === $scope.model.layerWatch[$scope.model.selected_layer]);
-                    })[0];
+                        if ((d.fragment.end <= $scope.model.maximalXDisplayedValue && d.fragment.end >= $scope.model.minimalXDisplayedValue)
+                            || (d.fragment.start <= $scope.model.maximalXDisplayedValue && d.fragment.start >= $scope.model.minimalXDisplayedValue)
+                            || (($scope.model.maximalXDisplayedValue <= d.fragment.end && $scope.model.maximalXDisplayedValue >= d.fragment.start)
+                            || ($scope.model.minimalXDisplayedValue <= d.fragment.end && $scope.model.minimalXDisplayedValue >= d.fragment.start))) {
+                            var addedLayer = $scope.model.layers.filter(function (l) {
+                                return(l._id === $scope.model.layerWatch[$scope.model.selected_layer]);
+                            })[0];
 
-                    for (var i = 0, max = $scope.slices.length; i < max; i++) {
-                        if ($scope.slices[i].element == addedLayer.mapping.getKey(d)) {
-                            addElement = false;
-                            $scope.slices[i].spokenTime += (d.fragment.end - d.fragment.start);
+                            for (var i = 0, max = $scope.slices.length; i < max; i++) {
+                                if ($scope.slices[i].element == addedLayer.mapping.getKey(d)) {
+                                    addElement = false;
+                                    $scope.slices[i].spokenTime += (d.fragment.end - d.fragment.start);
+                                }
+                            }
+
+                            if (addElement) {
+                                $scope.slices.push({"element": addedLayer.mapping.getKey(d), "spokenTime": (d.fragment.end - d.fragment.start)});
+                            }
                         }
-                    }
-
-                    if (addElement) {
-                        $scope.slices.push({"element": addedLayer.mapping.getKey(d), "spokenTime": (d.fragment.end - d.fragment.start)});
-                    }
-                });
+                    });
+                }
             };
 
-            $scope.setMinimalXDisplayedValue = function(value)
-            {
+            $scope.setMinimalXDisplayedValue = function (value) {
                 $scope.model.minimalXDisplayedValue = value;
             }
 
-            $scope.setMaximalXDisplayedValue = function(value)
-            {
+            $scope.setMaximalXDisplayedValue = function (value) {
                 $scope.model.maximalXDisplayedValue = value;
             }
 
@@ -714,7 +724,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     scope.get_media(scope.model.selected_corpus);
                     // blank the medium selection
                     scope.model.selected_medium = undefined;
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
 
@@ -726,7 +736,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if (newValue) {
                     scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
                     scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
 
@@ -740,7 +750,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_reference);
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
 
@@ -754,7 +764,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_before);
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
 
@@ -768,7 +778,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_after);
-                    $scope.resetPiechart(true);
+                    $scope.resetPiechart(true, true, true);
                 }
             });
         }
@@ -992,13 +1002,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             };
 
-            $scope.setMinimalXDisplayedValue = function(value)
-            {
+            $scope.setMinimalXDisplayedValue = function (value) {
                 $scope.model.minimalXDisplayedValue = value;
             }
 
-            $scope.setMaximalXDisplayedValue = function(value)
-            {
+            $scope.setMaximalXDisplayedValue = function (value) {
                 $scope.model.maximalXDisplayedValue = value;
             }
 
