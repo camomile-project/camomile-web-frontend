@@ -107,9 +107,13 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     focus.select(".x.axis").call(xAxis);
 
                     // log scope min and max date
-                    scope.$apply( function() {
+                    scope.$apply(function () {
                         scope.setMinimalXDisplayedValue(xMsScale.domain()[0]);
                         scope.setMaximalXDisplayedValue(xMsScale.domain()[1]);
+                        if ('function' == typeof (scope.clickOnAPiechartSlice)) {
+                            scope.clickOnAPiechartSlice(-1);
+                        }
+
                     });
                 };
 
@@ -392,6 +396,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     // (see comments above refreshTooltipForLayer definition)
                     layerSel.enter()
                         .append("g")
+                        .attr("id", function (d, i) {
+                            return "layer_" + i;
+                        })
                         .attr("class", "layer")
                         .on("mouseover", function () {
                             return tooltip.style("visibility", "visible");
@@ -458,6 +465,58 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                 };
 
+                var updateLayerSelectedItem = function(selectedSliceValue)
+                {
+                    if (scope.model.selected_layer != undefined && scope.model.selected_layer != undefined != -1) {
+
+                        var addedLayer;
+
+                        // Restore initial color and opacity
+                        for (var i = 0, max = scope.model.layers.length; i < max; i++) {
+
+                            addedLayer = scope.model.layers.filter(function (l) {
+                                return(l._id === scope.model.layerWatch[i]);
+                            })[0];
+
+                            d3.select('#layer_' + i).selectAll("rect").attr("opacity", 0.4)
+                                .attr("fill", function (d) {
+                                    return scope.model.colScale(addedLayer.mapping.getKey(d));
+                                });
+                        }
+
+
+                        addedLayer = scope.model.layers.filter(function (l) {
+                            return(l._id === scope.model.layerWatch[scope.model.selected_layer]);
+                        })[0];
+
+                        // in Selected layer:
+                        d3.select('#layer_' + scope.model.selected_layer).selectAll("rect").attr("opacity", function (d) {
+                            // if selected slice correspond to target rectangle, make it opaque and give it the selection color
+                            // if not, make it transparent and let it have its original color
+                            if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d))
+                            {
+                                return 1;
+                            }
+                            else if (selectedSliceValue != undefined && selectedSliceValue != -1) {
+                                return 0.1;
+                            }
+                            else {
+                                return 0.4;
+                            }
+                        })
+                            .attr("fill", function (d, i) {
+                                if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d))
+                                {
+                                    return scope.model.colScale("selection_color");
+                                }
+                                else {
+                                    return scope.model.colScale(addedLayer.mapping.getKey(d));
+                                }
+                            });
+
+                    }
+                }
+
 
                 // BUG #8946 : handle multiple additions/deletions
 
@@ -477,13 +536,20 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                 }, true);
 
+                scope.$watch('model.selected_slice', function (newValue, oldValue) {
+
+                    updateLayerSelectedItem(newValue);
+                }, true);
+
 
                 init();
 
             }
         }
-    }])
-    .directive('cmPiechart', ['palette', function (palette) {
+    }
+    ])
+    .
+    directive('cmPiechart', ['palette', function (palette) {
         return {
             restrict: 'E',
             replace: true,
@@ -559,7 +625,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 .style("width", (scope.slices[i].element * 10));
                         })
                         .on("click", function (d, i) {
-                            scope.clickOnAPiechartSlice(i);
+                            scope.$apply(function () {
+                                scope.clickOnAPiechartSlice(i);
+                            });
 //                            scope.selectASlice();
 
                         }); //allow us to style things in the slices (like text)
@@ -568,46 +636,59 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         .style("stroke", "white")
                         .attr("fill", function (d, i) {
                             if (i == scope.model.selected_slice) {
-                                return "purple";
+                                return scope.model.colScale("selection_color");
                             }
                             else {
                                 return scope.model.colScale(scope.slices[i].element);
                             }
                         }) //set the color for each slice to be chosen from the color function defined above
                         .attr("d", arc)                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
-                        .attr("opacity", 0.4);
+                        .attr("opacity", function (d, i) {
+                            if (i == scope.model.selected_slice) {
+                                return 1;
+                            }
+                            else {
+                                return 0.4;
+                            }
+                        });
 
-                    scope.selectASlice = function () {
+//                    var detail =  d3.select("#detail");
 
-//                        detail.selectAll("div").remove();
+//                    scope.selectASlice = function () {
 //
-//                        if(scope.selected_slice != -1)
-//                        {
-//                            detail.style("display","inline");
-//                            detail.append("div")
-//                                .attr("id", "actor")
-//                                .text("Actor: " + data[scope.selected_slice].actor)
-//                                .style('padding-left', "3px")
-//                                .style('padding-right', "3px")
-//                                .style('background', "purple")
-//                                .style('color', "white")
-//                                .style('border', "solid black 1px");
-//                            detail.append("div").
-//                                attr("id", "spokenTime").
-//                                text("Spoken time: " + data[scope.selected_slice].spokenTime)
-//                                .style('padding-left', "3px")
-//                                .style('padding-right', "3px")
-//                                .style('border-left', "solid black 1px")
-//                                .style('border-right', "solid black 1px")
-//                                .style('border-bottom', "solid black 1px");
+////                        detail.selectAll("div").remove();
+////
+////                        if(scope.selected_slice != -1)
+////                        {
+////                            detail.style("display","inline");
+////                            detail.append("div")
+////                                .attr("id", "actor")
+////                                .text("Actor: " + data[scope.selected_slice].actor)
+////                                .style('padding-left', "3px")
+////                                .style('padding-right', "3px")
+////                                .style('background', "purple")
+////                                .style('color', "white")
+////                                .style('border', "solid black 1px");
+////                            detail.append("div").
+////                                attr("id", "spokenTime").
+////                                text("Spoken time: " + data[scope.selected_slice].spokenTime)
+////                                .style('padding-left', "3px")
+////                                .style('padding-right', "3px")
+////                                .style('border-left', "solid black 1px")
+////                                .style('border-right', "solid black 1px")
+////                                .style('border-bottom', "solid black 1px");
+////
+////                        }
+////                        else
+////                        {
+////                            detail.style("display","none");
+////                        }
+////                        scope.$apply(function(){
+////
+////                        });
 //
-//                        }
-//                        else
-//                        {
-//                            detail.style("display","none");
-//                        }
 //                        scope.updatePiechart();
-                    };
+//                    };
 
                 };
 
@@ -617,11 +698,11 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     }
                 });
 
-//                scope.$watch('model.selected_slice', function (newValue) {
-//                    if (newValue != -1) {
-//                        scope.updatePiechart();
-//                    }
-//                });
+                scope.$watch('model.selected_slice', function (newValue) {
+                    if (newValue != undefined) {
+                        scope.updatePiechart();
+                    }
+                });
 
                 // only one has to be watch cause both change at the same time
                 scope.$watch('model.maximalXDisplayedValue + model.minimalXDisplayedValue', function (newValue) {
@@ -676,6 +757,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         oldGraph.remove();
                     }
 
+
                     svgContainer.style("float", "right");
 
                     var svg = svgContainer.attr("width", legendWidth + "px")
@@ -697,13 +779,20 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         .attr("height", rectHeight)
                         .style("fill", function (d, i) {
                             if (i == scope.model.selected_slice) {
-                                return "purple";
+                                return scope.model.colScale("selection_color");
                             }
                             else {
                                 return scope.model.colScale(d.element);
                             }
                         })
-                        .style("opacity", 0.4)
+                        .style("opacity", function (d, i) {
+                            if (i == scope.model.selected_slice) {
+                                return 1;
+                            }
+                            else {
+                                return 0.4;
+                            }
+                        })
                         .style("stroke", "black");   //allow us to style things in the slices (like text);
 
                     //Add the SVG Text Element to the svgContainer
@@ -721,8 +810,23 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             return scope.slices[i].element + '   (' + parseInt(scope.slices[i].spokenTime).toFixed(0) + 's)';
                         })
                         .attr("font-family", "sans-serif")
-                        .attr("font-size", "16px")
-                        .attr("fill", "black");
+                        .attr("font-size", function (d, i) {
+                            if (i == scope.model.selected_slice) {
+                                return "18px";
+                            }
+                            else {
+                                return "16px";
+                            }
+                        })
+//                        .attr("fill", "black")
+                        .attr("fill", function (d, i) {
+                            if (i == scope.model.selected_slice) {
+                                return scope.model.colScale("selection_color");
+                            }
+                            else {
+                                return "black";
+                            }
+                        });
                 };
 
                 scope.$watch('model.selected_layer', function (newValue) {
@@ -738,6 +842,12 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         scope.updateLegend();
                     }
 
+                });
+
+                scope.$watch('model.selected_slice', function (newValue) {
+                    if (newValue != undefined) {
+                        scope.updateLegend();
+                    }
                 });
             }
         }

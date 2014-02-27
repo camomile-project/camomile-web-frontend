@@ -139,6 +139,7 @@ angular.module('myApp.services', ['ngResource'])
         'tooltip': keyFunc,
         'diffMapping': {
             'colors': {
+                "selection_color": "#FF0000",
                 "correct": "#00FF00",
                 "miss": "#E6FF00",
                 "false alarm": "#FFE600",
@@ -148,6 +149,7 @@ angular.module('myApp.services', ['ngResource'])
         },
         'regressionMapping': {
             'colors': {
+                "selection_color": "#000000",
                 "both_correct": "#FFFF00",
                 "both_incorrect": "#666666",
                 "improvement": "#00FF00",
