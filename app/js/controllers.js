@@ -298,7 +298,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                             }
 
                             if (addElement) {
-                                console.log("aaaaaaaaaaaaaaaaaaah" + addedLayer.mapping.getKey(d));
                                 $scope.slices.push({"element": addedLayer.mapping.getKey(d), "spokenTime": (d.fragment.end - d.fragment.start)});
                             }
                         }
