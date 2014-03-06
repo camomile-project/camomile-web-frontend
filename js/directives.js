@@ -305,18 +305,33 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     scope.updateColorScale(addedLayerId);
 
                     // adapt time scales
+                    // TODO: Check this when edition will be available.
                     var theMax = 0;
                     var curMax;
+                    var theMin = 999999999999999;
+                    var curMin;
                     var maxDate = parseDate("00:00:00.000");
+                    var minDate = parseDate("99:99:99.999");
                     scope.model.layers.forEach(function (l) {
                         curMax = d3.max(l.layer.map(function (d) {
                             return d.fragment.end;
                         }));
+                        curMin = d3.min(l.layer.map(function (d) {
+                            return d.fragment.start;
+                        }));
+
                         theMax = d3.max([theMax, curMax]);
+                        theMin = d3.min([theMin, curMin]);
+
                         curMax = d3.max(l.layer.map(function (d) {
                             return parseDate(secToTime(d.fragment.end));
                         }));
+                        curMin = d3.min(l.layer.map(function (d) {
+                            return parseDate(secToTime(d.fragment.start));
+                        }));
+
                         maxDate = d3.max([maxDate, curMax]);
+                        minDate = d3.min([minDate, curMin]);
                     });
 
                     // adapt brush to new scale
@@ -325,8 +340,8 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         brushExtent = brush.extent();
                     }
 
-                    x2MsScale.domain([0, theMax]);
-                    x2TimeScale.domain([parseDate("00:00:00.000"), maxDate]);
+                    x2MsScale.domain([theMin, theMax]);
+                    x2TimeScale.domain([minDate, maxDate]);
 
                     if (!brush.empty()) {
                         brush.extent(brushExtent);
@@ -495,7 +510,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             // if not, make it transparent and let it have its original color
                             if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d))
                             {
-                                return 1;
+                                return 0.4;
                             }
                             else if (selectedSliceValue != undefined && selectedSliceValue != -1) {
                                 return 0.1;
@@ -721,12 +736,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             template: '<svg id="legend"></svg>',
             link: function (scope, element, attrs) {
 
-//                scope.$watch("selectedElement", function (newValue) {
-//                    if (newValue != null && newValue != "") {
-//                        scope.update();
-//                    }
-//                });
-
 //                var colors = d3.scale.category20c();
 //                var detail =  d3.select("#detail");
 
@@ -818,7 +827,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 return "16px";
                             }
                         })
-//                        .attr("fill", "black")
                         .attr("fill", function (d, i) {
                             if (i == scope.model.selected_slice) {
                                 return scope.model.colScale("selection_color");
