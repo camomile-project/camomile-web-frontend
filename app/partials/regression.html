@@ -62,7 +62,7 @@
                ng-show="model.selected_medium">
         </video>
 
-        <cm-timeline></cm-timeline>
+        <cm-timeline ng-show="model.selected_medium"></cm-timeline>
         <div id="detailedView">
             <button ng-click="displayPiechart()" ng-show='model.selected_after'>Display piechart</button>
 
