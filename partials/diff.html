@@ -62,6 +62,7 @@
         <cm-timeline ng-show="model.selected_medium"></cm-timeline>
 
         <div id="detailedView">
+
             <button ng-click="displayPiechart()" ng-show='model.selected_hypothesis'>Display piechart</button>
 
             <select class="form-control" ng-model='model.selected_layer' ng-show='model.display_piechart' style="width: 200px;">
@@ -71,14 +72,12 @@
 
             <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
             <cm-piechart-legend ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart-legend>
+
             <div id="Detail"></div>
 
         </div>
 
     </div>
-
-
-
 
 </div>
 

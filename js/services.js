@@ -149,7 +149,7 @@ angular.module('myApp.services', ['ngResource'])
         },
         'regressionMapping': {
             'colors': {
-                "selection_color": "#000000",
+                "selection_color": "#FF0000",
                 "both_correct": "#FFFF00",
                 "both_incorrect": "#666666",
                 "improvement": "#00FF00",
