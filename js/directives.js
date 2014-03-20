@@ -117,6 +117,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     });
                 };
 
+                var isMouseDown = false;
                 var init = function () {
                     // init dimensions/margins
                     // height set depending on number of modalities - in updateComp
@@ -189,6 +190,57 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         .attr("class", "x axis")
                         .call(xAxis2);
 
+
+                    var gContainer = $(focus[0][0]);
+                    var yAxisContainer = gContainer.children(".y");
+
+                    focus.append("g").attr("id", "time").append("circle").attr("cx", gContainer.offset().left + xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
+
+                    var circleElement = d3.select("circle");
+
+                    focus.append("g").append("line").attr("id", "line").attr("x1", gContainer.offset().left + xMsScale(0)).attr("x2", gContainer.offset().left + xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
+                    var lineElement = d3.select("#line");
+                    circleElement.on("mousedown", function () {
+                        isMouseDown = true;
+                    });
+
+                    circleElement.on("mouseup", function () {
+                        isMouseDown = false;
+                        player.play();
+                    });
+
+                    // Event that allow to move the pointer on the timeline that is synchronised with the current time of the video
+                    circleElement.on("mousemove", function () {
+                        circleElement.style("cursor", "move");
+                        if (isMouseDown) {
+
+                            var position = event.pageX -
+                                (gContainer.offset().left + yAxisContainer[0].getBBox().width);
+
+                            circleElement.attr("cx", parseInt(position));
+                            lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
+
+                            player.currentTime = xMsScale.invert(position);
+                            player.pause();
+
+                        }
+                    });
+
+                    circleElement.on("mouseout", function () {
+                        isMouseDown = false;
+                    });
+
+                    // Listen the current time of the video to update pointer position in the timeline
+                    player.addEventListener('timeupdate', function () {
+                        if (!isMouseDown) {
+                            var margin = 0;
+
+                            lineElement.attr("x1", xMsScale(player.currentTime)).attr("x2", xMsScale(player.currentTime));
+                            circleElement.attr("cx", xMsScale(player.currentTime));
+                        }
+
+                    }, false);
+
                 };
 
                 var updateLayers = function (addedLayerId) {
@@ -224,6 +276,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         var yAxisContainer = gContainer.children(".y");
                         var pointerPos = event.pageX -
                             (gContainer.offset().left + yAxisContainer[0].getBBox().width);
+
+                        var margin = pointerPos;
+
                         pointerPos = xTimeScale.invert(pointerPos);
                         pointerPos = (d3.time.format("%H:%M:%S.%L"))(pointerPos);
 
@@ -308,7 +363,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     // TODO: Check this when edition will be available.
                     var theMax = 0;
                     var curMax;
-                    var theMin = 999999999999999;
+                    var theMin = 9999999999999999;
                     var curMin;
                     var maxDate = parseDate("00:00:00.000");
                     var minDate = parseDate("99:99:99.999");
@@ -480,8 +535,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                 };
 
-                var updateLayerSelectedItem = function(selectedSliceValue)
-                {
+                var updateLayerSelectedItem = function (selectedSliceValue) {
                     if (scope.model.selected_layer != undefined && scope.model.selected_layer != undefined != -1) {
 
                         var addedLayer;
@@ -508,8 +562,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         d3.select('#layer_' + scope.model.selected_layer).selectAll("rect").attr("opacity", function (d) {
                             // if selected slice correspond to target rectangle, make it opaque and give it the selection color
                             // if not, make it transparent and let it have its original color
-                            if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d))
-                            {
+                            if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d)) {
                                 return 0.4;
                             }
                             else if (selectedSliceValue != undefined && selectedSliceValue != -1) {
@@ -520,8 +573,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             }
                         })
                             .attr("fill", function (d, i) {
-                                if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d))
-                                {
+                                if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d)) {
                                     return scope.model.colScale("selection_color");
                                 }
                                 else {

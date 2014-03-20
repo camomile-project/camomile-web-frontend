@@ -51,7 +51,7 @@
                     <li><a href="#/fusion">Fusion</a></li>
                 </ul>
 
-                <div ng-controller="SessionCtrl">
+                <div ng-controller="SessionCtrl" data-ng-init="checkLoggin()">
 
                     <div ng-if="isLogged()">
                         <form ng-submit="logout()" class="navbar-form navbar-right">
@@ -110,6 +110,7 @@
 <script src="lib/angular/angular.js"></script>
 <script src="lib/angular/angular-resource.js"></script>
 <script src="lib/angular/angular-route.min.js"></script>
+<script src="http://code.angularjs.org/1.0.0rc10/angular-cookies-1.0.0rc10.js"></script>
 <script src="lib/d3.v3.js"></script>
 <script src="js/app.js"></script>
 <script src="js/services.js"></script>
