@@ -14,8 +14,8 @@
 
 angular.module('myApp.controllers', ['myApp.services'])
 
-    .controller('SessionCtrl', ['$sce', '$scope', '$http', 'Session',
-        function ($sce, $scope, $http, Session) {
+    .controller('SessionCtrl', ['$sce', '$scope', '$http', 'Session', '$cookieStore',
+        function ($sce, $scope, $http, Session, $cookieStore) {
 
             $scope.model = {};
             $scope.model.message = undefined;
@@ -29,12 +29,14 @@ angular.module('myApp.controllers', ['myApp.services'])
                         console.log('logged in as ' + username);
                         Session.isLogged = true;
                         Session.username = username;
+                        $cookieStore.put("current.user", username);
                         $scope.model.message = "Connected as " + Session.username;
 
                     })
                     .error(function (data, status) {
                         Session.isLogged = false;
                         Session.username = undefined;
+                        $cookieStore.remove("current.user","");
                         $scope.model.message = "Connection error";
                     });
             };
@@ -43,18 +45,33 @@ angular.module('myApp.controllers', ['myApp.services'])
                 Session.logout()
                     .success(function (data, status) {
                         Session.isLogged = false;
+                        $cookieStore.remove("current.user","");
                         Session.username = undefined;
                         $scope.model.message = undefined;
                     });
             };
 
             $scope.isLogged = function () {
-                return Session.isLogged;
+                    return Session.isLogged;
             };
 
             $scope.getUserName = function () {
                 return Session.username;
             };
+
+            // Allow to check in the coockie if the user is already set
+            $scope.checkLoggin = function()
+            {
+                var currentUser = $cookieStore.get("current.user");
+                if(currentUser && currentUser != "")
+                {
+                    Session.isLogged = true;
+                    Session.username = currentUser;
+                    $cookieStore.put("current.user", currentUser)
+                    $scope.model.message = "Connected as " + Session.username;
+                }
+
+            }
 
         }
     ])
