@@ -193,42 +193,40 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                     var gContainer = $(focus[0][0]);
                     var yAxisContainer = gContainer.children(".y");
+                    var xAxisContainer = gContainer.children(".x");
 
-                    focus.append("g").attr("id", "time").append("circle").attr("cx", gContainer.offset().left + xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
+                    focus.append("g").attr("id", "time").append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
 
                     var circleElement = d3.select("circle");
 
                     focus.append("g").append("line").attr("id", "line").attr("x1", gContainer.offset().left + xMsScale(0)).attr("x2", gContainer.offset().left + xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
                     var lineElement = d3.select("#line");
-                    circleElement.on("mousedown", function () {
-                        isMouseDown = true;
+
+
+                    circleElement.on("mousemove", function () {
+                        circleElement.style("cursor", "e-resize");
                     });
 
-                    circleElement.on("mouseup", function () {
-                        isMouseDown = false;
-                        player.play();
-                    });
 
                     // Event that allow to move the pointer on the timeline that is synchronised with the current time of the video
-                    circleElement.on("mousemove", function () {
-                        circleElement.style("cursor", "move");
-                        if (isMouseDown) {
-
+                    var drag = d3.behavior.drag()
+                        .on("drag", function () {
                             var position = event.pageX -
                                 (gContainer.offset().left + yAxisContainer[0].getBBox().width);
 
-                            circleElement.attr("cx", parseInt(position));
-                            lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
+                            if (position >= 0 && position <= xAxisContainer[0].getBBox().width) {
+                                circleElement.attr("cx", parseInt(position));
+                                lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
 
-                            player.currentTime = xMsScale.invert(position);
-                            player.pause();
+                                player.currentTime = xMsScale.invert(position);
+                                player.pause();
+                            }
+                        }).on("dragend", function()
+                        {
+                            player.play();
+                        });
 
-                        }
-                    });
-
-                    circleElement.on("mouseout", function () {
-                        isMouseDown = false;
-                    });
+                    circleElement.call(drag);
 
                     // Listen the current time of the video to update pointer position in the timeline
                     player.addEventListener('timeupdate', function () {
