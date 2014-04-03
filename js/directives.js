@@ -210,7 +210,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                     // Event that allow to move the pointer on the timeline that is synchronised with the current time of the video
                     var drag = d3.behavior.drag()
-                        .on("drag", function () {
+                        .on("drag",function () {
                             var position = event.pageX -
                                 (gContainer.offset().left + yAxisContainer[0].getBBox().width);
 
@@ -221,8 +221,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 player.currentTime = xMsScale.invert(position);
                                 player.pause();
                             }
-                        }).on("dragend", function()
-                        {
+                        }).on("dragend", function () {
                             player.play();
                         });
 
@@ -231,12 +230,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     // Listen the current time of the video to update pointer position in the timeline
                     player.addEventListener('timeupdate', function () {
                         if (!isMouseDown) {
-                            var margin = 0;
-
                             lineElement.attr("x1", xMsScale(player.currentTime)).attr("x2", xMsScale(player.currentTime));
                             circleElement.attr("cx", xMsScale(player.currentTime));
                         }
-
                     }, false);
 
                 };
@@ -716,45 +712,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 return 0.4;
                             }
                         });
-
-//                    var detail =  d3.select("#detail");
-
-//                    scope.selectASlice = function () {
-//
-////                        detail.selectAll("div").remove();
-////
-////                        if(scope.selected_slice != -1)
-////                        {
-////                            detail.style("display","inline");
-////                            detail.append("div")
-////                                .attr("id", "actor")
-////                                .text("Actor: " + data[scope.selected_slice].actor)
-////                                .style('padding-left', "3px")
-////                                .style('padding-right', "3px")
-////                                .style('background', "purple")
-////                                .style('color', "white")
-////                                .style('border', "solid black 1px");
-////                            detail.append("div").
-////                                attr("id", "spokenTime").
-////                                text("Spoken time: " + data[scope.selected_slice].spokenTime)
-////                                .style('padding-left', "3px")
-////                                .style('padding-right', "3px")
-////                                .style('border-left', "solid black 1px")
-////                                .style('border-right', "solid black 1px")
-////                                .style('border-bottom', "solid black 1px");
-////
-////                        }
-////                        else
-////                        {
-////                            detail.style("display","none");
-////                        }
-////                        scope.$apply(function(){
-////
-////                        });
-//
-//                        scope.updatePiechart();
-//                    };
-
                 };
 
                 scope.$watch('model.selected_layer', function (newValue) {
@@ -786,8 +743,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             template: '<svg id="legend"></svg>',
             link: function (scope, element, attrs) {
 
-//                var colors = d3.scale.category20c();
-//                var detail =  d3.select("#detail");
 
                 scope.updateLegend = function () {
                     scope.computeSlices();
@@ -834,6 +789,12 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         .attr("y", function (d, i) {
                             return rectHeight * (i) + i * legendMargin;
                         })
+                        .on("click", function (d, i) {
+                            scope.$apply(function () {
+                                scope.clickOnAPiechartSlice(i);
+                            });
+                        })
+                        .attr("class", "legend")
                         .attr("width", rectWidth)
                         .attr("height", rectHeight)
                         .style("fill", function (d, i) {

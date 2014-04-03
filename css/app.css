@@ -117,3 +117,7 @@ div.piechartTooltip {
 g.slice {
     cursor: pointer;
 }
+
+rect.legend {
+    cursor: pointer;
+}
