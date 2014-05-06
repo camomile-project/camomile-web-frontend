@@ -114,14 +114,14 @@ div.tooltip, div.piecharttooltip, div.treeemaptooltip {
     pointer-events: none;
 }
 
-.node {
-    border: solid 1px white;
-    font: 10px sans-serif;
-    line-height: 12px;
-    overflow: hidden;
-    position: absolute;
-    text-indent: 2px;
-}
+/*.node {*/
+    /*border: solid 1px white;*/
+    /*font: 10px sans-serif;*/
+    /*line-height: 12px;*/
+    /*overflow: hidden;*/
+    /*position: absolute;*/
+    /*text-indent: 2px;*/
+/*}*/
 
 g.slice {
     cursor: pointer;
