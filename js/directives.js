@@ -609,13 +609,140 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
         }
     }
     ])
-    .
-    directive('cmPiechart', ['palette', function (palette) {
+    .directive('cmBarchart', ['palette', '$filter', function (palette, $filter) {
+        return {
+            restrict: 'E',
+            replace: true,
+            template: '<svg id="barchart"></svg>',
+            link: function (scope, element, attrs) {
+
+                scope.updateBarChart = function () {
+
+                    scope.computeSlices();
+
+                    scope.slices = $filter('orderBy')(scope.slices, function (d) {
+                        return -d.spokenTime;
+                    });
+
+                    var rectHeight = 20,
+                        legendMargin = 4, w = 500,                            // width
+                        h = (rectHeight + legendMargin) * scope.slices.length, // height
+                        sum = d3.sum(scope.slices, function (d) {
+                            return parseInt(d.spokenTime);
+                        }),
+                        max = d3.max(scope.slices, function (d) {
+                            return parseInt(d.spokenTime);
+                        });
+
+                    // Get the correct svg tag to append the chart
+                    var vis = d3.select("#barchart").attr("width", w).attr("height", h);
+
+
+                    // Remove old existing chart
+                    var oldGraph = vis.selectAll("g");
+                    if (oldGraph) {
+                        oldGraph.remove();
+                    }
+
+                    // Remove old existing tooltips
+                    var detailedView = d3.select("#detailedView");
+                    var oldTooltip = detailedView.selectAll("div.tooltip");
+                    if (oldTooltip) {
+                        oldTooltip.remove();
+                    }
+
+                    // add a div used to display a tooltip
+                    var div = detailedView.append("div")
+                        .attr("class", "tooltip")
+                        .style("opacity", 0);
+
+                    vis = vis
+                        .append("g")              //create the SVG element inside the <body>
+                        .data([scope.slices])                   //associate our data with the document
+                        .attr("width", w + "px")           //set the width and height of our visualization (these will be attributes of the <svg> tag
+                        .attr("height", h + "px")
+                        .append("g");                //make a group to hold our pie chart
+
+                    vis.selectAll("g.barchart-bar")
+                        .data(scope.slices)
+                        .enter().append("rect")
+                        .attr("class", "barchart-bar")
+                        .attr("fill", function (d, i) {
+                            if (i == scope.model.selected_slice) {
+                                return scope.model.colScale("selection_color");
+                            }
+                            else {
+                                return scope.model.colScale(scope.slices[i].element);
+                            }
+                        })
+                        .attr("x", "4px")
+                        .attr("y", function (d, i) {
+                            return rectHeight * (i) + i * legendMargin + 5;
+                        })
+                        .attr("width", function (d, i) {
+                            return Math.floor(Math.max(scope.slices[i].spokenTime / max * (w - 14 - legendMargin), 3));
+                        })
+                        .attr("height", "15px")
+                        .style("opacity", function (d, i) {
+                            if (i == scope.model.selected_slice) {
+                                return 1;
+                            }
+                            else {
+                                return 0.4;
+                            }
+                        })
+                        .style("stroke", "black")
+                        .on("mouseover", function (d, i) {
+                            div.transition()
+                                .duration(200)
+                                .style("opacity", 1);
+                            div.html(scope.slices[i].element + '<br/>' + 'Duration: ' + Math.floor(scope.slices[i].spokenTime / sum * 100) + "%")
+                                .style("left", (d3.event.pageX) + "px")
+                                .style("top", (d3.event.pageY - 18) + "px");
+                        })
+                        .on("mouseout", function (d, i) {
+                            div.transition()
+                                .duration(200)
+                                .attr("dy", ".3em")
+                                .style("opacity", 0)
+                                .style("width", (scope.slices[i].element * 10));
+                        })
+                        .on("click", function (d, i) {
+                            scope.$apply(function () {
+                                scope.clickOnAPiechartSlice(i);
+                            });
+                        }); //allow us to style things in the slices (like text);
+                }
+
+                scope.$watch('model.selected_layer', function (newValue) {
+                    if (newValue != null && newValue != "" && newValue != undefined) {
+                        scope.updateBarChart();
+                    }
+                });
+
+                scope.$watch('model.selected_slice', function (newValue) {
+                    if (newValue != undefined) {
+                        scope.updateBarChart();
+                    }
+                });
+
+                // only one has to be watch cause both change at the same time
+                scope.$watch('model.maximalXDisplayedValue + model.minimalXDisplayedValue', function (newValue) {
+                    if (newValue && scope.model.selected_layer != -1 && scope.model.selected_layer != undefined) {
+                        scope.updateBarChart();
+                    }
+
+                });
+            }
+        };
+    }])
+    .directive('cmPiechart', ['palette', function (palette) {
         return {
             restrict: 'E',
             replace: true,
             template: '<svg id="piechart"></svg>',
             link: function (scope, element, attrs) {
+
                 scope.updatePiechart = function () {
 
                     scope.computeSlices();
@@ -639,14 +766,14 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                     // Remove old existing tooltips
                     var detailedView = d3.select("#detailedView");
-                    var oldTooltip = detailedView.selectAll("div");
+                    var oldTooltip = detailedView.selectAll("div.piecharttooltip");
                     if (oldTooltip) {
                         oldTooltip.remove();
                     }
 
                     // add a div used to display a tooltip
                     var div = detailedView.append("div")
-                        .attr("class", "piechartTooltip")
+                        .attr("class", "piecharttooltip")
                         .style("opacity", 0);
 
                     vis = vis
@@ -736,7 +863,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             }
         }
     }])
-    .directive("cmPiechartLegend", ['palette', function (palette) {
+    .directive("cmPiechartLegend", ['palette', '$filter', function (palette, $filter) {
         return {
             restrict: 'E',
             replace: true,
@@ -745,7 +872,12 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 
                 scope.updateLegend = function () {
+
                     scope.computeSlices();
+
+                    scope.slices = $filter('orderBy')(scope.slices, function (d) {
+                        return -d.spokenTime;
+                    });
 
                     var maxLength = d3.max(scope.slices, function (d) {
                         return parseInt(d.element.length);
@@ -870,4 +1002,174 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 });
             }
         }
-    }]);
+    }])
+    .directive('cmTreemap', ['palette', '$filter', function (palette, $filter) {
+        return {
+            restrict: 'E',
+            replace: true,
+            template: '<svg id="treemap"></svg>',
+            link: function (scope, element, attrs) {
+
+                scope.updateTreeMap = function () {
+
+                    scope.computeSlices();
+
+                    var w = 500,                            // width
+                        h = 500,                            // height
+                        sum = d3.sum(scope.slices, function (d) {
+                            return parseInt(d.spokenTime);
+                        });
+
+                    scope.slices = $filter('orderBy')(scope.slices, function (d) {
+                        return -d.spokenTime;
+                    });
+
+                    // Get the correct svg tag to append the chart
+                    var vis = d3.select("#treemap")
+                        .attr("width", w)
+                        .attr("height", h);
+
+
+                    // Remove old existing piechart
+                    var oldGraph = vis.selectAll("g");
+                    if (oldGraph) {
+                        oldGraph.remove();
+                    }
+
+                    // Remove old existing tooltips
+                    var detailedView = d3.select("#detailedView");
+                    var oldTooltip = detailedView.selectAll("div.treeemaptooltip");
+                    if (oldTooltip) {
+                        oldTooltip.remove();
+                    }
+
+                    // add a div used to display a tooltip
+                    var div = detailedView.append("div")
+                        .attr("class", "treeemaptooltip")
+                        .style("opacity", 0);
+
+                    var slices = {children: scope.slices};
+
+                    vis = vis
+                        .append("g")
+                        .attr("x", "4")
+                        .attr("y", "4")
+                        .attr("width", w + "px")           //set the width and height of our visualization (these will be attributes of the <svg> tag
+                        .attr("height", h + "px")
+                        .append("g");
+
+                    // make the treemap layout
+                    var treemap = d3.layout.treemap()
+                        .size([w, h])
+                        .sticky(true)
+                        .value(function (d) {
+                            return d.spokenTime;
+                        });
+
+
+                    // make cells for each cause
+                    var node = vis.datum(slices).selectAll(".node").append("g");
+                    node.data(treemap.nodes)
+                        .enter().append("rect")
+                        .attr("class", "node")
+                        .call(position)
+                        .style("stroke", function(d)
+                        {
+                            if (d.children) {
+                                return "white";
+                            }
+                            else
+                            {
+                                return "black";
+                            }
+                        })
+                        .style("fill", function (d, i) {
+                            if (d.children) {
+                                return "white";
+                            }
+                            else if (i - 1 == scope.model.selected_slice) {
+                                return scope.model.colScale("selection_color");
+                            }
+                            else {
+//                                console.log(slices.children[i-1].element);
+                                return scope.model.colScale(slices.children[i-1].element); //'blue';
+                            }
+                        })
+                        .style("opacity", function (d, i) {
+                            if (i-1 == scope.model.selected_slice) {
+                                return 1;
+                            }
+                            else {
+                                return 0.4;
+                            }
+                        })
+                        .on("mouseover", function (d, i) {
+                            if (!d.children) {
+                                div.transition()
+                                    .duration(200)
+                                    .style("opacity", 1);
+                                div.html(scope.slices[i - 1].element + '<br/>' + 'Duration: ' + Math.floor(scope.slices[i - 1].spokenTime / sum * 100) + "%")
+                                    .style("left", (d3.event.pageX) + "px")
+                                    .style("top", (d3.event.pageY - 18) + "px");
+                            }
+                        })
+                        .on("mouseout", function (d, i) {
+                            if (!d.children) {
+                                div.transition()
+                                    .duration(200)
+                                    .attr("dy", ".3em")
+                                    .style("opacity", 0)
+                                    .style("width", (scope.slices[i - 1].element * 10));
+                            }
+                        })
+                        .on("click", function (d, i) {
+                            scope.$apply(function () {
+                                scope.clickOnAPiechartSlice(i - 1);
+                            });
+                        });
+                    ;
+
+//                    node.data(treemap.nodes)
+//                        .enter().append("text").text(function (d) {
+//                            return  d.element;
+//                        }).call(positionText);
+
+                    function position() {
+                        this.attr("x", function (d) {
+                            return d.x + "px";
+                        })
+                            .attr("y", function (d) {
+                                return d.y + "px";
+                            })
+                            .attr("width", function (d) {
+                                return Math.max(0, d.dx - 2) + "px";
+                            })
+                            .attr("height", function (d) {
+                                return Math.max(0, d.dy - 2) + "px";
+                            });
+                    }
+                };
+
+                scope.$watch('model.selected_layer', function (newValue) {
+                    if (newValue != null && newValue != "" && newValue != undefined) {
+                        scope.updateTreeMap();
+                    }
+                });
+
+                scope.$watch('model.selected_slice', function (newValue) {
+                    if (newValue != undefined && scope.slices != undefined && scope.slices.length > 0 ) {
+                        scope.updateTreeMap();
+                    }
+                });
+
+                // only one has to be watch cause both change at the same time
+                scope.$watch('model.maximalXDisplayedValue + model.minimalXDisplayedValue', function (newValue) {
+                    if (newValue && scope.model.selected_layer != -1 && scope.model.selected_layer != undefined) {
+                        scope.updateTreeMap();
+                    }
+
+                });
+            }
+        };
+    }])
+;

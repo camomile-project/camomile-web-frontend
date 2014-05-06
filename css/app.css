@@ -102,7 +102,7 @@ span.label {
     color: red;
 }
 
-div.piechartTooltip {
+div.tooltip, div.piecharttooltip, div.treeemaptooltip {
     position: absolute;
     text-align: left;
     padding: 2px;
@@ -114,10 +114,19 @@ div.piechartTooltip {
     pointer-events: none;
 }
 
+.node {
+    border: solid 1px white;
+    font: 10px sans-serif;
+    line-height: 12px;
+    overflow: hidden;
+    position: absolute;
+    text-indent: 2px;
+}
+
 g.slice {
     cursor: pointer;
 }
 
-rect.legend {
+rect.legend, rect.barchart-bar {
     cursor: pointer;
 }
