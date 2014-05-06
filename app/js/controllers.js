@@ -36,7 +36,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     .error(function (data, status) {
                         Session.isLogged = false;
                         Session.username = undefined;
-                        $cookieStore.remove("current.user","");
+                        $cookieStore.remove("current.user", "");
                         $scope.model.message = "Connection error";
                     });
             };
@@ -45,14 +45,14 @@ angular.module('myApp.controllers', ['myApp.services'])
                 Session.logout()
                     .success(function (data, status) {
                         Session.isLogged = false;
-                        $cookieStore.remove("current.user","");
+                        $cookieStore.remove("current.user", "");
                         Session.username = undefined;
                         $scope.model.message = undefined;
                     });
             };
 
             $scope.isLogged = function () {
-                    return Session.isLogged;
+                return Session.isLogged;
             };
 
             $scope.getUserName = function () {
@@ -60,11 +60,9 @@ angular.module('myApp.controllers', ['myApp.services'])
             };
 
             // Allow to check in the coockie if the user is already set
-            $scope.checkLoggin = function()
-            {
+            $scope.checkLoggin = function () {
                 var currentUser = $cookieStore.get("current.user");
-                if(currentUser && currentUser != "")
-                {
+                if (currentUser && currentUser != "") {
                     Session.isLogged = true;
                     Session.username = currentUser;
                     $cookieStore.put("current.user", currentUser)
@@ -84,7 +82,10 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
             $scope.model = {};
+            $scope.model.selectedSummary = "nothing";
             $scope.model.display_piechart = false;
+            $scope.model.display_barchart = false;
+            $scope.model.display_treemap = false;
             // placeholder definitions
             var defaultReferenceLayer = {
                 'label': 'Reference',
@@ -276,9 +277,39 @@ angular.module('myApp.controllers', ['myApp.services'])
                 });
             };
 
-            // Action on button "display piechart"
+            // Action on combobox "display piechart"
             $scope.displayPiechart = function () {
-                $scope.model.display_piechart = !$scope.model.display_piechart;
+                $scope.model.display_piechart = true;
+            };
+
+            // Action on button "display barchart"
+            $scope.displayBarchart = function () {
+                $scope.model.display_barchart = true;
+            };
+
+            // Action on button "display treemap"
+            $scope.displayTreemap = function () {
+                $scope.model.display_treemap = true;
+            };
+
+            // Action on button "display nothing"
+            $scope.displayNothing = function () {
+                $scope.model.display_piechart = false;
+                $scope.model.display_barchart = false;
+                $scope.model.display_treemap = false;
+            };
+
+            $scope.displayRepresentation = function () {
+                $scope.displayNothing();
+                if ($scope.model.selectedSummary === "piechart") {
+                    $scope.displayPiechart();
+                }
+                else if ($scope.model.selectedSummary === "barchart") {
+                    $scope.displayBarchart();
+                }
+                else if ($scope.model.selectedSummary === "treemap") {
+                    $scope.displayTreemap();
+                }
             };
 
             $scope.clickOnAPiechartSlice = function (sliceId) {
@@ -330,10 +361,34 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $scope.model.maximalXDisplayedValue = value;
             }
 
-            // remove old Piechart
-            $scope.resetPiechart = function (resetSelection) {
+            // remove old summary
+            $scope.resetSummaryView = function (resetSelection) {
                 // Get the correct svg tag to append the chart
                 var vis = d3.select("#piechart").attr("width", 410).attr("height", 410);
+
+
+                // Remove old existing piechart
+                var oldGraph = vis.selectAll("g");
+
+
+                if (oldGraph) {
+                    oldGraph.remove();
+                }
+
+                // remove barchart
+                var vis = d3.select("#barchart").attr("width", 410).attr("height", 410);
+
+
+                // Remove old existing piechart
+                var oldGraph = vis.selectAll("g");
+
+
+                if (oldGraph) {
+                    oldGraph.remove();
+                }
+
+                // remove treemap
+                var vis = d3.select("#treemap").attr("width", 410).attr("height", 410);
 
 
                 // Remove old existing piechart
@@ -370,6 +425,9 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.selected_slice = undefined;
                     $scope.model.selected_layer = undefined;
                     $scope.model.display_piechart = false;
+                    $scope.model.selectedSummary = "nothing";
+                    $scope.model.display_barchart = false;
+                    $scope.model.display_treemap = false;
                 }
             };
 
@@ -379,7 +437,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     scope.get_media(scope.model.selected_corpus);
                     // blank the medium selection
                     scope.model.selected_medium = undefined;
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
 
@@ -391,7 +449,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if (newValue) {
                     scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
                     scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
 
@@ -405,7 +463,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_reference);
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
 
@@ -419,7 +477,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_hypothesis);
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
 
@@ -432,8 +490,10 @@ angular.module('myApp.controllers', ['myApp.services'])
             delete $http.defaults.headers.common['X-Requested-With'];
 
             $scope.model = {};
+            $scope.model.selectedSummary = "nothing";
             $scope.model.display_piechart = false;
-            $scope.model.selected_slice = -1;
+            $scope.model.display_barchart = false;
+            $scope.model.display_treemap = false;
 
             var curColInd = 0;
 
@@ -586,9 +646,39 @@ angular.module('myApp.controllers', ['myApp.services'])
                 });
             };
 
-            // Action on button "display piechart"
+            // Action on combobox "display piechart"
             $scope.displayPiechart = function () {
-                $scope.model.display_piechart = !$scope.model.display_piechart;
+                $scope.model.display_piechart = true;
+            };
+
+            // Action on button "display barchart"
+            $scope.displayBarchart = function () {
+                $scope.model.display_barchart = true;
+            };
+
+            // Action on button "display treemap"
+            $scope.displayTreemap = function () {
+                $scope.model.display_treemap = true;
+            };
+
+            // Action on button "display nothing"
+            $scope.displayNothing = function () {
+                $scope.model.display_piechart = false;
+                $scope.model.display_barchart = false;
+                $scope.model.display_treemap = false;
+            };
+
+            $scope.displayRepresentation = function () {
+                $scope.displayNothing();
+                if ($scope.model.selectedSummary === "piechart") {
+                    $scope.displayPiechart();
+                }
+                else if ($scope.model.selectedSummary === "barchart") {
+                    $scope.displayBarchart();
+                }
+                else if ($scope.model.selectedSummary === "treemap") {
+                    $scope.displayTreemap();
+                }
             };
 
             $scope.clickOnAPiechartSlice = function (sliceId) {
@@ -698,16 +788,45 @@ angular.module('myApp.controllers', ['myApp.services'])
             };
 
             // remove old Piechart
-            $scope.resetPiechart = function (resetSelection) {
+            // remove old summary
+            // remove old summary
+            $scope.resetSummaryView = function (resetSelection) {
                 // Get the correct svg tag to append the chart
                 var vis = d3.select("#piechart").attr("width", 410).attr("height", 410);
 
 
                 // Remove old existing piechart
                 var oldGraph = vis.selectAll("g");
+
+
                 if (oldGraph) {
                     oldGraph.remove();
                 }
+
+                // remove barchart
+                var vis = d3.select("#barchart").attr("width", 410).attr("height", 410);
+
+
+                // Remove old existing piechart
+                var oldGraph = vis.selectAll("g");
+
+
+                if (oldGraph) {
+                    oldGraph.remove();
+                }
+
+                // remove treemap
+                var vis = d3.select("#treemap").attr("width", 410).attr("height", 410);
+
+
+                // Remove old existing piechart
+                var oldGraph = vis.selectAll("g");
+
+
+                if (oldGraph) {
+                    oldGraph.remove();
+                }
+
 
                 // Remove old existing tooltips
                 var detailedView = d3.select("#detailedView").attr("width", 0).attr("height", 0);
@@ -715,6 +834,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if (oldTooltip) {
                     oldTooltip.remove();
                 }
+
 
                 var svgContainer = d3.select("#legend");
 
@@ -730,8 +850,12 @@ angular.module('myApp.controllers', ['myApp.services'])
                 }
 
                 if (resetSelection) {
+                    $scope.model.selected_slice = undefined;
                     $scope.model.selected_layer = undefined;
                     $scope.model.display_piechart = false;
+                    $scope.model.selectedSummary = "nothing";
+                    $scope.model.display_barchart = false;
+                    $scope.model.display_treemap = false;
                 }
             };
 
@@ -740,7 +864,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     scope.get_media(scope.model.selected_corpus);
                     // blank the medium selection
                     scope.model.selected_medium = undefined;
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
 
@@ -752,7 +876,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if (newValue) {
                     scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
                     scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
 
@@ -766,7 +890,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_reference);
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
 
@@ -780,7 +904,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_before);
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
 
@@ -794,7 +918,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_after);
-                    $scope.resetPiechart(true, true, true);
+                    $scope.resetSummaryView(true, true, true);
                 }
             });
         }
