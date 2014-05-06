@@ -886,7 +886,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     var rectHeight = 20,
                         rectWidth = 20,
                         legendMargin = 4,
-                        legendWidth = 16 * (maxLength ? maxLength : 0) + rectWidth * 4,
+                        legendWidth = 16 * (maxLength ? maxLength : 0) + rectWidth + 4* legendMargin,
                         legendHeight = (rectHeight + legendMargin) * scope.slices.length;
 
                     //Create the SVG Viewport
@@ -1139,13 +1139,13 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             return d.x + "px";
                         })
                             .attr("y", function (d) {
-                                return d.y + "px";
+                                return (d.y +3)+ "px";
                             })
                             .attr("width", function (d) {
-                                return Math.max(0, d.dx - 2) + "px";
+                                return Math.max(0, d.dx - 5) + "px";
                             })
                             .attr("height", function (d) {
-                                return Math.max(0, d.dy - 2) + "px";
+                                return Math.max(0, d.dy - 5) + "px";
                             });
                     }
                 };

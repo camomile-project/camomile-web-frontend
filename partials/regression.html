@@ -63,33 +63,42 @@
         </video>
 
         <cm-timeline ng-show="model.selected_medium"></cm-timeline>
+    </div>
 
-        <div id="detailedView">
+    <div id="detailedView" class="pagination-centered container">
 
-            <!--<button ng-click="displayPiechart()" ng-show='model.selected_hypothesis'>Display piechart</button>-->
+        <!--<button ng-click="displayPiechart()" ng-show='model.selected_hypothesis'>Display piechart</button>-->
+        <p class="col-xs-6 cm-selector" ng-show='model.selected_after'>
             <label ng-show='model.selected_after'>Display a summary with:</label>
 
-            <select ng-click="displayRepresentation()" ng-show='model.selected_after' ng-model="model.selectedSummary" value="nothing">
-                <option value="" disabled>Select a representation</option>
+            <select class="form-control" ng-click="displayRepresentation()" ng-show='model.selected_after' ng-model="model.selectedSummary" value="nothing" style="width: 200px;">
+                <option value="" disabled>-- Select a representation --</option>
                 <option value="nothing">nothing</option>
                 <option value="piechart">a Piechart</option>
                 <option value="barchart">a Barchart</option>
                 <option value="treemap">a Treemap</option>
             </select>
 
+
+
+        </p>
+
+        <p>
             <select class="form-control" ng-model='model.selected_layer' ng-show='model.display_piechart || model.display_barchart || model.display_treemap' style="width: 200px;">
                 <option value='' disabled>-- Select a layer --</option>
                 <option ng-repeat='layer in model.layers' value={{$index}}>{{layer.label}}</option>
             </select>
-
+        </p>
+        <p>
             <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
             <cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>
             <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>
+
             <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap" width="0px" height="0px"></cm-piechart-legend>
+        </p>
+        <div id="Detail"></div>
 
-            <div id="Detail"></div>
-
-        </div>
+    </div>
 
         <!--<div id="detailedView">-->
             <!--<button ng-click="displayPiechart()" ng-show='model.selected_after'>Display piechart</button>-->
