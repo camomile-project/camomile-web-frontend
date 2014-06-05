@@ -1,4 +1,3 @@
-
 <div ng-controller="DiffCtrl">
 
     <div class="form-group container">
@@ -32,16 +31,18 @@
             <!-- Reference selection -->
             <div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
                 <label>Reference: </label>
-                <select class="form-control" ng-model='model.selected_reference' >
-                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
+                <select class="form-control" ng-model='model.selected_reference'>
+                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}
+                    </option>
                 </select>
             </div>
 
             <!-- Hypothesis selection -->
             <div class="col-xs-6 cm-selector" ng-show='model.selected_medium'>
                 <label>Hypothesis: </label>
-                <select class="form-control" ng-model='model.selected_hypothesis' >
-                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}</option>
+                <select class="form-control" ng-model='model.selected_hypothesis'>
+                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}
+                    </option>
                 </select>
             </div>
 
@@ -63,43 +64,71 @@
         <cm-timeline ng-show="model.selected_medium"></cm-timeline>
     </div>
 
-        <div id="detailedView">
+    <div id="detailedView" class="container">
 
-            <!--<button ng-click="displayPiechart()" ng-show='model.selected_hypothesis'>Display piechart</button>-->
+        <p class="col-xs-6 cm-selector" ng-show='model.selected_hypothesis'>
 
+            <label ng-show='model.selected_hypothesis'>Display a summary with:</label>
 
-            <p class="col-xs-6 cm-selector" ng-show='model.selected_hypothesis'>
+            <select class="form-control" ng-click="displayRepresentation()" ng-show='model.selected_hypothesis'
+                    ng-model="model.selectedSummary" value="nothing" style="width: 200px;">
+                <option value="" disabled>-- Select a representation --</option>
+                <option value="nothing">nothing</option>
+                <option value="piechart">a Piechart</option>
+                <option value="barchart">a Barchart</option>
+                <option value="treemap">a Treemap</option>
+            </select>
+        </p>
 
-                <label ng-show='model.selected_hypothesis'>Display a summary with:</label>
+        <p>
+            <select class="form-control" ng-model='model.selected_layer'
+                    ng-show='model.display_piechart || model.display_barchart || model.display_treemap'
+                    style="width: 200px;">
+                <option value='' disabled>-- Select a layer --</option>
+                <option ng-repeat='layer in model.layers' value={{$index}}>{{layer.label}}</option>
+            </select>
+        </p>
 
-                <select class="form-control" ng-click="displayRepresentation()" ng-show='model.selected_hypothesis' ng-model="model.selectedSummary" value="nothing" style="width: 200px;">
-                    <option value="" disabled>-- Select a representation --</option>
-                    <option value="nothing">nothing</option>
-                    <option value="piechart">a Piechart</option>
-                    <option value="barchart">a Barchart</option>
-                    <option value="treemap">a Treemap</option>
-                </select>
-            </p>
+        <p class="container">
 
-            <p>
-                <select class="form-control" ng-model='model.selected_layer' ng-show='model.display_piechart || model.display_barchart || model.display_treemap' style="width: 200px;">
-                    <option value='' disabled>-- Select a layer --</option>
-                    <option ng-repeat='layer in model.layers' value={{$index}}>{{layer.label}}</option>
-                </select>
-            </p>
-            <p >
-                <cm-piechart ng-show="model.display_piechart" width="0px" height="0px" ></cm-piechart>
+            <p class="col-md-11">
+                <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
                 <cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>
-                <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap >
-
-                <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap" width="0px" height="0px"></cm-piechart-legend>
+                <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>
+            </p>
+            <p class="col-md-1">
+                <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
+                                    width="0px" height="0px"></cm-piechart-legend>
 
             </p>
-            <!--<div id="Detail"></div>-->
+        </p>
 
-        </div>
+        <div id="Detail"></div>
 
     </div>
+
+    <div class="modal" id="modal-dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Edit element</h4>
+                </div>
+                <div class="modal-body">
+                    <label>Name: </label>
+                    <input type="text" id="labelChange" ng-model="model.modified_element"></select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" ng-click="modifyElement()">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+</div>
+
 
 </div>
 

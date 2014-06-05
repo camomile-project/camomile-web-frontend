@@ -493,6 +493,20 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         .on("click", function (d) {
                             player.currentTime = d.fragment.start;
                             player.play();
+                        })
+                        .on("dblclick", function(d)
+                        {
+                            // TODO
+                            player.pause();
+
+                            // display a modal dialog to modify data
+                            scope.$apply(function()
+                            {
+                                scope.changeValues(d, addedLayer.mapping.getKey(d));
+                            });
+                            console.log(d);
+
+                            $('.modal').modal('show');
                         });
 
                     layerSel.exit().remove();
