@@ -82,6 +82,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
             $scope.model = {};
+            $scope.model.modified_element = "nothing";
             $scope.model.selectedSummary = "nothing";
             $scope.model.display_piechart = false;
             $scope.model.display_barchart = false;
@@ -430,6 +431,22 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.display_treemap = false;
                 }
             };
+
+            $scope.changeValues = function(oldValue, newValue)
+            {
+                $scope.model.modified_element = newValue;
+                $scope.model.element_to_modify = oldValue;
+            }
+
+            $scope.modifyElement = function()
+            {
+
+                // TODO
+                console.log("nouveau nom: " + $scope.model.modified_element);
+                console.log("element à modifier: " + $scope.model.element_to_modify);
+
+                $('.modal').modal('hide');
+            }
 
             // the selected corpus has changed
             $scope.$watch('model.selected_corpus', function (newValue, oldValue, scope) {
