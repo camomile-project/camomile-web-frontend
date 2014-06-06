@@ -494,14 +494,12 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             player.currentTime = d.fragment.start;
                             player.play();
                         })
-                        .on("dblclick", function(d)
-                        {
+                        .on("dblclick", function (d) {
                             // TODO
                             player.pause();
 
                             // display a modal dialog to modify data
-                            scope.$apply(function()
-                            {
+                            scope.$apply(function () {
                                 scope.changeValues(d, addedLayer.mapping.getKey(d));
                             });
                             console.log(d);
@@ -535,6 +533,12 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             }
                         });
                     maxTickLength = maxTickLength * 16 / 12; // approx. points to pixels conversion
+
+                    // ensure maxTickLength != 0 to avoid 0 division
+                    if(maxTickLength == 0)
+                    {
+                        maxTickLength = 1;
+                    }
                     focus.select(".y")
                         .selectAll("text")
                         .attr("transform", function () {
@@ -544,7 +548,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 };
 
                 var updateLayerSelectedItem = function (selectedSliceValue) {
-                    if (scope.model.selected_layer != undefined && scope.model.selected_layer != undefined != -1) {
+                    if (scope.model.selected_layer != undefined && scope.model.selected_layer != -1) {
 
                         var addedLayer;
 
@@ -596,7 +600,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 // BUG #8946 : handle multiple additions/deletions
 
                 scope.$watch('model.layerWatch', function (newValue, oldValue) {
-
                     var addedLayersId = newValue.filter(function (l) {
                         return !(oldValue.indexOf(l) > -1);
                     });
@@ -613,7 +616,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                 scope.$watch('model.selected_slice', function (newValue, oldValue) {
 
-                    updateLayerSelectedItem(newValue);
+                    if (newValue) {
+                        updateLayerSelectedItem(newValue);
+                    }
                 }, true);
 
 
@@ -900,7 +905,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     var rectHeight = 20,
                         rectWidth = 20,
                         legendMargin = 4,
-                        legendWidth = 16 * (maxLength ? maxLength : 0) + rectWidth + 4* legendMargin,
+                        legendWidth = 16 * (maxLength ? maxLength : 0) + rectWidth + 4 * legendMargin,
                         legendHeight = (rectHeight + legendMargin) * scope.slices.length;
 
                     //Create the SVG Viewport
@@ -1087,13 +1092,11 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         .enter().append("rect")
                         .attr("class", "node")
                         .call(position)
-                        .style("stroke", function(d)
-                        {
+                        .style("stroke", function (d) {
                             if (d.children) {
                                 return "white";
                             }
-                            else
-                            {
+                            else {
                                 return "black";
                             }
                         })
@@ -1106,11 +1109,11 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             }
                             else {
 //                                console.log(slices.children[i-1].element);
-                                return scope.model.colScale(slices.children[i-1].element); //'blue';
+                                return scope.model.colScale(slices.children[i - 1].element); //'blue';
                             }
                         })
                         .style("opacity", function (d, i) {
-                            if (i-1 == scope.model.selected_slice) {
+                            if (i - 1 == scope.model.selected_slice) {
                                 return 1;
                             }
                             else {
@@ -1153,7 +1156,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             return d.x + "px";
                         })
                             .attr("y", function (d) {
-                                return (d.y +3)+ "px";
+                                return (d.y + 3) + "px";
                             })
                             .attr("width", function (d) {
                                 return Math.max(0, d.dx - 5) + "px";
@@ -1171,7 +1174,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 });
 
                 scope.$watch('model.selected_slice', function (newValue) {
-                    if (newValue != undefined && scope.slices != undefined && scope.slices.length > 0 ) {
+                    if (newValue != undefined && scope.slices != undefined && scope.slices.length > 0) {
                         scope.updateTreeMap();
                     }
                 });
