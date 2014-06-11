@@ -63,21 +63,31 @@
                     </div>
 
                     <div ng-if="!isLogged()">
-                        <form ng-submit="login(username, password)" class="navbar-form navbar-right">
+                        <!-- 2 forms (1 stays hidden) to enable username and password save -->
+                        <!-- see http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs -->
+                        <form name="login-form" id="login-form" method="POST" action="" style="display: none;">
+                            <input name="login" id="login-login" type="text">
+                            <input name="password" id="login-password" type="password">
+                        </form>
+
+                        <form name="login-form" autocomplete="on" ng-login-submit="login"
+                              message="model.message" class="navbar-form navbar-right">
                             <div class="form-group">
-                                <p class="form-control-static cm-errmsg">{{ model.message }}</p>
+                                <p class="form-control-static cm-errmsg">{{ message }}</p>
                             </div>
                             <div class="form-group">
-                                <input ng-model="username" name="username" type="text" placeholder="Login"
-                                       class="form-control">
+                                <input id="login" name="login" type="text" autocomplete="on"
+                                    placeholder="Login" class="form-control">
                             </div>
+
                             <div class="form-group">
-                                <input ng-model="password" name="password" type="password" placeholder="Password"
-                                       class="form-control">
+                                <input id="password" name="password" type="password" autocomplete="on"
+                                    placeholder="Password" class="form-control">
                             </div>
                             <button type="submit" class="btn btn-success">Sign in</button>
                         </form>
-                    </div>
+
+                   </div>
 
                 </div>
 

@@ -1189,4 +1189,26 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             }
         };
     }])
-;
+
+	// see index.html about login form
+		.directive("ngLoginSubmit", function(){
+			return {
+				restrict: "A",
+				scope: {
+					onSubmit: "=ngLoginSubmit",
+					message: "="
+				},
+				link: function(scope, element, attrs) {
+					$(element)[0].onsubmit = function() {
+						$("#login-login").val($("#login", element).val());
+						$("#login-password").val($("#password", element).val());
+
+						scope.onSubmit(function() {
+							$("#login-form")[0].submit();
+						});
+						return false;
+					};
+				}
+			};
+		});
+

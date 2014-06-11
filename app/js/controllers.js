@@ -19,27 +19,35 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.model = {};
             $scope.model.message = undefined;
-            $scope.login = function (username, password) {
 
-                Session.login({
-                    username: username,
-                    password: password
-                })
-                    .success(function (data, status) {
-                        console.log('logged in as ' + username);
-                        Session.isLogged = true;
-                        Session.username = username;
-                        $cookieStore.put("current.user", username);
-                        $scope.model.message = "Connected as " + Session.username;
 
-                    })
-                    .error(function (data, status) {
-                        Session.isLogged = false;
-                        Session.username = undefined;
-                        $cookieStore.remove("current.user", "");
-                        $scope.model.message = "Connection error";
-                    });
-            };
+						$scope.login = function(submit) {
+							var username = $("#login").val();
+							var password = $("#password").val(); // get actual values in the form, as aunglar scope not
+																									// updated from autocomplete
+							Session.login({
+								username: username,
+								password: password
+							})
+							.success(function (data, status) {
+									console.log('logged in as ' + username);
+									Session.isLogged = true;
+									Session.username = username;
+									$cookieStore.put("current.user", username);
+									$scope.model.message = "Connected as " + Session.username;
+									submit(); // hack to allow autofill and autocomplete support
+
+							})
+							.error(function (data, status) {
+									Session.isLogged = false;
+									Session.username = undefined;
+									$cookieStore.remove("current.user", "");
+									$scope.model.message = "Connection error";
+							});
+
+							//return false;
+						};
+
 
             $scope.logout = function () {
                 Session.logout()

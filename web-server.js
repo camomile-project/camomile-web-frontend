@@ -9,5 +9,9 @@ app.configure(function(){
 	app.use(app.router);
 });
 
+app.post('/', function(req, res){
+	res.redirect('/'); // handle the hidden form submit
+});
+
 app.listen(port);
 console.log('Now serving the app at http://localhost:' + port + '/');
