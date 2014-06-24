@@ -130,3 +130,8 @@ g.slice {
 rect.legend, rect.barchart-bar {
     cursor: pointer;
 }
+
+.position-fixed {
+    position: fixed;
+}
+
