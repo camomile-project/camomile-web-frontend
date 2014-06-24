@@ -93,6 +93,11 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.display_piechart = false;
             $scope.model.display_barchart = false;
             $scope.model.display_treemap = false;
+
+
+						$scope.model.testval = false;
+
+
             // placeholder definitions
             var defaultReferenceLayer = {
                 'label': 'Reference',
