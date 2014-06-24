@@ -3,7 +3,7 @@
 
 angular.module('myApp.services', ['ngResource'])
 
-.value('DataRoot', 'http://localhost:3000')
+.value('DataRoot', 'http://WS-01929:3000')
 //.value('DataRoot', 'https://flower.limsi.fr/data')
 .value('ToolRoot', 'https://flower.limsi.fr/tool')
 
