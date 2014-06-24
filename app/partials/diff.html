@@ -89,19 +89,38 @@
             </select>
         </p>
 
-        <p class="container">
+        <!--<p class="container">-->
 
-            <p class="col-md-11">
-                <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
-                <cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>
-                <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>
-            </p>
-            <p class="col-md-1">
-                <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
-                                    width="0px" height="0px"></cm-piechart-legend>
+            <!--<p class="col-md-11">-->
+                <!--<cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>-->
+                <!--<cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>-->
+                <!--<cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>-->
+            <!--</p>-->
+            <!--<p class="col-md-1">-->
+                <!--<cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"-->
+                                    <!--width="0px" height="0px"></cm-piechart-legend>-->
 
-            </p>
-        </p>
+            <!--</p>-->
+        <!--</p>-->
+
+        <table id="table-summary-view" class="container">
+            <tbody>
+
+            <tr>
+                <td>
+                    <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
+                    <cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>
+                    <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>
+                </td>
+                <td>
+                    <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
+                                        width="0px" height="0px"></cm-piechart-legend>
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
 
         <div id="Detail"></div>
 
