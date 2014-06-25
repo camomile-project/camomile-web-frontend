@@ -190,7 +190,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.attr("class", "x axis")
 						.call(xAxis2);
 
-
 					var gContainer = $(focus[0][0]);
 					var yAxisContainer = gContainer.children(".y");
 					var xAxisContainer = gContainer.children(".x");
@@ -509,10 +508,10 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						});
 
 					// link with cm-context-menu
-					element.removeAttr("cm-timeline");
-					$compile(element)(scope);
-					element.removeClass("cm-timeline");
-					$compile(element)(scope);
+//					element.removeAttr("cm-timeline");
+//					$compile(element)(scope);
+//					element.removeClass("cm-timeline");
+//					$compile(element)(scope);
 					// Pierrick: use right-click instead
 //                        .on("dblclick", function (d) {
 //                            // TODO
@@ -696,8 +695,8 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						}
 					});
 				});
-				element.removeAttr("element1");
-				$compile(element)(scope);
+//				element.removeAttr("class")
+//				$compile(element)(scope);
 			}
 		}
 	}])
