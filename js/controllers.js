@@ -131,6 +131,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.model.selected_slice = -1;
 
+						$scope.model.restrict_toggle = false;
+						$scope.model.play_label = "Play";
+
             $scope.updateColorScale = function (addedLayerId) {
                 // get layer actual object from ID
                 var addedLayer = $scope.model.layers.filter(function (l) {
@@ -454,6 +457,20 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $('.modal').modal('hide');
             }
 
+
+						$scope.$watch("model.play_state", function(newValue) {
+							if (newValue) {
+								$scope.model.play_label = "Pause";
+							} else {
+								$scope.model.play_label = "Play";
+							}
+						});
+
+						$('#seek-bar').on('mousedown', function() {
+							$scope.model.toggle_play(false);
+						});
+
+
             // the selected corpus has changed
             $scope.$watch('model.selected_corpus', function (newValue, oldValue, scope) {
                 if (newValue) {
@@ -471,7 +488,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                 scope.model.selected_hypothesis = undefined;
                 if (newValue) {
                     scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
-                    scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
+                    scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
+											scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
                     $scope.resetSummaryView(true, true, true);
                 }
             });
