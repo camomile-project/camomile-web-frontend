@@ -50,18 +50,47 @@
 
     </div>
 
-    <div class="text-center container">
+    <div class="row" ng-show="model.selected_medium">
+        <div class="col-md-1"></div>
+        <div class="col-md-7">
 
-        <video id="player"
-               preload="auto"
-               width="50%"
-               src="{{model.video}}"
-               controls
-               ng-show="model.selected_medium">
-        </video>
+            <div id="video-container">
+                <!-- Video -->
+                <video id="player"
+                       cm-video-player
+                       src="{{ model.video }}"
+                       width="100%">
+                </video>
+                <!-- Video Controls -->
+                <div id="video-controls">
+                    <div class="row">
+                        <div class="col-md-1">
+                            <button type="button" class="video-control" id="play-pause" ng-click="model.toggle_play()">
+                                {{ model.play_label }}
+                            </button>
+                        </div>
+                        <div class="col-md-11">
+                            <input width="100%" type="range" id="seek-bar" step="1"
+                                   min="{{ model.infbndsec }}" max="{{ model.supbndsec }}" ng-model="model.current_time">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+
+
+        <div class="col-md-4">
+            <label>Restrict playback to annotations:</label>
+            <button type="button" class="btn btn-default" ng-model="model.restrict_toggle" bs-checkbox>Toggle</button>
+        </div>
+
         <!--<div id="time"></div>-->
 
-        <cm-timeline ng-show="model.selected_medium"></cm-timeline>
+        <cm-timeline></cm-timeline>
     </div>
 
     <div id="detailedView" class="container">
