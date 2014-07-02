@@ -734,7 +734,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             };
 
             $scope.clickOnAPiechartSlice = function (sliceId) {
-                if ($scope.model.selected_slice == sliceId) {
+                if ($scope.model.selected_slice === sliceId) {
                     $scope.model.selected_slice = -1;
                 }
                 else {
