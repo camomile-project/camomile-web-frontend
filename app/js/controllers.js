@@ -326,7 +326,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.selected_slice = -1;
                 }
                 else {
-
                     $scope.model.selected_slice = sliceId;
                 }
             };
@@ -360,6 +359,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                         }
                     });
                 }
+
+                // Sort them (descending) in order to keep indexes correct
+                $scope.slices.sort(function(a,b){
+                    return (b.spokenTime - a.spokenTime);
+                });
             };
 
             $scope.setMinimalXDisplayedValue = function (value) {
@@ -773,6 +777,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                         }
                     });
                 }
+
+                // Sort them (descending) in order to keep indexes correct
+                $scope.slices.sort(function(a,b){
+                    return (b.spokenTime - a.spokenTime);
+                });
             };
 
             $scope.setMinimalXDisplayedValue = function (value) {

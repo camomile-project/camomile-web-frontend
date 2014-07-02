@@ -179,3 +179,10 @@ button.video-control {
     -o-border-radius: 3px;
     border-radius: 3px;
 }
+
+.row-top-aligned
+{
+    /*text-align: left;*/
+    /*float:right;*/
+    vertical-align: top;
+}
