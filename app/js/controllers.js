@@ -131,7 +131,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.model.selected_slice = -1;
 
-						$scope.model.restrict_toggle = false;
 						$scope.model.play_label = "Play";
 
             $scope.updateColorScale = function (addedLayerId) {
@@ -458,7 +457,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             }
 
 
-						$scope.$watch("model.play_state", function(newValue) {
+						$scope.$watch("model.play_state", function(newValue, oldValue) {
 							if (newValue) {
 								$scope.model.play_label = "Pause";
 							} else {
@@ -507,6 +506,17 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.resetSummaryView(true, true, true);
                 }
             });
+
+						$scope.$watch('model.selected_reference === undefined && model.selected_hypothesis === undefined',
+							function(newValue, oldValue) {
+								// to avoid triggering at init (only case where new and old are both true)
+								if(!newValue) {
+									$scope.model.restrict_toggle = 1;
+								} else if(!oldValue) {
+									$scope.model.restrict_toggle = 0;
+								}
+						});
+
 
             $scope.$watch('model.selected_hypothesis', function (newValue, oldValue, scope) {
                 // handle the reinit case
