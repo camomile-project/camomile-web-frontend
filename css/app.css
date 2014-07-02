@@ -163,6 +163,7 @@ rect.legend, rect.barchart-bar {
         color-stop(0.13, rgb(3,113,168)),
         color-stop(1, rgb(0,136,204))
     );
+    color: white;
 }
 
 #video-container:hover #video-controls {
@@ -177,8 +178,4 @@ button.video-control {
     -moz-border-radius: 3px;
     -o-border-radius: 3px;
     border-radius: 3px;
-}
-
-button.video-control:hover {
-    cursor: pointer;
 }

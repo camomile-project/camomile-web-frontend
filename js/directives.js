@@ -10,7 +10,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 		};
 	}])
 
-	.directive('cmVideoPlayer', function() {
+	.directive('cmVideoPlayer', ['DateUtils', function(DateUtils) {
 		return {
 			restrict: 'A',
 			link: function(scope, element, attrs) {
@@ -33,15 +33,19 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 				element[0].addEventListener("loadedmetadata", function() {
 					scope.$apply(function() {
 						scope.model.play_state = false;
-						scope.model.current_time = 0;
+						scope.model.restrict_toggle = 0;
 						scope.model.infbndsec = 0;
-						scope.model.supbndsec = element[0].duration;
+						scope.model.duration = element[0].duration;
+						scope.model.supbndsec = scope.model.duration;
 					});
 				});
 
 				scope.$watch("model.current_time", function(newValue) {
-					if((newValue) && element[0].paused) {
-						element[0].currentTime = newValue;
+					if(newValue !== undefined && element[0].readyState !== 0) {
+						scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
+						if(element[0].paused) {
+							element[0].currentTime = newValue;
+						}
 					}
 				});
 
@@ -53,9 +57,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 			}
 		};
-	})
+	}])
 
-	.directive('cmTimeline', ['palette', function (palette) {
+	.directive('cmTimeline', ['palette', 'DateUtils', function (palette, DateUtils) {
 		return {
 			restrict: 'E',
 			replace: true,
@@ -67,36 +71,13 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 				var laneHeight = 30;
 				var contextPadding = 25;
 				// hack : multiple time scales, to circumvent unsupported difference for dates in JS
-				var xMsScale, xTimeScale, x2MsScale, x2TimeScale, yScale;
+				var xTimeScale, x2MsScale, x2TimeScale, yScale;
 				var xAxis, xAxis2, yAxis;
 				var d3elmt = d3.select(element[0]).append("svg"); // d3 wrapper of the SVG element
 				var brush, focus, context;
-				var infannot, supannot;
+				var infannot, supannot, infannotdate, supannotdate;
+				var lineElement, circleElement;
 
-//				var player = $("#player")[0];
-//				var play_pause = $("#play-pause")[0];
-//				var seek_bar = $("#seek-bar")[0];
-
-				// utility functions for date conversion
-				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
-
-				var secToTime = function (s) {
-					function addZ(n) {
-						return (n < 10 ? '0' : '') + n;
-					}
-
-					var ms = s % 1;
-					s = Math.floor(s);
-					var secs = s % 60;
-					s = (s - secs) / 60;
-					var mins = s % 60;
-					var hrs = (s - mins) / 60;
-
-					// hack to force ms with 3 decimal parts
-					ms = parseFloat("0." + ms.toString()).toFixed(3).slice(2);
-
-					return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
-				};
 
 				// use SVG to draw the tooltip content
 				// this is the tooltip graph component init - it is then updated by refreshTooltipForLayer
@@ -141,23 +122,23 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 				// callback function for the focus brush
 				var brushed = function () {
 					var brushRange = brush.extent().map(x2MsScale);
-					xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
+					scope.model.xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
 					xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
 
 					focus.selectAll(".annot")
 						.attr("x", function (d) {
-							return xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.start);
 						})
 						.attr("width", function (d) {
-							return xMsScale(d.fragment.end) - xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
 						});
 
 					focus.select(".x.axis").call(xAxis);
 
 					// log scope min and max date
 					scope.$apply(function () {
-						scope.setMinimalXDisplayedValue(xMsScale.domain()[0]);
-						scope.setMaximalXDisplayedValue(xMsScale.domain()[1]);
+						scope.setMinimalXDisplayedValue(scope.model.xMsScale.domain()[0]);
+						scope.setMaximalXDisplayedValue(scope.model.xMsScale.domain()[1]);
 						if ('function' == typeof (scope.clickOnAPiechartSlice)) {
 							scope.clickOnAPiechartSlice(-1);
 						}
@@ -179,7 +160,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					// and for internal use (raw annotations use seconds) and display (formatted)
 					xTimeScale = d3.time.scale().domain([0, 0]).range([0, width]).clamp(true);
 					x2TimeScale = d3.time.scale().domain([0, 0]).range([0, width]).clamp(true);
-					xMsScale = d3.scale.linear().domain([0, 0]).range([0, width]).clamp(true);
+					scope.model.xMsScale = d3.scale.linear().domain([0, 0]).range([0, width]).clamp(true);
 					x2MsScale = d3.scale.linear().domain([0, 0]).range([0, width]).clamp(true);
 
 					yScale = d3.scale.ordinal().range([0, height]); // scale for layer labels
@@ -242,45 +223,42 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					var yAxisContainer = gContainer.children(".y");
 					var xAxisContainer = gContainer.children(".x");
 
-					focus.append("g").attr("id", "time").append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
+					focus.append("g").attr("id", "time").append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + scope.model.xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
 
-					var circleElement = d3.select("circle");
+					circleElement = d3.select("circle");
 
-					focus.append("g").append("line").attr("id", "line").attr("x1", gContainer.offset().left + xMsScale(0)).attr("x2", gContainer.offset().left + xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
-					var lineElement = d3.select("#line");
+					focus.append("g").append("line").attr("id", "line").attr("x1", gContainer.offset().left + scope.model.xMsScale(0)).attr("x2", gContainer.offset().left + scope.model.xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
+					lineElement = d3.select("#line");
 
 
 					circleElement.on("mousemove", function () {
 						circleElement.style("cursor", "e-resize");
 					});
 
-					// TODO : Default timeline to whole video.
-					// TODO : if at least one layer loaded, optionally restrict to annotations
 
 					// Event that allow to move the pointer on the timeline that is synchronised with the current time of the video
-//					var drag = d3.behavior.drag()
-//						.on("dragstart", function() {
-//							player.pause();
-//						})
-//						.on("drag",function () {
-//							var position = event.pageX -
-//								(gContainer.offset().left + yAxisContainer[0].getBBox().width);
-//
-//							if (position >= 0 && position <= xAxisContainer[0].getBBox().width) {
-//								circleElement.attr("cx", parseInt(position));
-//								lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
-//
-//								player.currentTime = xMsScale.invert(position);
-//							}
-//						});
-//
-//					circleElement.call(drag);
-//
-//					// Listen the current time of the video to update pointer position in the timeline
-//					player.addEventListener('timeupdate', function () {
-//							lineElement.attr("x1", xMsScale(player.currentTime)).attr("x2", xMsScale(player.currentTime));
-//							circleElement.attr("cx", xMsScale(player.currentTime));
-//					}, false);
+					var drag = d3.behavior.drag()
+						.on("dragstart", function() {
+							scope.$apply(function() {
+								scope.model.toggle_play(false);
+							});
+						})
+						.on("drag",function () {
+
+								var position = d3.event.pageX -
+									(gContainer.offset().left + yAxisContainer[0].getBBox().width);
+
+								if (position >= 0 && position <= xAxisContainer[0].getBBox().width) {
+									circleElement.attr("cx", parseInt(position));
+									lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
+									scope.$apply(function() {
+										scope.model.current_time = scope.model.xMsScale.invert(position);
+									});
+								}
+						});
+
+					circleElement.call(drag);
+
 
 				};
 
@@ -321,7 +299,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						var margin = pointerPos;
 
 						pointerPos = xTimeScale.invert(pointerPos);
-						pointerPos = (d3.time.format("%H:%M:%S.%L"))(pointerPos);
+						pointerPos = DateUtils.timestampFormat(pointerPos);
 
 						currentSel = tooltip.selectAll(".time")
 							.data([pointerPos]);
@@ -401,14 +379,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					scope.updateColorScale(addedLayerId);
 
 					// adapt time scales
-
-					// TODO: Check this when edition will be available.
-//					var theMax = 0;
-//					var curMax;
-//					var theMin = 9999999999999999;
-//					var curMin;
-//					var maxDate = parseDate("00:00:00.000");
-//					var minDate = parseDate("99:99:99.999");
 					scope.model.layers.forEach(function (l) {
 						var curMax = d3.max(l.layer.map(function (d) {
 							return d.fragment.end;
@@ -417,27 +387,21 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 							return d.fragment.start;
 						}));
 
-						if(infannot === undefined || curMin < infannot) {
-							infannot = curMin;
-						}
-
-						if(supannot === undefined || curMax > supannot) {
-							supannot = curMax;
-						}
-
-						theMax = d3.max([theMax, curMax]);
-						theMin = d3.min([theMin, curMin]);
+						infannot = d3.min([infannot, curMin]);
+						supannot = d3.max([supannot, curMax]);
 
 						curMax = d3.max(l.layer.map(function (d) {
-							return parseDate(secToTime(d.fragment.end));
+							return DateUtils.parseDate(d.fragment.end);
 						}));
 						curMin = d3.min(l.layer.map(function (d) {
-							return parseDate(secToTime(d.fragment.start));
+							return DateUtils.parseDate(d.fragment.start);
 						}));
 
-						maxDate = d3.max([maxDate, curMax]);
-						minDate = d3.min([minDate, curMin]);
+						infannotdate = d3.min([infannotdate, curMin]);
+						supannotdate = d3.max([supannotdate, curMax]);
+
 					});
+
 
 					// adapt brush to new scale
 					var brushExtent = [];
@@ -445,17 +409,19 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						brushExtent = brush.extent();
 					}
 
-					x2MsScale.domain([theMin, theMax]);
-					x2TimeScale.domain([minDate, maxDate]);
+					// rescale only if restricted to loaded annotations
+					if(scope.model.restrict_toggle === 2) {
+						x2MsScale.domain([infannot, supannot]);
+						x2TimeScale.domain([infannotdate, supannotdate]);
+						if (brush.empty() || scope.model.layers.length === 0) {
+							scope.model.xMsScale.domain(x2MsScale.domain());
+							xTimeScale.domain(x2TimeScale.domain());
+						}
+					}
 
 					if (!brush.empty()) {
 						brush.extent(brushExtent);
 						brush(context.select(".brush"));
-					}
-
-					if (brush.empty() || scope.model.layers.length === 0) {
-						xMsScale.domain(x2MsScale.domain());
-						xTimeScale.domain(x2TimeScale.domain());
 					}
 
 					// adapt component dimensions and y axis
@@ -540,28 +506,19 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.attr("y", 0)
 						.attr("height", laneHeight)
 						.attr("x", function (d) {
-							return xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.start);
 						})
 						.attr("width", function (d) {
-							return xMsScale(d.fragment.end) - xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
 						})
-						.attr("class", "annot");
-//						.on("click", function (d) {
-//							player.currentTime = d.fragment.start;
-//							player.play();
-//						})
-//						.on("dblclick", function (d) {
-//							// TODO
-//							player.pause();
-//
-//							// display a modal dialog to modify data
-//							scope.$apply(function () {
-//								scope.changeValues(d, addedLayer.mapping.getKey(d));
-//							});
-//							console.log(d);
-//
-//							$('.modal').modal('show');
-//						});
+						.attr("class", "annot")
+						.on("click", function (d) {
+							scope.$apply(function() {
+								scope.model.toggle_play(false);
+								scope.model.current_time = d.fragment.start;
+							})
+						});
+
 
 					layerSel.exit().remove();
 
@@ -573,10 +530,10 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					// refresh all annotations in case of rescale
 					focus.selectAll(".annot")
 						.attr("x", function (d) {
-							return xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.start);
 						})
 						.attr("width", function (d) {
-							return xMsScale(d.fragment.end) - xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
 						});
 
 					// adjust font size to available space in left margin
@@ -678,6 +635,72 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					}
 				}, true);
 
+
+
+				// restrict timeline to loaded annotations if wanted
+				scope.$watch("model.restrict_toggle", function(newValue) {
+					if(newValue === 2) {
+						if(infannot !== undefined) {
+							x2MsScale.domain([infannot, supannot]);
+							x2TimeScale.domain([infannotdate, supannotdate]);
+							scope.model.infbndsec = infannot;
+							scope.model.supbndsec = supannot;
+
+							if(scope.model.current_time < scope.model.infbndsec) {
+								scope.model.current_time = scope.model.infbndsec;
+							}
+							if(scope.model.current_time > scope.model.supbndsec) {
+								scope.model.current_time = scope.model.supbndsec;
+							}
+						}
+					} else if (newValue === 0 || newValue === 1){
+						x2MsScale.domain([0, scope.model.duration]);
+						x2TimeScale.domain([DateUtils.parseDate(0),
+							DateUtils.parseDate(scope.model.duration)]);
+						scope.model.infbndsec = 0;
+						scope.model.supbndsec = scope.model.duration;
+					}
+					if (brush.empty()) {
+						scope.model.xMsScale.domain(x2MsScale.domain());
+						xTimeScale.domain(x2TimeScale.domain());
+					}
+
+					focus.select(".x.axis").call(xAxis);
+					context.select(".x.axis").call(xAxis2);
+
+					focus.selectAll(".annot")
+						.attr("x", function (d) {
+							return scope.model.xMsScale(d.fragment.start);
+						})
+						.attr("width", function (d) {
+							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
+						});
+
+					context.selectAll(".annot")
+						.attr("x", function (d) {
+							return x2MsScale(d.fragment.start);
+						})
+						.attr("width", function (d) {
+							return x2MsScale(d.fragment.end) - x2MsScale(d.fragment.start);
+						});
+
+
+				});
+
+				scope.$watch("model.xMsScale.domain()", function(newValue) {
+					if(newValue !== undefined && scope.model.play_state !== undefined) {
+						lineElement.attr("x1", scope.model.xMsScale(scope.model.current_time)).attr("x2",
+							scope.model.xMsScale(scope.model.current_time));
+						circleElement.attr("cx", scope.model.xMsScale(scope.model.current_time));
+					}
+				}, true);
+
+				scope.$watch("model.current_time", function(newValue) {
+					if(newValue !== undefined) {
+						lineElement.attr("x1", scope.model.xMsScale(newValue)).attr("x2", scope.model.xMsScale(newValue));
+						circleElement.attr("cx", scope.model.xMsScale(newValue));
+					}
+				});
 
 				init();
 
@@ -1267,5 +1290,16 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 				};
 			}
 		};
+	})
+
+	.directive('blurbtn', function() {
+		return {
+			restrict: 'A',
+			link: function(scope, element) {
+				$(element).click(function() {
+					$(element).blur();
+				});
+			}
+		}
 	});
 

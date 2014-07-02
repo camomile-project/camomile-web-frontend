@@ -69,9 +69,12 @@
                                 {{ model.play_label }}
                             </button>
                         </div>
-                        <div class="col-md-11">
+                        <div class="col-md-9">
                             <input width="100%" type="range" id="seek-bar" step="1"
                                    min="{{ model.infbndsec }}" max="{{ model.supbndsec }}" ng-model="model.current_time">
+                        </div>
+                        <div class="col-md-2">
+                            <label style="color: #ffffff;">{{ model.current_time_display }}</label>
                         </div>
                     </div>
 
@@ -85,7 +88,10 @@
 
         <div class="col-md-4">
             <label>Restrict playback to annotations:</label>
-            <button type="button" class="btn btn-default" ng-model="model.restrict_toggle" bs-checkbox>Toggle</button>
+            <button type="button" class="btn btn-default"
+                    ng-disabled="model.restrict_toggle === 0 || model.restrict_toggle === undefined"
+                    blurbtn ng-model="model.restrict_toggle"
+                    data-true-value="2" data-false-value="1" bs-checkbox>Toggle</button>
         </div>
 
         <!--<div id="time"></div>-->
