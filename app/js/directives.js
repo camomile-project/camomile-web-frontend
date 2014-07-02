@@ -245,16 +245,17 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						})
 						.on("drag",function () {
 
-								var position = d3.event.pageX -
-									(gContainer.offset().left + yAxisContainer[0].getBBox().width);
+//								var position = d3.event.pageX -
+//									(gContainer.offset().left + yAxisContainer[0].getBBox().width);
+							var position = d3.event.x;
 
-								if (position >= 0 && position <= xAxisContainer[0].getBBox().width) {
-									circleElement.attr("cx", parseInt(position));
-									lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
-									scope.$apply(function() {
-										scope.model.current_time = scope.model.xMsScale.invert(position);
-									});
-								}
+							if (position >= 0 && position <= xAxisContainer[0].getBBox().width) {
+								circleElement.attr("cx", parseInt(position));
+								lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
+								scope.$apply(function() {
+									scope.model.current_time = scope.model.xMsScale.invert(position);
+								});
+							}
 						});
 
 					circleElement.call(drag);
@@ -277,13 +278,19 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						var currentLayer = d3.select(this);
 						var currentSel = currentLayer.selectAll(".annot");
 //                        var pointerPos = undefined;
+						var bodyElt = $("body")[0];
+						var coords = d3.mouse(bodyElt);
 						var hoveredElts = currentSel[0].filter(function (d) {
 							var dims = d.getBBox();
 							dims.top = $(d).offset().top;
 							dims.left = $(d).offset().left;
+//							return dims.top <= event.pageY && dims.left <= event.pageX &&
+//								dims.top + dims.height >= event.pageY && dims.left + dims.width >= event.pageX;
+//							return dims.top <= d3.event.y && dims.left <= d3.event.x &&
+//								dims.top + dims.height >= d3.event.y && dims.left + dims.width >= d3.event.x;
+							return dims.top <= coords[1] && dims.left <= coords[0] &&
+								dims.top + dims.height >= coords[1] && dims.left + dims.width >= coords[0];
 
-							return dims.top <= event.pageY && dims.left <= event.pageX &&
-								dims.top + dims.height >= event.pageY && dims.left + dims.width >= event.pageX;
 						});
 
 
@@ -293,9 +300,11 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						// to get actual time position, y axis space has thus to be explicitly accounted for
 						var gContainer = $($(currentLayer[0][0]).parent()[0]);
 						var yAxisContainer = gContainer.children(".y");
-						var pointerPos = event.pageX -
+//						var pointerPos = event.pageX -
+//						var pointerPos = d3.event.x -
+//							(gContainer.offset().left + yAxisContainer[0].getBBox().width);
+						var pointerPos = coords[0] -
 							(gContainer.offset().left + yAxisContainer[0].getBBox().width);
-
 						var margin = pointerPos;
 
 						pointerPos = xTimeScale.invert(pointerPos);
@@ -368,7 +377,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 							.attr("height", tooltipHeight)
 							.select("path")
 							.attr("d", lineFunction(borderGenerator(tooltipWidth + 2 * tooltipPadding, tooltipHeight)));
-						return tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");
+//						return tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");
+//						return tooltip.style("top", (d3.event.y - 10) + "px").style("left", (d3.event.x + 10) + "px");
+						return tooltip.style("top", (coords[1] - 10) + "px").style("left", (coords[0] + 10) + "px");
 					};
 
 					// get layer actual object from ID
@@ -588,7 +599,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 							// if selected slice correspond to target rectangle, make it opaque and give it the selection color
 							// if not, make it transparent and let it have its original color
 							if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d)) {
-								return 0.4;
+								return 1.0;
 							}
 							else if (selectedSliceValue != undefined && selectedSliceValue != -1) {
 								return 0.1;
@@ -792,12 +803,14 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						})
 						.style("stroke", "black")
 						.on("mouseover", function (d, i) {
+							var bodyElt = $("body")[0];
+							var coords = d3.mouse(bodyElt);
 							div.transition()
 								.duration(200)
 								.style("opacity", 1);
 							div.html(scope.slices[i].element + '<br/>' + 'Duration: ' + Math.floor(scope.slices[i].spokenTime / sum * 100) + "%")
-								.style("left", (d3.event.pageX) + "px")
-								.style("top", (d3.event.pageY - 18) + "px");
+								.style("left", (coords[0]) + "px")
+								.style("top", (coords[1] - 18) + "px");
 						})
 						.on("mouseout", function (d, i) {
 							div.transition()
@@ -897,12 +910,14 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
 						.attr("class", "slice")
 						.on("mouseover", function (d, i) {
+							var bodyElt = $("body")[0];
+							var coords = d3.mouse(bodyElt);
 							div.transition()
 								.duration(200)
 								.style("opacity", 1);
 							div.html(scope.slices[i].element + '<br/>' + 'Duration: ' + Math.floor(scope.slices[i].spokenTime / sum * 100) + "%")
-								.style("left", (d3.event.pageX) + "px")
-								.style("top", (d3.event.pageY - 18) + "px");
+								.style("left", (coords[0]) + "px")
+								.style("top", (coords[1] - 18) + "px");
 						})
 						.on("mouseout", function (d, i) {
 							div.transition()
@@ -1202,12 +1217,14 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						})
 						.on("mouseover", function (d, i) {
 							if (!d.children) {
+								var bodyElt = $("body")[0];
+								var coords = d3.mouse(bodyElt);
 								div.transition()
 									.duration(200)
 									.style("opacity", 1);
 								div.html(scope.slices[i - 1].element + '<br/>' + 'Duration: ' + Math.floor(scope.slices[i - 1].spokenTime / sum * 100) + "%")
-									.style("left", (d3.event.pageX) + "px")
-									.style("top", (d3.event.pageY - 18) + "px");
+									.style("left", (coords[0]) + "px")
+									.style("top", (coords[1] - 18) + "px");
 							}
 						})
 						.on("mouseout", function (d, i) {
