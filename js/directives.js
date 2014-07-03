@@ -235,8 +235,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 
                     var gContainer = $(focus[0][0]);
-                    var yAxisContainer = gContainer.children(".y");
-                    var xAxisContainer = gContainer.children(".x");
+                    var xAxisContainer = $(".x path");
 
                     focus.append("g").attr("id", "time").append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + scope.model.xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
 
