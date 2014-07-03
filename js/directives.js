@@ -33,6 +33,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 element[0].addEventListener("loadedmetadata", function () {
                     scope.$apply(function () {
                         scope.model.play_state = false;
+												scope.model.current_time = 0;
                         scope.model.restrict_toggle = 0;
                         scope.model.infbndsec = 0;
                         scope.model.duration = element[0].duration;
@@ -42,18 +43,22 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                 scope.$watch("model.current_time", function (newValue) {
                     if (newValue !== undefined && element[0].readyState !== 0) {
+												console.log("readyState: ", element[0].readyState);
                         scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
-                        if (element[0].paused) {
-                            element[0].currentTime = newValue;
-                        }
+                        element[0].currentTime = newValue;
                     }
                 });
 
                 element[0].addEventListener("timeupdate", function () {
                     scope.$apply(function () {
-                        scope.model.current_time = element[0].currentTime;
-                    });
+											// if player paused, currentTime has been changed for exogenous reasons
+											if(!element[0].paused) {
+                    		scope.model.current_time = element[0].currentTime;
+											}
+										});
                 });
+
+
 
             }
         };
@@ -93,6 +98,16 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     .style("position", "absolute")
                     .style("z-index", "10")
                     .style("visibility", "hidden");
+
+
+								// hack to remove selection glitch with dblclick event
+								var clearSelection= function() {
+									if ( document.selection ) {
+										document.selection.empty();
+									} else if ( window.getSelection ) {
+										window.getSelection().removeAllRanges();
+									}
+								};
 
                 var borderGenerator = function (w, h) {
                     return [
@@ -236,27 +251,32 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     });
 
 
+										var save_state;
+
                     // Event that allow to move the pointer on the timeline that is synchronised with the current time of the video
                     var drag = d3.behavior.drag()
-                        .on("dragstart", function () {
-                            scope.$apply(function () {
-                                scope.model.toggle_play(false);
-                            });
-                        })
-                        .on("drag", function () {
+											.on("dragstart", function () {
+												save_state = scope.model.play_state;
+												scope.$apply(function () {
+														scope.model.toggle_play(false);
+												});
+											})
+											.on("drag", function () {
+													var position = d3.event.x;
 
-//								var position = d3.event.pageX -
-//									(gContainer.offset().left + yAxisContainer[0].getBBox().width);
-                            var position = d3.event.x;
-
-                            if (position >= 0 && position <= xAxisContainer[0].getBBox().width) {
-                                circleElement.attr("cx", parseInt(position));
-                                lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
-                                scope.$apply(function () {
-                                    scope.model.current_time = scope.model.xMsScale.invert(position);
-                                });
-                            }
-                        });
+													if (position >= 0 && position <= xAxisContainer[0].getBBox().width) {
+															circleElement.attr("cx", parseInt(position));
+															lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
+															scope.$apply(function () {
+																	scope.model.current_time = scope.model.xMsScale.invert(position);
+															});
+													}
+											})
+											.on("dragend", function() {
+												scope.$apply(function () {
+													scope.model.toggle_play(save_state);
+												});
+											});
 
                     circleElement.call(drag);
 
@@ -284,10 +304,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             var dims = d.getBBox();
                             dims.top = $(d).offset().top;
                             dims.left = $(d).offset().left;
-//							return dims.top <= event.pageY && dims.left <= event.pageX &&
-//								dims.top + dims.height >= event.pageY && dims.left + dims.width >= event.pageX;
-//							return dims.top <= d3.event.y && dims.left <= d3.event.x &&
-//								dims.top + dims.height >= d3.event.y && dims.left + dims.width >= d3.event.x;
                             return dims.top <= coords[1] && dims.left <= coords[0] &&
                                 dims.top + dims.height >= coords[1] && dims.left + dims.width >= coords[0];
 
@@ -300,9 +316,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         // to get actual time position, y axis space has thus to be explicitly accounted for
                         var gContainer = $($(currentLayer[0][0]).parent()[0]);
                         var yAxisContainer = gContainer.children(".y");
-//						var pointerPos = event.pageX -
-//						var pointerPos = d3.event.x -
-//							(gContainer.offset().left + yAxisContainer[0].getBBox().width);
                         var pointerPos = coords[0] -
                             (gContainer.offset().left + yAxisContainer[0].getBBox().width);
                         var margin = pointerPos;
@@ -377,8 +390,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             .attr("height", tooltipHeight)
                             .select("path")
                             .attr("d", lineFunction(borderGenerator(tooltipWidth + 2 * tooltipPadding, tooltipHeight)));
-//						return tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");
-//						return tooltip.style("top", (d3.event.y - 10) + "px").style("left", (d3.event.x + 10) + "px");
                         return tooltip.style("top", (coords[1] - 10) + "px").style("left", (coords[0] + 10) + "px");
                     };
 
@@ -524,11 +535,22 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         })
                         .attr("class", "annot")
                         .on("click", function (d) {
-                            scope.$apply(function () {
-                                scope.model.toggle_play(false);
-                                scope.model.current_time = d.fragment.start;
-                            })
-                        });
+													scope.$apply(function () {
+															var save_state;
+															save_state = scope.model.play_state;
+															scope.model.toggle_play(false);
+															scope.model.current_time = d.fragment.start;
+															scope.model.toggle_play(save_state);
+													});
+                        })
+												.on("dblclick", function(d) {
+													scope.$apply(function () {
+														scope.model.toggle_play(false);
+														scope.model.current_time = d.fragment.start;
+														scope.model.toggle_play(true);
+													});
+													clearSelection();
+												});
 
 
                     layerSel.exit().remove();
