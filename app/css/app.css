@@ -180,9 +180,6 @@ button.video-control {
     border-radius: 3px;
 }
 
-.row-top-aligned
-{
-    /*text-align: left;*/
-    /*float:right;*/
-    vertical-align: top;
+.top-padding {
+    padding-top: 20px;
 }

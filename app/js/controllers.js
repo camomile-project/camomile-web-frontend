@@ -469,8 +469,20 @@ angular.module('myApp.controllers', ['myApp.services'])
 							}
 						});
 
+						var save_state;
+
 						$('#seek-bar').on('mousedown', function() {
-							$scope.model.toggle_play(false);
+							save_state = $scope.model.play_state;
+							$scope.$apply(function() {
+								$scope.model.toggle_play(false);
+							});
+
+						});
+
+						$('#seek-bar').on('mouseup', function() {
+							$scope.$apply(function() {
+								$scope.model.toggle_play(save_state);
+							});
 						});
 
 
