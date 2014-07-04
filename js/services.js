@@ -3,8 +3,9 @@
 
 angular.module('myApp.services', ['ngResource'])
 
-.value('DataRoot', 'http://WS-01929:3000')
-//.value('DataRoot', 'https://flower.limsi.fr/data')
+
+//.value('DataRoot', 'http://ws-01929:3000')
+.value('DataRoot', 'https://flower.limsi.fr/data')
 .value('ToolRoot', 'https://flower.limsi.fr/tool')
 
 .factory('Corpus', ['$resource', 'DataRoot',
@@ -116,6 +117,38 @@ angular.module('myApp.services', ['ngResource'])
         }
     }
 ])
+
+.factory('DateUtils', function() {
+	return {
+		parseDate: function(nSec) {
+			var parseFunc = d3.time.format("%H:%M:%S.%L").parse;
+
+			var secToTime = function (s) {
+				function addZ(n) {
+					return (n < 10 ? '0' : '') + n;
+				}
+
+				var ms = s % 1;
+				s = Math.floor(s);
+				var secs = s % 60;
+				s = (s - secs) / 60;
+				var mins = s % 60;
+				var hrs = (s - mins) / 60;
+
+				// hack to force ms with 3 decimal parts
+				ms = parseFloat(ms.toString()).toFixed(3).slice(2);
+
+				return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
+			};
+
+			return parseFunc(secToTime(nSec));
+		},
+		timestampFormat: function(date) {
+			return (d3.time.format("%H:%M:%S.%L"))(date);
+		}
+
+	};
+})
 
 // palette of categorical colors for use throughout the application.
 // was especially thought to avoid confusion with green, red and yellow,

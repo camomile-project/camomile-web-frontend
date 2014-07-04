@@ -136,6 +136,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.model.selected_slice = -1;
 
+						$scope.model.play_label = "Play";
+
             $scope.updateColorScale = function (addedLayerId) {
                 // get layer actual object from ID
                 var addedLayer = $scope.model.layers.filter(function (l) {
@@ -329,7 +331,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.selected_slice = -1;
                 }
                 else {
-
                     $scope.model.selected_slice = sliceId;
                 }
             };
@@ -363,6 +364,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                         }
                     });
                 }
+
+                // Sort them (descending) in order to keep indexes correct
+                $scope.slices.sort(function(a,b){
+                    return (b.spokenTime - a.spokenTime);
+                });
             };
 
             $scope.setMinimalXDisplayedValue = function (value) {
@@ -459,6 +465,32 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $('.modal').modal('hide');
             }
 
+
+						$scope.$watch("model.play_state", function(newValue, oldValue) {
+							if (newValue) {
+								$scope.model.play_label = "Pause";
+							} else {
+								$scope.model.play_label = "Play";
+							}
+						});
+
+						var save_state;
+
+						$('#seek-bar').on('mousedown', function() {
+							save_state = $scope.model.play_state;
+							$scope.$apply(function() {
+								$scope.model.toggle_play(false);
+							});
+
+						});
+
+						$('#seek-bar').on('mouseup', function() {
+							$scope.$apply(function() {
+								$scope.model.toggle_play(save_state);
+							});
+						});
+
+
             // the selected corpus has changed
             $scope.$watch('model.selected_corpus', function (newValue, oldValue, scope) {
                 if (newValue) {
@@ -476,7 +508,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                 scope.model.selected_hypothesis = undefined;
                 if (newValue) {
                     scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
-                    scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
+                    scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
+											scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
                     $scope.resetSummaryView(true, true, true);
                 }
             });
@@ -494,6 +527,17 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.resetSummaryView(true, true, true);
                 }
             });
+
+						$scope.$watch('model.selected_reference === undefined && model.selected_hypothesis === undefined',
+							function(newValue, oldValue) {
+								// to avoid triggering at init (only case where new and old are both true)
+								if(!newValue) {
+									$scope.model.restrict_toggle = 1;
+								} else if(!oldValue) {
+									$scope.model.restrict_toggle = 0;
+								}
+						});
+
 
             $scope.$watch('model.selected_hypothesis', function (newValue, oldValue, scope) {
                 // handle the reinit case
@@ -711,7 +755,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             };
 
             $scope.clickOnAPiechartSlice = function (sliceId) {
-                if ($scope.model.selected_slice == sliceId) {
+                if ($scope.model.selected_slice === sliceId) {
                     $scope.model.selected_slice = -1;
                 }
                 else {
@@ -750,6 +794,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                         }
                     });
                 }
+
+                // Sort them (descending) in order to keep indexes correct
+                $scope.slices.sort(function(a,b){
+                    return (b.spokenTime - a.spokenTime);
+                });
             };
 
             $scope.setMinimalXDisplayedValue = function (value) {

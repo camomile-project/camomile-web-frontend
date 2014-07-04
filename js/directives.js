@@ -10,11 +10,64 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 		};
 	}])
 
-	.directive('cmTimeline', ['palette', '$compile', function (palette, $compile) {
+	.directive('cmVideoPlayer', ['DateUtils', function (DateUtils) {
+		return {
+			restrict: 'A',
+			link: function (scope, element, attrs) {
+				scope.model.toggle_play = function (value) {
+					if (scope.model.play_state !== undefined) {
+						if (value !== undefined) {
+							scope.model.play_state = value;
+						} else {
+							scope.model.play_state = !scope.model.play_state;
+						}
+
+						if (scope.model.play_state) {
+							element[0].play();
+						} else {
+							element[0].pause();
+						}
+					}
+				};
+
+				element[0].addEventListener("loadedmetadata", function () {
+					scope.$apply(function () {
+						scope.model.play_state = false;
+						scope.model.current_time = 0;
+						scope.model.restrict_toggle = 0;
+						scope.model.infbndsec = 0;
+						scope.model.duration = element[0].duration;
+						scope.model.supbndsec = scope.model.duration;
+					});
+				});
+
+				scope.$watch("model.current_time", function (newValue) {
+					if (newValue !== undefined && element[0].readyState !== 0) {
+						scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
+						element[0].currentTime = newValue;
+					}
+				});
+
+				element[0].addEventListener("timeupdate", function () {
+					scope.$apply(function () {
+						// if player paused, currentTime has been changed for exogenous reasons
+						if(!element[0].paused) {
+							scope.model.current_time = element[0].currentTime;
+						}
+					});
+				});
+
+
+
+			}
+		};
+	}])
+
+	.directive('cmTimeline', ['palette', 'DateUtils', function (palette, DateUtils) {
 		return {
 			restrict: 'E',
 			replace: true,
-			template: '<svg></svg>',
+			//template: '<svg></svg>', // fix related to issue in angularjs
 			link: function (scope, element, attrs) {
 				// definition of timeline properties
 				var margin = {}, margin2 = {}, width, height, height2;
@@ -22,33 +75,13 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 				var laneHeight = 30;
 				var contextPadding = 25;
 				// hack : multiple time scales, to circumvent unsupported difference for dates in JS
-				var xMsScale, xTimeScale, x2MsScale, x2TimeScale, yScale;
+				var xTimeScale, x2MsScale, x2TimeScale, yScale;
 				var xAxis, xAxis2, yAxis;
-				var d3elmt = d3.select(element[0]); // d3 wrapper of the SVG element
+				var d3elmt = d3.select(element[0]).append("svg"); // d3 wrapper of the SVG element
 				var brush, focus, context;
+				var infannot, supannot, infannotdate, supannotdate;
+				var lineElement, circleElement;
 
-				var player = $("#player")[0];
-
-				// utility functions for date conversion
-				var parseDate = d3.time.format("%H:%M:%S.%L").parse;
-
-				var secToTime = function (s) {
-					function addZ(n) {
-						return (n < 10 ? '0' : '') + n;
-					}
-
-					var ms = s % 1;
-					s = Math.floor(s);
-					var secs = s % 60;
-					s = (s - secs) / 60;
-					var mins = s % 60;
-					var hrs = (s - mins) / 60;
-
-					// hack to force ms with 3 decimal parts
-					ms = parseFloat("0." + ms.toString()).toFixed(3).slice(2);
-
-					return addZ(hrs) + ':' + addZ(mins) + ':' + addZ(secs) + '.' + ms;
-				};
 
 				// use SVG to draw the tooltip content
 				// this is the tooltip graph component init - it is then updated by refreshTooltipForLayer
@@ -64,6 +97,16 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					.style("position", "absolute")
 					.style("z-index", "10")
 					.style("visibility", "hidden");
+
+
+				// hack to remove selection glitch with dblclick event
+				var clearSelection= function() {
+					if ( document.selection ) {
+						document.selection.empty();
+					} else if ( window.getSelection ) {
+						window.getSelection().removeAllRanges();
+					}
+				};
 
 				var borderGenerator = function (w, h) {
 					return [
@@ -93,23 +136,23 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 				// callback function for the focus brush
 				var brushed = function () {
 					var brushRange = brush.extent().map(x2MsScale);
-					xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
+					scope.model.xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
 					xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brushRange.map(x2TimeScale.invert));
 
 					focus.selectAll(".annot")
 						.attr("x", function (d) {
-							return xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.start);
 						})
 						.attr("width", function (d) {
-							return xMsScale(d.fragment.end) - xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
 						});
 
 					focus.select(".x.axis").call(xAxis);
 
 					// log scope min and max date
 					scope.$apply(function () {
-						scope.setMinimalXDisplayedValue(xMsScale.domain()[0]);
-						scope.setMaximalXDisplayedValue(xMsScale.domain()[1]);
+						scope.setMinimalXDisplayedValue(scope.model.xMsScale.domain()[0]);
+						scope.setMaximalXDisplayedValue(scope.model.xMsScale.domain()[1]);
 						if ('function' == typeof (scope.clickOnAPiechartSlice)) {
 							scope.clickOnAPiechartSlice(-1);
 						}
@@ -117,7 +160,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					});
 				};
 
-				var isMouseDown = false;
 				var init = function () {
 					// init dimensions/margins
 					// height set depending on number of modalities - in updateComp
@@ -132,7 +174,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					// and for internal use (raw annotations use seconds) and display (formatted)
 					xTimeScale = d3.time.scale().domain([0, 0]).range([0, width]).clamp(true);
 					x2TimeScale = d3.time.scale().domain([0, 0]).range([0, width]).clamp(true);
-					xMsScale = d3.scale.linear().domain([0, 0]).range([0, width]).clamp(true);
+					scope.model.xMsScale = d3.scale.linear().domain([0, 0]).range([0, width]).clamp(true);
 					x2MsScale = d3.scale.linear().domain([0, 0]).range([0, width]).clamp(true);
 
 					yScale = d3.scale.ordinal().range([0, height]); // scale for layer labels
@@ -190,49 +232,50 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.attr("class", "x axis")
 						.call(xAxis2);
 
+
 					var gContainer = $(focus[0][0]);
-					var yAxisContainer = gContainer.children(".y");
-					var xAxisContainer = gContainer.children(".x");
+					var xAxisContainer = $(".x path");
 
-					focus.append("g").attr("id", "time").append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
+					focus.append("g").attr("id", "time").append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + scope.model.xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
 
-					var circleElement = d3.select("circle");
+					circleElement = d3.select("circle");
 
-					focus.append("g").append("line").attr("id", "line").attr("x1", gContainer.offset().left + xMsScale(0)).attr("x2", gContainer.offset().left + xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
-					var lineElement = d3.select("#line");
-
+					focus.append("g").append("line").attr("id", "line").attr("x1", gContainer.offset().left + scope.model.xMsScale(0)).attr("x2", gContainer.offset().left + scope.model.xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
+					lineElement = d3.select("#line");
 
 					circleElement.on("mousemove", function () {
 						circleElement.style("cursor", "e-resize");
 					});
 
+					var save_state;
+
 
 					// Event that allow to move the pointer on the timeline that is synchronised with the current time of the video
 					var drag = d3.behavior.drag()
-						.on("drag",function () {
-							var position = event.pageX -
-								(gContainer.offset().left + yAxisContainer[0].getBBox().width);
+						.on("dragstart", function () {
+							save_state = scope.model.play_state;
+							scope.$apply(function () {
+								scope.model.toggle_play(false);
+							});
+						})
+						.on("drag", function () {
+							var position = d3.event.x;
 
 							if (position >= 0 && position <= xAxisContainer[0].getBBox().width) {
 								circleElement.attr("cx", parseInt(position));
 								lineElement.attr("x1", parseInt(position)).attr("x2", parseInt(position));
-
-								player.currentTime = xMsScale.invert(position);
-								player.pause();
+								scope.$apply(function () {
+									scope.model.current_time = scope.model.xMsScale.invert(position);
+								});
 							}
-						}).on("dragend", function () {
-							player.play();
+						})
+						.on("dragend", function() {
+							scope.$apply(function () {
+								scope.model.toggle_play(save_state);
+							});
 						});
 
 					circleElement.call(drag);
-
-					// Listen the current time of the video to update pointer position in the timeline
-					player.addEventListener('timeupdate', function () {
-						if (!isMouseDown) {
-							lineElement.attr("x1", xMsScale(player.currentTime)).attr("x2", xMsScale(player.currentTime));
-							circleElement.attr("cx", xMsScale(player.currentTime));
-						}
-					}, false);
 
 				};
 
@@ -251,13 +294,15 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						var currentLayer = d3.select(this);
 						var currentSel = currentLayer.selectAll(".annot");
 //                        var pointerPos = undefined;
+						var bodyElt = $("body")[0];
+						var coords = d3.mouse(bodyElt);
 						var hoveredElts = currentSel[0].filter(function (d) {
 							var dims = d.getBBox();
 							dims.top = $(d).offset().top;
 							dims.left = $(d).offset().left;
+							return dims.top <= coords[1] && dims.left <= coords[0] &&
+								dims.top + dims.height >= coords[1] && dims.left + dims.width >= coords[0];
 
-							return dims.top <= event.pageY && dims.left <= event.pageX &&
-								dims.top + dims.height >= event.pageY && dims.left + dims.width >= event.pageX;
 						});
 
 
@@ -267,13 +312,12 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						// to get actual time position, y axis space has thus to be explicitly accounted for
 						var gContainer = $($(currentLayer[0][0]).parent()[0]);
 						var yAxisContainer = gContainer.children(".y");
-						var pointerPos = event.pageX -
+						var pointerPos = coords[0] -
 							(gContainer.offset().left + yAxisContainer[0].getBBox().width);
-
 						var margin = pointerPos;
 
 						pointerPos = xTimeScale.invert(pointerPos);
-						pointerPos = (d3.time.format("%H:%M:%S.%L"))(pointerPos);
+						pointerPos = DateUtils.timestampFormat(pointerPos);
 
 						currentSel = tooltip.selectAll(".time")
 							.data([pointerPos]);
@@ -342,7 +386,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 							.attr("height", tooltipHeight)
 							.select("path")
 							.attr("d", lineFunction(borderGenerator(tooltipWidth + 2 * tooltipPadding, tooltipHeight)));
-						return tooltip.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px");
+						return tooltip.style("top", (coords[1] - 10) + "px").style("left", (coords[0] + 10) + "px");
 					};
 
 					// get layer actual object from ID
@@ -353,34 +397,29 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					scope.updateColorScale(addedLayerId);
 
 					// adapt time scales
-					// TODO: Check this when edition will be available.
-					var theMax = 0;
-					var curMax;
-					var theMin = 9999999999999999;
-					var curMin;
-					var maxDate = parseDate("00:00:00.000");
-					var minDate = parseDate("99:99:99.999");
 					scope.model.layers.forEach(function (l) {
-						curMax = d3.max(l.layer.map(function (d) {
+						var curMax = d3.max(l.layer.map(function (d) {
 							return d.fragment.end;
 						}));
-						curMin = d3.min(l.layer.map(function (d) {
+						var curMin = d3.min(l.layer.map(function (d) {
 							return d.fragment.start;
 						}));
 
-						theMax = d3.max([theMax, curMax]);
-						theMin = d3.min([theMin, curMin]);
+						infannot = d3.min([infannot, curMin]);
+						supannot = d3.max([supannot, curMax]);
 
 						curMax = d3.max(l.layer.map(function (d) {
-							return parseDate(secToTime(d.fragment.end));
+							return DateUtils.parseDate(d.fragment.end);
 						}));
 						curMin = d3.min(l.layer.map(function (d) {
-							return parseDate(secToTime(d.fragment.start));
+							return DateUtils.parseDate(d.fragment.start);
 						}));
 
-						maxDate = d3.max([maxDate, curMax]);
-						minDate = d3.min([minDate, curMin]);
+						infannotdate = d3.min([infannotdate, curMin]);
+						supannotdate = d3.max([supannotdate, curMax]);
+
 					});
+
 
 					// adapt brush to new scale
 					var brushExtent = [];
@@ -388,17 +427,19 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						brushExtent = brush.extent();
 					}
 
-					x2MsScale.domain([theMin, theMax]);
-					x2TimeScale.domain([minDate, maxDate]);
+					// rescale only if restricted to loaded annotations
+					if (scope.model.restrict_toggle === 2) {
+						x2MsScale.domain([infannot, supannot]);
+						x2TimeScale.domain([infannotdate, supannotdate]);
+						if (brush.empty() || scope.model.layers.length === 0) {
+							scope.model.xMsScale.domain(x2MsScale.domain());
+							xTimeScale.domain(x2TimeScale.domain());
+						}
+					}
 
 					if (!brush.empty()) {
 						brush.extent(brushExtent);
 						brush(context.select(".brush"));
-					}
-
-					if (brush.empty() || scope.model.layers.length === 0) {
-						xMsScale.domain(x2MsScale.domain());
-						xTimeScale.domain(x2TimeScale.domain());
 					}
 
 					// adapt component dimensions and y axis
@@ -483,48 +524,43 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.attr("y", 0)
 						.attr("height", laneHeight)
 						.attr("x", function (d) {
-							return xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.start);
 						})
 						.attr("width", function (d) {
-							return xMsScale(d.fragment.end) - xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
 						})
-						.attr("class", "annot cm-context-menu")
+						.attr("class", "annot")
 						.on("click", function (d) {
-							player.currentTime = d.fragment.start;
-							player.play();
+							scope.$apply(function () {
+								var save_state;
+								save_state = scope.model.play_state;
+								scope.model.toggle_play(false);
+								scope.model.current_time = d.fragment.start;
+								scope.model.toggle_play(save_state);
+							});
+						})
+						.on("dblclick", function(d) {
+							scope.$apply(function () {
+								scope.model.toggle_play(false);
+								scope.model.current_time = d.fragment.start;
+								scope.model.toggle_play(true);
+							});
+							clearSelection();
 						})
 						.on('contextmenu', function(d){
 							d3.event.preventDefault();
 							console.log("R-C");
-							scope.$apply(function() {
-								d3.select(this).attr("name", function(d) {
-									return addedLayer.mapping.getKey(d);
-								})
-								.attr("toggle", true);
-								scope.model.testval = !scope.model.testval;
-								console.log(scope.model.testval);
-							});
+//													scope.$apply(function() {
+//														d3.select(this).attr("name", function(d) {
+//															return addedLayer.mapping.getKey(d);
+//														})
+//															.attr("toggle", true);
+//														scope.model.testval = !scope.model.testval;
+//														console.log(scope.model.testval);
+//													});
 							return false;
 						});
 
-					// link with cm-context-menu
-//					element.removeAttr("cm-timeline");
-//					$compile(element)(scope);
-//					element.removeClass("cm-timeline");
-//					$compile(element)(scope);
-					// Pierrick: use right-click instead
-//                        .on("dblclick", function (d) {
-//                            // TODO
-//                            player.pause();
-//
-//                            // display a modal dialog to modify data
-//                            scope.$apply(function () {
-//                                scope.changeValues(d, addedLayer.mapping.getKey(d));
-//                            });
-//                            console.log(d);
-//
-//                            $('.modal').modal('show');
-//                        });
 
 					layerSel.exit().remove();
 
@@ -536,10 +572,10 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					// refresh all annotations in case of rescale
 					focus.selectAll(".annot")
 						.attr("x", function (d) {
-							return xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.start);
 						})
 						.attr("width", function (d) {
-							return xMsScale(d.fragment.end) - xMsScale(d.fragment.start);
+							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
 						});
 
 					// adjust font size to available space in left margin
@@ -554,8 +590,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					maxTickLength = maxTickLength * 16 / 12; // approx. points to pixels conversion
 
 					// ensure maxTickLength != 0 to avoid 0 division
-					if(maxTickLength == 0)
-					{
+					if (maxTickLength == 0) {
 						maxTickLength = 1;
 					}
 					focus.select(".y")
@@ -594,7 +629,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 							// if selected slice correspond to target rectangle, make it opaque and give it the selection color
 							// if not, make it transparent and let it have its original color
 							if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d)) {
-								return 0.4;
+								return 1.0;
 							}
 							else if (selectedSliceValue != undefined && selectedSliceValue != -1) {
 								return 0.1;
@@ -633,44 +668,108 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 				}, true);
 
-				scope.$watch('model.selected_slice', function (newValue, oldValue) {
 
-					if (newValue) {
-						updateLayerSelectedItem(newValue);
+				scope.$watch('model.selected_slice', function (newValue) {
+					updateLayerSelectedItem(newValue);
+				}, true);
+
+
+				// restrict timeline to loaded annotations if wanted
+				scope.$watch("model.restrict_toggle", function (newValue) {
+					if (newValue === 2) {
+						if (infannot !== undefined) {
+							x2MsScale.domain([infannot, supannot]);
+							x2TimeScale.domain([infannotdate, supannotdate]);
+							scope.model.infbndsec = infannot;
+							scope.model.supbndsec = supannot;
+
+							if (scope.model.current_time < scope.model.infbndsec) {
+								scope.model.current_time = scope.model.infbndsec;
+							}
+							if (scope.model.current_time > scope.model.supbndsec) {
+								scope.model.current_time = scope.model.supbndsec;
+							}
+						}
+					} else if (newValue === 0 || newValue === 1) {
+						x2MsScale.domain([0, scope.model.duration]);
+						x2TimeScale.domain([DateUtils.parseDate(0),
+							DateUtils.parseDate(scope.model.duration)]);
+						scope.model.infbndsec = 0;
+						scope.model.supbndsec = scope.model.duration;
+					}
+					if (brush.empty()) {
+						scope.model.xMsScale.domain(x2MsScale.domain());
+						xTimeScale.domain(x2TimeScale.domain());
+					}
+
+					focus.select(".x.axis").call(xAxis);
+					context.select(".x.axis").call(xAxis2);
+
+					focus.selectAll(".annot")
+						.attr("x", function (d) {
+							return scope.model.xMsScale(d.fragment.start);
+						})
+						.attr("width", function (d) {
+							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
+						});
+
+					context.selectAll(".annot")
+						.attr("x", function (d) {
+							return x2MsScale(d.fragment.start);
+						})
+						.attr("width", function (d) {
+							return x2MsScale(d.fragment.end) - x2MsScale(d.fragment.start);
+						});
+
+
+				});
+
+				scope.$watch("model.xMsScale.domain()", function (newValue) {
+					if (newValue !== undefined && scope.model.play_state !== undefined) {
+						lineElement.attr("x1", scope.model.xMsScale(scope.model.current_time)).attr("x2",
+							scope.model.xMsScale(scope.model.current_time));
+						circleElement.attr("cx", scope.model.xMsScale(scope.model.current_time));
 					}
 				}, true);
 
+				scope.$watch("model.current_time", function (newValue) {
+					if (newValue !== undefined) {
+						lineElement.attr("x1", scope.model.xMsScale(newValue)).attr("x2", scope.model.xMsScale(newValue));
+						circleElement.attr("cx", scope.model.xMsScale(newValue));
+					}
+				});
 
 				init();
 
 			}
 		}
 	}
-	])
+])
 
-	.directive('cmContextMenu', ['$dropdown', function($dropdown) {
-		return {
-			restrict: 'C',
+
+.directive('cmContextMenu', ['$dropdown', function($dropdown) {
+	return {
+		restrict: 'C',
 //			scope: {
 //				name: "=name",
 //				toggle: "=toggle"
 //			},
-			link: function(scope, element, attrs) {
-				var dropdown = $dropdown(element, {
-					content: name,
-					show: false,
-					trigger: "manual"
-				});
-				scope.$watch("model.testval", function(newValue) {
-					if(newValue) {
-						dropdown.show();
-					} else {
-						dropdown.hide();
-					}
-				});
-			}
-		};
-	}])
+		link: function(scope, element, attrs) {
+			var dropdown = $dropdown(element, {
+				content: name,
+				show: false,
+				trigger: "manual"
+			});
+			scope.$watch("model.testval", function(newValue) {
+				if(newValue) {
+					dropdown.show();
+				} else {
+					dropdown.hide();
+				}
+			});
+		}
+	};
+}])
 
 	.directive('element1', ['$compile', function($compile) {
 		return {
@@ -798,12 +897,14 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						})
 						.style("stroke", "black")
 						.on("mouseover", function (d, i) {
+							var bodyElt = $("body")[0];
+							var coords = d3.mouse(bodyElt);
 							div.transition()
 								.duration(200)
 								.style("opacity", 1);
 							div.html(scope.slices[i].element + '<br/>' + 'Duration: ' + Math.floor(scope.slices[i].spokenTime / sum * 100) + "%")
-								.style("left", (d3.event.pageX) + "px")
-								.style("top", (d3.event.pageY - 18) + "px");
+								.style("left", (coords[0]) + "px")
+								.style("top", (coords[1] - 18) + "px");
 						})
 						.on("mouseout", function (d, i) {
 							div.transition()
@@ -892,7 +993,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
 						.outerRadius(r);
 
-					var pie = d3.layout.pie()           //this will create arc data for us given a list of values
+					var pie = d3.layout.pie(scope.slices)           //this will create arc data for us given a list of values
 						.value(function (d) {
 							return d.spokenTime;
 						});    //we must tell it out to access the value of each element in our data array
@@ -903,12 +1004,14 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
 						.attr("class", "slice")
 						.on("mouseover", function (d, i) {
+							var bodyElt = $("body")[0];
+							var coords = d3.mouse(bodyElt);
 							div.transition()
 								.duration(200)
 								.style("opacity", 1);
 							div.html(scope.slices[i].element + '<br/>' + 'Duration: ' + Math.floor(scope.slices[i].spokenTime / sum * 100) + "%")
-								.style("left", (d3.event.pageX) + "px")
-								.style("top", (d3.event.pageY - 18) + "px");
+								.style("left", (coords[0]) + "px")
+								.style("top", (coords[1] - 18) + "px");
 						})
 						.on("mouseout", function (d, i) {
 							div.transition()
@@ -1208,12 +1311,14 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						})
 						.on("mouseover", function (d, i) {
 							if (!d.children) {
+								var bodyElt = $("body")[0];
+								var coords = d3.mouse(bodyElt);
 								div.transition()
 									.duration(200)
 									.style("opacity", 1);
 								div.html(scope.slices[i - 1].element + '<br/>' + 'Duration: ' + Math.floor(scope.slices[i - 1].spokenTime / sum * 100) + "%")
-									.style("left", (d3.event.pageX) + "px")
-									.style("top", (d3.event.pageY - 18) + "px");
+									.style("left", (coords[0]) + "px")
+									.style("top", (coords[1] - 18) + "px");
 							}
 						})
 						.on("mouseout", function (d, i) {
@@ -1277,24 +1382,36 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 	}])
 
 	// see index.html about login form
-	.directive("ngLoginSubmit", function(){
+	.directive("ngLoginSubmit", function () {
 		return {
 			restrict: "A",
 			scope: {
 				onSubmit: "=ngLoginSubmit",
 				message: "="
 			},
-			link: function(scope, element, attrs) {
-				$(element)[0].onsubmit = function() {
+			link: function (scope, element, attrs) {
+				$(element)[0].onsubmit = function () {
 					$("#login-login").val($("#login", element).val());
 					$("#login-password").val($("#password", element).val());
 
-					scope.onSubmit(function() {
+					scope.onSubmit(function () {
 						$("#login-form")[0].submit();
 					});
 					return false;
 				};
 			}
 		};
+	})
+
+	.directive('blurbtn', function () {
+		return {
+			restrict: 'A',
+			link: function (scope, element) {
+				$(element).click(function () {
+					$(element).blur();
+				});
+			}
+		}
 	});
+
 
