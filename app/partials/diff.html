@@ -50,22 +50,52 @@
 
     </div>
 
-    <div class="text-center container">
 
-        <video id="player"
-               preload="auto"
-               width="50%"
-               src="{{model.video}}"
-               controls
-               ng-show="model.selected_medium">
-        </video>
-        <!--<div id="time"></div>-->
+    <div class="container-fluid" ng-show="model.selected_medium">
 
-        <cm-timeline ng-show="model.selected_medium"></cm-timeline>
-        <!--<svg>-->
-            <!--<rect fill="red" width="100" height="100" ng-attr-class="class1"></rect>-->
-        <!--</svg>-->
-        <!--<element1></element1>-->
+        <div class="row top-padding">
+            <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
+            </div>
+            <div class="col-lg-7 col-md-12 col-xs-12">
+                <div id="video-container">
+                    <!-- Video -->
+                    <video id="player"
+                           cm-video-player
+                           ng-src="{{model.video}}"
+                           width="100%">
+                    </video>
+                    <!-- Video Controls -->
+                    <div id="video-controls">
+                        <div class="row">
+                            <div class="col-md-1">
+                                <button type="button" class="video-control" id="play-pause" ng-click="model.toggle_play()">
+                                    {{ model.play_label }}
+                                </button>
+                            </div>
+                            <div class="col-md-9">
+                                <input width="100%" type="range" id="seek-bar" step="1"
+                                       min="{{ model.infbndsec }}" max="{{ model.supbndsec }}" ng-model="model.current_time">
+                            </div>
+                            <div class="col-md-2">
+                                <label style="color: #ffffff;">{{ model.current_time_display }}</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-push-0 col-xs-push-0">
+                <label>Restrict playback to annotations:</label>
+                <button type="button" class="btn btn-default"
+                        ng-disabled="model.restrict_toggle === 0 || model.restrict_toggle === undefined"
+                        blurbtn ng-model="model.restrict_toggle"
+                        data-true-value="2" data-false-value="1" bs-checkbox>Toggle</button>
+            </div>
+        </div>
+
+        <div class="row top-padding">
+            <cm-timeline></cm-timeline>
+        </div>
 
     </div>
 
@@ -94,19 +124,38 @@
             </select>
         </p>
 
-        <p class="container">
+        <!--<p class="container">-->
 
-            <p class="col-md-11">
-                <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
-                <cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>
-                <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>
-            </p>
-            <p class="col-md-1">
-                <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
-                                    width="0px" height="0px"></cm-piechart-legend>
+            <!--<p class="col-md-11">-->
+                <!--<cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>-->
+                <!--<cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>-->
+                <!--<cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>-->
+            <!--</p>-->
+            <!--<p class="col-md-1">-->
+                <!--<cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"-->
+                                    <!--width="0px" height="0px"></cm-piechart-legend>-->
 
-            </p>
-        </p>
+            <!--</p>-->
+        <!--</p>-->
+
+        <table id="table-summary-view" class="container">
+            <tbody>
+
+            <tr>
+                <td>
+                    <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
+                    <cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>
+                    <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>
+                </td>
+                <td>
+                    <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
+                                        width="0px" height="0px"></cm-piechart-legend>
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
 
         <div id="Detail"></div>
 
