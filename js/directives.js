@@ -63,11 +63,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 		};
 	}])
 
-	.directive('cmTimeline', ['palette', 'DateUtils', function (palette, DateUtils) {
+	.directive('cmTimeline', ['palette', 'DateUtils', '$compile', function (palette, DateUtils, $compile) {
 		return {
-			restrict: 'E',
-			replace: true,
-			//template: '<svg></svg>', // fix related to issue in angularjs
+			restrict: 'A',
 			link: function (scope, element, attrs) {
 				// definition of timeline properties
 				var margin = {}, margin2 = {}, width, height, height2;
@@ -77,11 +75,11 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 				// hack : multiple time scales, to circumvent unsupported difference for dates in JS
 				var xTimeScale, x2MsScale, x2TimeScale, yScale;
 				var xAxis, xAxis2, yAxis;
-				var d3elmt = d3.select(element[0]).append("svg"); // d3 wrapper of the SVG element
+				//var d3elmt = d3.select(element[0]).append("svg"); // d3 wrapper of the SVG element
+				var d3elmt = d3.select(element[0]);
 				var brush, focus, context;
 				var infannot, supannot, infannotdate, supannotdate;
 				var lineElement, circleElement;
-
 
 				// use SVG to draw the tooltip content
 				// this is the tooltip graph component init - it is then updated by refreshTooltipForLayer
@@ -498,11 +496,13 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					// insert new focus layer.
 					// note that mouse events are handled at layer level, to allow greater flexibility
 					// (see comments above refreshTooltipForLayer definition)
+					// layer ids are managed by controller, and are presumably unique.
 					layerSel.enter()
 						.append("g")
 						.attr("id", function (d, i) {
-							return "layer_" + i;
+							return d._id;
 						})
+
 						.attr("class", "layer")
 						.on("mouseover", function () {
 							return tooltip.style("visibility", "visible");
@@ -530,6 +530,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
 						})
 						.attr("class", "annot")
+						.attr("id", function(d) {
+							return d._id;
+						})
 						.on("click", function (d) {
 							scope.$apply(function () {
 								var save_state;
@@ -550,14 +553,33 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.on('contextmenu', function(d){
 							d3.event.preventDefault();
 							console.log("R-C");
-//													scope.$apply(function() {
-//														d3.select(this).attr("name", function(d) {
-//															return addedLayer.mapping.getKey(d);
-//														})
-//															.attr("toggle", true);
-//														scope.model.testval = !scope.model.testval;
-//														console.log(scope.model.testval);
-//													});
+
+							var $contextMenu = $("#contextMenu");
+							var edit_layer_id = $(this).parent().attr("id");
+							var edit_annot_id = $(this).attr("id");
+
+							$contextMenu.css({
+								display: "block",
+								left: d3.event.pageX,
+								top: d3.event.pageY
+							});
+
+							if(edit_layer_id.match(/Computed.*/) !== null) {
+								$contextMenu.find("li").addClass("disabled").children().css({
+									"pointer-events": "none"
+								});
+								edit_layer_id = undefined;
+								edit_annot_id = undefined;
+							}
+
+
+							scope.$apply(function() {
+								// $apply has full window as this - use that pointer copy to preserve the context
+								scope.model.edit_layer_id = edit_layer_id;
+								scope.model.edit_annot_id = edit_annot_id;
+								scope.model.edit_data = d.data;
+							});
+
 							return false;
 						});
 
@@ -598,6 +620,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.attr("transform", function () {
 							return "scale(" + margin.left / maxTickLength + "," + margin.left / maxTickLength + ")";
 						});
+
 
 				};
 
@@ -744,73 +767,23 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 			}
 		}
 	}
-])
+	])
 
-
-.directive('cmContextMenu', ['$dropdown', function($dropdown) {
-	return {
-		restrict: 'C',
-//			scope: {
-//				name: "=name",
-//				toggle: "=toggle"
-//			},
-		link: function(scope, element, attrs) {
-			var dropdown = $dropdown(element, {
-				content: name,
-				show: false,
-				trigger: "manual"
-			});
-			scope.$watch("model.testval", function(newValue) {
-				if(newValue) {
-					dropdown.show();
-				} else {
-					dropdown.hide();
-				}
-			});
-		}
-	};
-}])
-
-	.directive('element1', ['$compile', function($compile) {
+	.directive('cmEditModal', ['LangUtils', function (LangUtils) {
+		// edit form based on properties in model.edit_data
+		// inspect properties, form with same structure and names
+		// - if edit_data is a string: edit value
+		// - if is an array: edit value_i
+		// - if is a regular object: edit string properties with appropriate labels
 		return {
-			restrict: 'E',
-			replace: true,
-			template: '<svg></svg>',
-			link: function (scope, element, attrs) {
-				var therect = d3.select(element[0])
-					.append("rect")
-					.attr("fill", "red")
-					.attr("width", 100)
-					.attr("height", 100)
-					.attr("class", "class1");
-				therect.on("click", function() {
-					console.log("rect clicked");
-					console.log("current scopeval is", scope.scopeval);
-					scope.$apply(function() {
-						if(scope.scopeval === undefined) {
-							scope.scopeval = true;
-						} else {
-							scope.scopeval = !scope.scopeval;
-						}
-					});
-				});
-//				element.removeAttr("class")
-//				$compile(element)(scope);
+			restrict: 'A',
+			link: function(scope, element, attrs) {
+
 			}
-		}
+		};
+
+
 	}])
-
-	.directive('class1', function() {
-		return {
-			restrict: 'C',
-			link: function (scope, element, attrs) {
-				scope.$watch("scopeval", function() {
-					console.log("scopeval change detected");
-				});
-			}
-		}
-	})
-
 
 
 	.directive('cmBarchart', ['palette', '$filter', function (palette, $filter) {

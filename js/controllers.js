@@ -95,8 +95,11 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.display_treemap = false;
 
 
-						$scope.model.testval = false;
-
+						$("body").on("click", function() {
+								$("#contextMenu").hide().find("li").removeClass("disabled").children().css({
+									"pointer-events": "auto"
+								});
+						});
 
             // placeholder definitions
             var defaultReferenceLayer = {
@@ -236,7 +239,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id) {
                 $scope.model.layers[0] = {
                     'label': 'Reference',
-                    '_id': layer_id + "0"
+                    '_id': layer_id + "_0"
                 };
                 $scope.model.layers[0].layer = Annotation.query({
                         corpusId: corpus_id,
@@ -244,7 +247,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         layerId: layer_id
                     },
                     function () {
-                        $scope.model.layerWatch[0] = layer_id + "0";
+                        $scope.model.layerWatch[0] = layer_id + "_0";
                         $scope.compute_diff();
                     }
                 );
@@ -256,7 +259,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.get_hypothesis_annotations = function (corpus_id, medium_id, layer_id) {
                 $scope.model.layers[1] = {
                     'label': 'Hypothesis',
-                    '_id': layer_id + "1"
+                    '_id': layer_id + "_1"
                 };
                 $scope.model.layers[1].layer = Annotation.query({
                         corpusId: corpus_id,
@@ -264,7 +267,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         layerId: layer_id
                     },
                     function () {
-                        $scope.model.layerWatch[1] = layer_id + "1";
+                        $scope.model.layerWatch[1] = layer_id + "_1";
                         $scope.compute_diff();
                     });
             };
@@ -281,7 +284,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 CMError.diff(reference_and_hypothesis).success(function (data, status) {
                     $scope.model.layers[2] = {
                         'label': 'Difference',
-                        '_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
+                        '_id': 'Computed_' + $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
                         'mapping': defaults.diffMapping,
                         'tooltipFunc': defaults.tooltip
                     };
@@ -466,6 +469,15 @@ angular.module('myApp.controllers', ['myApp.services'])
             }
 
 
+						$scope.model.edit_click = function() {
+							console.log("edit click");
+						}
+
+						$scope.model.remove_click = function() {
+							console.log("remove click");
+						}
+
+
 						$scope.$watch("model.play_state", function(newValue, oldValue) {
 							if (newValue) {
 								$scope.model.play_label = "Pause";
@@ -648,7 +660,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id) {
                 $scope.model.layers[0] = {
                     'label': 'Reference',
-                    '_id': layer_id + "0"
+                    '_id': layer_id + "_0"
                 };
                 $scope.model.layers[0].layer = Annotation.query({
                         corpusId: corpus_id,
@@ -665,7 +677,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.get_before_annotations = function (corpus_id, medium_id, layer_id) {
                 $scope.model.layers[1] = {
                     'label': 'Hypothesis 1',
-                    '_id': layer_id + "1"
+                    '_id': layer_id + "_1"
                 };
                 $scope.model.layers[1].layer = Annotation.query({
                         corpusId: corpus_id,
@@ -682,7 +694,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.get_after_annotations = function (corpus_id, medium_id, layer_id) {
                 $scope.model.layers[2] = {
                     'label': 'Hypothesis 2',
-                    '_id': layer_id + "2"
+                    '_id': layer_id + "_2"
                 };
                 $scope.model.layers[2].layer = Annotation.query({
                         corpusId: corpus_id,
