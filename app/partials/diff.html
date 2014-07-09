@@ -94,7 +94,7 @@
         </div>
 
         <div class="row top-padding">
-            <cm-timeline></cm-timeline>
+            <svg cm-timeline cm-context-menu></svg>
         </div>
 
     </div>
@@ -179,6 +179,19 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+
+
+    <div id="contextMenu" class="dropdown clearfix">
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+            <li><a tabindex="-1" href="" ng-click="model.edit_click()">
+                Edit</a>
+            </li>
+            <li><a tabindex="-1" href="" ng-click="model.remove_click()">
+                Remove</a>
+            </li>
+        </ul>
+    </div>
+
 
 
 </div>
