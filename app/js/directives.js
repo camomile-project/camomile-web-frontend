@@ -75,6 +75,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 				// hack : multiple time scales, to circumvent unsupported difference for dates in JS
 				var xTimeScale, x2MsScale, x2TimeScale, yScale;
 				var xAxis, xAxis2, yAxis;
+				// SVG template caused binding problems - use <svg> in HTML instead
 				//var d3elmt = d3.select(element[0]).append("svg"); // d3 wrapper of the SVG element
 				var d3elmt = d3.select(element[0]);
 				var brush, focus, context;
@@ -172,6 +173,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					// and for internal use (raw annotations use seconds) and display (formatted)
 					xTimeScale = d3.time.scale().domain([0, 0]).range([0, width]).clamp(true);
 					x2TimeScale = d3.time.scale().domain([0, 0]).range([0, width]).clamp(true);
+					// xMsScale at controller level so that can be watched
 					scope.model.xMsScale = d3.scale.linear().domain([0, 0]).range([0, width]).clamp(true);
 					x2MsScale = d3.scale.linear().domain([0, 0]).range([0, width]).clamp(true);
 
@@ -277,8 +279,8 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 				};
 
-				var updateLayers = function (addedLayerId) {
-					var addedLayer;
+				// now rather a "refresh" function
+				var updateLayers = function () {
 
 					// HTML5/DOM does not support multiple event trigger for overlaying SVG elements :
 					// only the "latest sibling" in the DOM tree is triggered. This is not satisfactory for
@@ -291,7 +293,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						// and find those hovered by the mouse
 						var currentLayer = d3.select(this);
 						var currentSel = currentLayer.selectAll(".annot");
-//                        var pointerPos = undefined;
 						var bodyElt = $("body")[0];
 						var coords = d3.mouse(bodyElt);
 						var hoveredElts = currentSel[0].filter(function (d) {
@@ -305,7 +306,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 
 						// get position of the pointer wrt current timescale, in pixels
-						// hack : as layer object is shifted to first annotation - use the enclosing <g>
+						// hack : as DOM layer object is shifted to first annotation - use the enclosing <g>
 						// NB that his margins (translate) define its shift wrt page
 						// to get actual time position, y axis space has thus to be explicitly accounted for
 						var gContainer = $($(currentLayer[0][0]).parent()[0]);
@@ -333,7 +334,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 						// get the associated labels, with potential repetitions
 						var newLabels = hoveredElts.map(function (d) {
-							return addedLayer.tooltipFunc(d3.select(d).data()[0]);
+							return currentLayer.data()[0].tooltipFunc(d3.select(d).data()[0]);
 						});
 
 						// add its multiplicity to each value in the array
@@ -387,12 +388,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						return tooltip.style("top", (coords[1] - 10) + "px").style("left", (coords[0] + 10) + "px");
 					};
 
-					// get layer actual object from ID
-					addedLayer = scope.model.layers.filter(function (l) {
-						return(l._id === addedLayerId);
-					})[0];
 
-					scope.updateColorScale(addedLayerId);
+					// updateColorScale now refreshed independently of a specific layer
+					scope.updateColorScale();
 
 					// adapt time scales
 					scope.model.layers.forEach(function (l) {
@@ -493,10 +491,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 							return d._id;
 						});
 
-					// insert new focus layer.
-					// note that mouse events are handled at layer level, to allow greater flexibility
-					// (see comments above refreshTooltipForLayer definition)
-					// layer ids are managed by controller, and are presumably unique.
+					// new layer/annot update sequence to allow annotation removal/modifications
 					layerSel.enter()
 						.append("g")
 						.attr("id", function (d, i) {
@@ -510,16 +505,26 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						.on("mousemove", refreshTooltipForLayer)
 						.on("mouseout", function () {
 							return tooltip.style("visibility", "hidden");
-						})
-						.selectAll(".annot")
+						});
+
+					layerSel.exit().remove();
+
+					var annotSel = layerSel.selectAll(".annot")
 						.data(function (d) {
+							// use the property "layer" from the upper level selection
 							return d.layer;
-						})
-						.enter()
+						}, function(d2, i2) {
+							// map cells in "layer" wrt their _id property
+							// manage case where no _id property
+							if(d2._id === undefined) {
+								return i2;
+							} else {
+								return d2._id;
+							}
+						});
+
+					annotSel.enter()
 						.append("rect")
-						.attr("fill", function (d) {
-							return scope.model.colScale(addedLayer.mapping.getKey(d));
-						})
 						.attr("opacity", 0.4)
 						.attr("y", 0)
 						.attr("height", laneHeight)
@@ -552,7 +557,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						})
 						.on('contextmenu', function(d){
 							d3.event.preventDefault();
-							console.log("R-C");
 
 							var $contextMenu = $("#contextMenu");
 							var edit_layer_id = $(this).parent().attr("id");
@@ -578,13 +582,22 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 								scope.model.edit_layer_id = edit_layer_id;
 								scope.model.edit_annot_id = edit_annot_id;
 								scope.model.edit_data = d.data;
+
 							});
 
 							return false;
 						});
 
+					annotSel.exit().remove();
 
-					layerSel.exit().remove();
+					// allow refresh operations
+					annotSel.attr("fill", function (d) {
+						// use parent jquery to get the correct getkey func
+						// to have refresh not to depend on specific addedLayer parameter
+						//return scope.model.colScale(addedLayer.mapping.getKey(d));
+						return scope.model.colScale(d3.select(this.parentNode).data()[0].mapping.getKey(d));
+					});
+
 
 					// update positions of new selection
 					layerSel.attr("transform", function (d, i) {
@@ -629,26 +642,21 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 						var addedLayer;
 
-						// Restore initial color and opacity
-						for (var i = 0, max = scope.model.layers.length; i < max; i++) {
-
-							addedLayer = scope.model.layers.filter(function (l) {
-								return(l._id === scope.model.layerWatch[i]);
-							})[0];
-
-							d3.select('#layer_' + i).selectAll("rect").attr("opacity", 0.4)
-								.attr("fill", function (d) {
-									return scope.model.colScale(addedLayer.mapping.getKey(d));
+//						// Restore initial color and opacity
+						scope.model.layers.forEach(function(l) {
+							// use of jQuery selector as d3 selector has limitations
+							d3.select($("#" + l._id)[0]).selectAll("rect").attr("opacity", 0.4)
+								.attr("fill", function(d) {
+									return scope.model.colScale(d3.select(this.parentNode).data()[0].mapping.getKey(d));
 								});
-						}
+						});
 
 
-						addedLayer = scope.model.layers.filter(function (l) {
-							return(l._id === scope.model.layerWatch[scope.model.selected_layer]);
-						})[0];
+						addedLayer = scope.model.layers[scope.model.selected_layer];
 
 						// in Selected layer:
-						d3.select('#layer_' + scope.model.selected_layer).selectAll("rect").attr("opacity", function (d) {
+						d3.select($("#" + addedLayer._id)[0])
+							.selectAll("rect").attr("opacity", function (d) {
 							// if selected slice correspond to target rectangle, make it opaque and give it the selection color
 							// if not, make it transparent and let it have its original color
 							if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d)) {
@@ -675,21 +683,35 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 
 				// BUG #8946 : handle multiple additions/deletions
+				// DEPRECATED : now use model.layersUpdated
 
 				scope.$watch('model.layerWatch', function (newValue, oldValue) {
-					var addedLayersId = newValue.filter(function (l) {
-						return !(oldValue.indexOf(l) > -1);
-					});
-
-					addedLayersId.forEach(function (d) {
-						updateLayers(d);
-					});
+//					var addedLayersId = newValue.filter(function (l) {
+//						return !(oldValue.indexOf(l) > -1);
+//					});
+//
+//					addedLayersId.forEach(function (d) {
+//						updateLayers(d);
+//					});
+					if(newValue !== undefined && newValue.length > 0) {
+						updateLayers();
+					}
 
 					// update min and max in scope
 					scope.setMinimalXDisplayedValue(x2MsScale.domain()[0]);
 					scope.setMaximalXDisplayedValue(x2MsScale.domain()[1]);
 
 				}, true);
+
+
+				scope.$watch('model.layersUpdated', function (newValue, oldValue) {
+					if(newValue === true) {
+						updateLayers();
+						scope.setMinimalXDisplayedValue(x2MsScale.domain()[0]);
+						scope.setMaximalXDisplayedValue(x2MsScale.domain()[1]);
+						scope.model.layersUpdated = false; // put the flag down
+					}
+				});
 
 
 				scope.$watch('model.selected_slice', function (newValue) {
@@ -747,6 +769,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 				});
 
+				// to refresh playback marker position on brush events
 				scope.$watch("model.xMsScale.domain()", function (newValue) {
 					if (newValue !== undefined && scope.model.play_state !== undefined) {
 						lineElement.attr("x1", scope.model.xMsScale(scope.model.current_time)).attr("x2",
@@ -770,14 +793,47 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 	])
 
 	.directive('cmEditModal', ['LangUtils', function (LangUtils) {
+		// LangUtils : isarray func.
+
 		// edit form based on properties in model.edit_data
 		// inspect properties, form with same structure and names
 		// - if edit_data is a string: edit value
 		// - if is an array: edit value_i
 		// - if is a regular object: edit string properties with appropriate labels
 		return {
-			restrict: 'A',
+			restrict: 'C',
 			link: function(scope, element, attrs) {
+				scope.$watch("model.edit_flag", function(newValue) {
+					// a bit tedious procedure, to allow for extensions such as array or object data
+					// (instead of mere string)
+					if(newValue === true) {
+						if(typeof scope.model.edit_data === 'string') {
+							scope.model.edit_items = [
+								{
+									id: '',
+									value: scope.model.edit_data
+								}
+							];
+						}
+
+						scope.model.edit_flag = false;
+						element.modal('show');
+					}
+				});
+
+				scope.model.edit_save = function() {
+					var layer_index = scope.model.layers.map(function(d) {
+						return d._id;
+					}).indexOf(scope.model.edit_layer_id);
+					var annot_index = scope.model.layers[layer_index].layer.map(function(d) {
+						return d._id;
+					}).indexOf(scope.model.edit_annot_id);
+
+					scope.model.layers[layer_index].layer[annot_index].data = scope.model.edit_items[0].value;
+					scope.model.layersUpdated = true;
+					scope.compute_diff();
+					element.modal('hide');
+				};
 
 			}
 		};
@@ -1270,7 +1326,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 								return scope.model.colScale("selection_color");
 							}
 							else {
-//                                console.log(slices.children[i-1].element);
 								return scope.model.colScale(slices.children[i - 1].element); //'blue';
 							}
 						})
