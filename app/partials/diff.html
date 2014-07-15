@@ -69,13 +69,15 @@
                     <div id="video-controls">
                         <div class="row">
                             <div class="col-md-1">
-                                <button type="button" class="video-control" id="play-pause" ng-click="model.toggle_play()">
+                                <button type="button" class="video-control" id="play-pause"
+                                        ng-click="model.toggle_play()">
                                     {{ model.play_label }}
                                 </button>
                             </div>
                             <div class="col-md-9">
                                 <input width="100%" type="range" id="seek-bar" step="1"
-                                       min="{{ model.infbndsec }}" max="{{ model.supbndsec }}" ng-model="model.current_time">
+                                       min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
+                                       ng-model="model.current_time">
                             </div>
                             <div class="col-md-2">
                                 <label style="color: #ffffff;">{{ model.current_time_display }}</label>
@@ -90,7 +92,8 @@
                 <button type="button" class="btn btn-default"
                         ng-disabled="model.restrict_toggle === 0 || model.restrict_toggle === undefined"
                         blurbtn ng-model="model.restrict_toggle"
-                        data-true-value="2" data-false-value="1" bs-checkbox>Toggle</button>
+                        data-true-value="2" data-false-value="1" bs-checkbox>Toggle
+                </button>
             </div>
         </div>
 
@@ -136,8 +139,9 @@
                     <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>
                 </td>
                 <td>
-                    <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
-                                        width="0px" height="0px"></cm-piechart-legend>
+                    <cm-piechart-legend
+                            ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
+                            width="0px" height="0px"></cm-piechart-legend>
                 </td>
             </tr>
 
@@ -167,24 +171,30 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" ng-click="model.edit_save()">Save changes</button>
                 </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
 
 
     <!--Context menu hidden by default. Triggered on Right click to .annot rect elements (see timeline directive)-->
     <div id="contextMenu" class="dropdown clearfix">
-        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu" style="display:block;position:static;margin-bottom:5px;">
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
+            style="display:block;position:static;margin-bottom:5px;">
             <li><a tabindex="-1" href="" ng-click="model.edit_click()">
-                Edit</a>
+                <image src="/img/Edit_document.ico" align="left" width="20" height="20" style="margin-left:-15px;margin-right:5px;"></image>
+                Edit
+            </a>
             </li>
             <li><a tabindex="-1" href="" ng-click="model.remove_click()">
-                Remove</a>
+                <image src="/img/Delete.ico" align="left" width="20" height="20" style="margin-left:-17px;margin-right:7px;"></image>
+                Remove
+            </a>
             </li>
         </ul>
     </div>
-
-
 
 </div>
 
