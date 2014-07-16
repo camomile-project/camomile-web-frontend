@@ -30,7 +30,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     username: username,
                     password: password
                 })
-                    .success(function (data, status) {
+                    .success(function () {
                         console.log('logged in as ' + username);
                         Session.isLogged = true;
                         Session.username = username;
@@ -39,10 +39,10 @@ angular.module('myApp.controllers', ['myApp.services'])
                         submit(); // hack to allow autofill and autocomplete support
 
                     })
-                    .error(function (data, status) {
+                    .error(function () {
                         Session.isLogged = false;
                         Session.username = undefined;
-                        $cookieStore.remove("current.user", "");
+                        $cookieStore.remove("current.user");
                         $scope.model.message = "Connection error";
                     });
             };
@@ -50,9 +50,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.logout = function () {
                 Session.logout()
-                    .success(function (data, status) {
+                    .success(function () {
                         Session.isLogged = false;
-                        $cookieStore.remove("current.user", "");
+                        $cookieStore.remove("current.user");
                         Session.username = undefined;
                         $scope.model.message = undefined;
                     });
@@ -80,10 +80,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
         }
     ])
-
-    .controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-        'CMError', 'defaults', 'palette', 'DataRoot',
-        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot) {
+    .controller('BaseCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+        'CMError', 'defaults', 'palette',
+        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette) {
 
             delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -95,6 +94,31 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.display_barchart = false;
             $scope.model.display_treemap = false;
             $scope.model.update_SummaryView = 0;
+
+            // reflects model.layer for watch by cm-timeline.
+            // initialized empty so that the initial watch triggers with consistent values for cm-timeline,
+            // as soon as the corpora are loaded - ie sufficiently "late" in the angular init loop.
+            $scope.model.layerWatch = [];
+
+            $scope.model.colScale = d3.scale.ordinal();// custom color scale
+
+            $scope.model.selected_slice = -1;
+
+            $scope.model.play_label = "Play";
+
+            $scope.model.layers = [];
+
+            // init color index
+            var curColInd = 0;
+
+            // IDs selected in the interface
+            $scope.model.selected_corpus = undefined;
+            $scope.model.selected_medium = undefined;
+            $scope.model.selected_reference = undefined;
+            $scope.model.selected_layer = undefined;
+
+            // URL for video
+            $scope.model.video = "";
 
             function f_filterResults(n_win, n_docel, n_body) {
                 var n_result = n_win ? n_win : 0;
@@ -110,7 +134,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     document.documentElement ? document.documentElement.clientHeight : 0,
                     document.body ? document.body.clientHeight : 0
                 );
-            }
+            };
 
             // get the client width
             $scope.f_clientWidth = function () {
@@ -119,7 +143,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     document.documentElement ? document.documentElement.clientWidth : 0,
                     document.body ? document.body.clientWidth : 0
                 );
-            }
+            };
 
             // hide contextmenu if clicked anywhere but on relevant targets
             $("body").on("click", function () {
@@ -127,46 +151,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                     "pointer-events": "auto"
                 });
             });
-
-            // placeholder definitions
-            var defaultReferenceLayer = {
-                'label': 'Reference',
-                '_id': 'Reference_init',
-                'layer': []
-            };
-
-            var defaultHypothesisLayer = {
-                'label': 'Hypothesis',
-                '_id': 'Hypothesis_init',
-                'layer': []
-            };
-
-            var defaultDiffLayer = {
-                'label': 'Difference',
-                '_id': 'Difference_init',
-                'layer': []
-            };
-
-            // init color index
-            var curColInd = 0;
-
-            // model.layers is mapped in cm-timeline using the defaults
-            $scope.model.layers = [
-                defaultReferenceLayer,
-                defaultHypothesisLayer,
-                defaultDiffLayer
-            ];
-
-            // reflects model.layer for watch by cm-timeline.
-            // initialized empty so that the initial watch triggers with consistent values for cm-timeline,
-            // as soon as the corpora are loaded - ie sufficiently "late" in the angular init loop.
-            $scope.model.layerWatch = [];
-
-            $scope.model.colScale = d3.scale.ordinal();// custom color scale
-
-            $scope.model.selected_slice = -1;
-
-            $scope.model.play_label = "Play";
 
             $scope.updateColorScale = function () {
                 // refresh color scale completely:
@@ -253,7 +237,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 });
 
                 oldVals.forEach(function (d) {
-                    var mapping = $scope.model.colScale(d);
+//                    var mapping = $scope.model.colScale(d);
                     var index = $scope.model.colScale.domain().indexOf(d);
                     $scope.model.colScale.domain().splice(index, 1);
                     $scope.model.colScale.domain($scope.model.colScale.domain());
@@ -263,16 +247,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
             };
-
-            // IDs selected in the interface
-            $scope.model.selected_corpus = undefined;
-            $scope.model.selected_medium = undefined;
-            $scope.model.selected_reference = undefined;
-            $scope.model.selected_hypothesis = undefined;
-            $scope.model.selected_layer = undefined;
-
-            // URL for video
-            $scope.model.video = "";
 
             // get list of corpora
             $scope.get_corpora = function () {
@@ -302,69 +276,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                 });
             };
 
-            // get list of reference annotations from a given layer,
-            // replace current reference layer,
-            // and update difference with hypothesis when it's done
-            $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id) {
-                $scope.model.layers[0] = {
-                    'label': 'Reference',
-                    '_id': layer_id + "_0"
-                };
-                $scope.model.layers[0].layer = Annotation.query({
-                        corpusId: corpus_id,
-                        mediaId: medium_id,
-                        layerId: layer_id
-                    },
-                    function () {
-                        //$scope.model.layerWatch[0] = layer_id + "_0";
-                        $scope.model.layersUpdated = true;
-                        $scope.compute_diff();
-                    }
-                );
-            };
-
-            // get list of hypothesis annotations from a given layer,
-            // replace current hypothesis layer,
-            // and update difference with reference when it's done
-            $scope.get_hypothesis_annotations = function (corpus_id, medium_id, layer_id) {
-                $scope.model.layers[1] = {
-                    'label': 'Hypothesis',
-                    '_id': layer_id + "_1"
-                };
-                $scope.model.layers[1].layer = Annotation.query({
-                        corpusId: corpus_id,
-                        mediaId: medium_id,
-                        layerId: layer_id
-                    },
-                    function () {
-//						$scope.model.layerWatch[1] = layer_id + "_1";
-                        $scope.model.layersUpdated = true;
-                        $scope.compute_diff();
-                    });
-            };
-
-            // recompute difference between reference and hypothesis,
-            // and replace diff layer.
-            $scope.compute_diff = function () {
-
-                var reference_and_hypothesis = {
-                    'hypothesis': $scope.model.layers[1].layer,
-                    'reference': $scope.model.layers[0].layer
-                };
-
-                CMError.diff(reference_and_hypothesis).success(function (data, status) {
-                    $scope.model.layers[2] = {
-                        'label': 'Difference',
-                        '_id': 'Computed_' + $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
-                        'mapping': defaults.diffMapping,
-                        'tooltipFunc': defaults.tooltip
-                    };
-
-                    $scope.model.layers[2].layer = data;
-//					$scope.model.layerWatch[2] = $scope.model.layers[2]._id;
-                    $scope.model.layersUpdated = true;
-                });
-            };
 
             // Action on combobox "display piechart"
             $scope.displayPiechart = function () {
@@ -416,7 +327,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if ($scope.model.selected_layer !== undefined) {
                     var data = $scope.model.layers[$scope.model.selected_layer];
 
-                    data.layer.forEach(function (d, i) {
+                    data.layer.forEach(function (d) {
                         var addElement = true;
                         if ((d.fragment.end <= $scope.model.maximalXDisplayedValue && d.fragment.end >= $scope.model.minimalXDisplayedValue)
                             || (d.fragment.start <= $scope.model.maximalXDisplayedValue && d.fragment.start >= $scope.model.minimalXDisplayedValue)
@@ -445,11 +356,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.setMinimalXDisplayedValue = function (value) {
                 $scope.model.minimalXDisplayedValue = value;
-            }
+            };
 
             $scope.setMaximalXDisplayedValue = function (value) {
                 $scope.model.maximalXDisplayedValue = value;
-            }
+            };
 
             // remove old summary
             $scope.resetSummaryView = function (resetSelection) {
@@ -466,11 +377,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                 }
 
                 // remove barchart
-                var vis = d3.select("#barchart").attr("width", 410).attr("height", 410);
+                vis = d3.select("#barchart").attr("width", 410).attr("height", 410);
 
 
                 // Remove old existing piechart
-                var oldGraph = vis.selectAll("g");
+                oldGraph = vis.selectAll("g");
 
 
                 if (oldGraph) {
@@ -478,11 +389,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                 }
 
                 // remove treemap
-                var vis = d3.select("#treemap").attr("width", 410).attr("height", 410);
+                vis = d3.select("#treemap").attr("width", 410).attr("height", 410);
 
 
                 // Remove old existing piechart
-                var oldGraph = vis.selectAll("g");
+                oldGraph = vis.selectAll("g");
 
 
                 if (oldGraph) {
@@ -521,7 +432,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                 }
             };
 
-
             $scope.model.edit_click = function () {
                 $scope.model.edit_flag = true;
             };
@@ -541,32 +451,21 @@ angular.module('myApp.controllers', ['myApp.services'])
                 // Get the layer that have to be removed from the brush
                 var layerToRemove = $scope.model.layers[layer_index].layer[annot_index];
                 // Get its corresponding rectangle in the brush
-                layerToRemove = document.getElementById('brushed' + layerToRemove._id)
+                layerToRemove = document.getElementById('brushed' + layerToRemove._id);
                 // Removes it from the brush
                 layerToRemove.parentNode.removeChild(layerToRemove);
 
                 $scope.model.layers[layer_index].layer.splice(annot_index, 1);
                 $scope.model.layersUpdated = true;
-                $scope.compute_diff();
+                $scope.computeLastLayer();
 
-                if($scope.model.update_SummaryView >3)
-                {
+                if ($scope.model.update_SummaryView > 3) {
                     $scope.model.update_SummaryView = 0;
                 }
-                else
-                {
+                else {
                     $scope.model.update_SummaryView++;
                 }
             };
-
-
-            $scope.$watch("model.play_state", function (newValue, oldValue) {
-                if (newValue) {
-                    $scope.model.play_label = "Pause";
-                } else {
-                    $scope.model.play_label = "Play";
-                }
-            });
 
             var save_state;
 
@@ -576,13 +475,235 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.toggle_play(false);
                 });
 
-            });
-
-            $('#seek-bar').on('mouseup', function () {
+            }).on('mouseup', function () {
                 $scope.$apply(function () {
                     $scope.model.toggle_play(save_state);
                 });
             });
+
+            $scope.computeLastLayer = function()
+            {
+                // TODO replace this in children controller;
+            }
+
+        }])
+    .controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+        'CMError', 'defaults', 'palette', 'DataRoot', '$controller',
+        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller) {
+
+            $controller('BaseCtrl',
+                {
+                    $sce: $sce,
+                    $scope: $scope,
+                    $http: $http,
+                    Corpus: Corpus,
+                    Media: Media,
+                    Layer: Layer,
+                    Annotation: Annotation,
+                    CMError: CMError,
+                    defaults: defaults,
+                    palette: palette
+                });
+
+
+            // placeholder definitions
+            var defaultReferenceLayer = {
+                'label': 'Reference',
+                '_id': 'Reference_init',
+                'layer': []
+            };
+
+            var defaultHypothesisLayer = {
+                'label': 'Hypothesis',
+                '_id': 'Hypothesis_init',
+                'layer': []
+            };
+
+            var defaultDiffLayer = {
+                'label': 'Difference',
+                '_id': 'Difference_init',
+                'layer': []
+            };
+
+            // model.layers is mapped in cm-timeline using the defaults
+            $scope.model.layers = [
+                defaultReferenceLayer,
+                defaultHypothesisLayer,
+                defaultDiffLayer
+            ];
+
+//            $scope.updateColorScale = function () {
+//                // refresh color scale completely:
+//                // - add new modalities
+//                // - remove unused
+//
+//
+//                // newVals: modalities not already in the color mapping
+//                // oldVals: modalities historically in the mapping, from which we exclude those still needed
+//                var vals;
+//                var newVals = [];
+//                var oldVals = $scope.model.colScale.domain();
+//                var newMaps = {
+//                    keys: [],
+//                    maps: []
+//                };
+//
+//
+//                $scope.model.layers.forEach(function (layer) {
+//                    if (layer.mapping === undefined) {
+//                        layer.mapping = {
+//                            getKey: function (d) {
+//                                return d.data;
+//                            }
+//                        };
+//                    }
+//
+//                    if (layer.tooltipFunc === undefined) {
+//                        layer.tooltipFunc = function (d) {
+//                            return d.data;
+//                        };
+//                    }
+//
+//
+//                    if (layer.mapping.colors === undefined) {
+//                        vals = layer.layer.map(layer.mapping.getKey);
+//                        vals = $.grep(vals, function (v, k) {
+//                            return $.inArray(v, vals) === k;
+//                        }); // jQuery hack to get Array of unique values
+//                        // and then all that are not already in the scale domain
+//                        newVals = newVals.concat(vals.filter(function (l) {
+//                            return (!($scope.model.colScale.domain().indexOf(l) > -1)
+//                                && !(newVals.indexOf(l) > -1));
+//                        }));
+//
+//                        oldVals = oldVals.filter(function (l) {
+//                            return !(vals.indexOf(l) > -1);
+//                        });
+//                    } else {
+//                        vals = Object.keys(layer.mapping.colors).filter(function (l) {
+//                            return (!($scope.model.colScale.domain().indexOf(l) > -1)
+//                                && !(newMaps.keys.indexOf(l) > -1));
+//                        });
+//                        // check that explicit mapping is not already defined in the color scale
+//                        newMaps.keys = newMaps.keys.concat(vals);
+//                        newMaps.maps = newMaps.maps.concat(vals.map(function (d) {
+//                            return layer.mapping.colors[d];
+//                        }));
+//
+//                        oldVals = oldVals.filter(function (l) {
+//                            return !(Object.keys(layer.mapping.colors).indexOf(l) > -1);
+//                        });
+//
+//                    }
+//
+//                });
+//
+//                // add new mappings, and remove stale ones
+//
+//                newVals.forEach(function (d) {
+//                    $scope.model.colScale.domain().push(d);
+//                    $scope.model.colScale.domain($scope.model.colScale.domain()); // hack to register changes
+//                    $scope.model.colScale.range().push(palette[curColInd]);
+//                    $scope.model.colScale.range($scope.model.colScale.range());
+//                    curColInd = (curColInd + 1) % palette.length;
+//                });
+//
+//
+//                newMaps.keys.forEach(function (k, i) {
+//                    $scope.model.colScale.domain().push(k);
+//                    $scope.model.colScale.domain($scope.model.colScale.domain());
+//                    $scope.model.colScale.range().push(newMaps.maps[i]);
+//                    $scope.model.colScale.range($scope.model.colScale.range());
+//                });
+//
+//                oldVals.forEach(function (d) {
+//                    var mapping = $scope.model.colScale(d);
+//                    var index = $scope.model.colScale.domain().indexOf(d);
+//                    $scope.model.colScale.domain().splice(index, 1);
+//                    $scope.model.colScale.domain($scope.model.colScale.domain());
+//                    $scope.model.colScale.range().splice(index, 1);
+//                    $scope.model.colScale.range($scope.model.colScale.range());
+//                });
+//
+//
+//            };
+
+            // get list of reference annotations from a given layer,
+            // replace current reference layer,
+            // and update difference with hypothesis when it's done
+            $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id) {
+                $scope.model.layers[0] = {
+                    'label': 'Reference',
+                    '_id': layer_id + "_0"
+                };
+                $scope.model.layers[0].layer = Annotation.query({
+                        corpusId: corpus_id,
+                        mediaId: medium_id,
+                        layerId: layer_id
+                    },
+                    function () {
+                        //$scope.model.layerWatch[0] = layer_id + "_0";
+                        $scope.model.layersUpdated = true;
+                        $scope.compute_diff();
+                    }
+                );
+            };
+
+            // get list of hypothesis annotations from a given layer,
+            // replace current hypothesis layer,
+            // and update difference with reference when it's done
+            $scope.get_hypothesis_annotations = function (corpus_id, medium_id, layer_id) {
+                $scope.model.layers[1] = {
+                    'label': 'Hypothesis',
+                    '_id': layer_id + "_1"
+                };
+                $scope.model.layers[1].layer = Annotation.query({
+                        corpusId: corpus_id,
+                        mediaId: medium_id,
+                        layerId: layer_id
+                    },
+                    function () {
+//						$scope.model.layerWatch[1] = layer_id + "_1";
+                        $scope.model.layersUpdated = true;
+                        $scope.compute_diff();
+                    });
+            };
+
+            // recompute difference between reference and hypothesis,
+            // and replace diff layer.
+            $scope.compute_diff = function () {
+
+                var reference_and_hypothesis = {
+                    'hypothesis': $scope.model.layers[1].layer,
+                    'reference': $scope.model.layers[0].layer
+                };
+
+                CMError.diff(reference_and_hypothesis).success(function (data) {
+                    $scope.model.layers[2] = {
+                        'label': 'Difference',
+                        '_id': 'Computed_' + $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
+                        'mapping': defaults.diffMapping,
+                        'tooltipFunc': defaults.tooltip
+                    };
+
+                    $scope.model.layers[2].layer = data;
+//					$scope.model.layerWatch[2] = $scope.model.layers[2]._id;
+                    $scope.model.layersUpdated = true;
+                });
+            };
+
+            $scope.$watch("model.play_state", function (newValue) {
+                if (newValue) {
+                    $scope.model.play_label = "Pause";
+                } else {
+                    $scope.model.play_label = "Play";
+                }
+            });
+
+            $scope.computeLastLayer = function()
+            {
+                $scope.compute_diff();
+            };
 
 
             // the selected corpus has changed
@@ -647,22 +768,28 @@ angular.module('myApp.controllers', ['myApp.services'])
                 }
             });
 
-        }
-    ])
+        }])
 
     .controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-        'defaults', 'palette', 'DataRoot',
-        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot) {
+        'defaults', 'palette', 'DataRoot', '$controller',
+        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller) {
 
             delete $http.defaults.headers.common['X-Requested-With'];
 
-            $scope.model = {};
-            $scope.model.selectedSummary = "nothing";
-            $scope.model.display_piechart = false;
-            $scope.model.display_barchart = false;
-            $scope.model.display_treemap = false;
+            $controller('BaseCtrl',
+                {
+                    $sce: $sce,
+                    $scope: $scope,
+                    $http: $http,
+                    Corpus: Corpus,
+                    Media: Media,
+                    Layer: Layer,
+                    Annotation: Annotation,
+                    CMError: CMError,
+                    defaults: defaults,
+                    palette: palette
+                });
 
-            var curColInd = 0;
 
             // placeholder definitions
             var defaultReferenceLayer = {
@@ -696,48 +823,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                 defaultHypothesis2Layer,
                 defaultRegressionLayer
             ];
-
-            // reflects model.layer for watch by cm-timeline.
-            // initialized empty so that the initial watch triggers with consistent values for cm-timeline,
-            // as soon as the corpora are loaded - ie sufficiently "late" in the angular init loop.
-            $scope.model.layerWatch = [];
-
-            // Ids selected in the interface
-            $scope.model.selected_corpus = undefined;
-            $scope.model.selected_medium = undefined;
-            $scope.model.selected_reference = undefined;
-            $scope.model.selected_before = undefined;
-            $scope.model.selected_after = undefined;
-            $scope.model.selected_layer = undefined;
-
-            // video URL
-            $scope.model.video = "";
-
-
-            $scope.get_corpora = function () {
-                $scope.model.available_corpora = Corpus.query(function () {
-                    // initializing layerWatch after corpora are loaded
-                    // Adds empty layers as border effect
-                    $scope.model.layerWatch = [$scope.model.layers[0]._id,
-                        $scope.model.layers[1]._id,
-                        $scope.model.layers[2]._id,
-                        $scope.model.layers[3]._id
-                    ];
-                });
-            };
-
-            $scope.get_media = function (corpus_id) {
-                $scope.model.available_media = Media.query({
-                    corpusId: corpus_id
-                });
-            };
-
-            $scope.get_layers = function (corpus_id, medium_id) {
-                $scope.model.available_layers = Layer.query({
-                    corpusId: corpus_id,
-                    mediaId: medium_id
-                });
-            };
 
             $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id) {
                 $scope.model.layers[0] = {
@@ -798,7 +883,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     'after': $scope.model.layers[2].layer
                 };
 
-                CMError.regression(reference_and_hypotheses).success(function (data, status) {
+                CMError.regression(reference_and_hypotheses).success(function (data) {
                     $scope.model.regression = data;
                     $scope.model.layers[3] = {
                         'label': 'Regression',
@@ -810,225 +895,67 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                     $scope.model.layers[3].layer = data;
                     $scope.model.layerWatch[3] = $scope.model.layers[3]._id;
+                    $scope.model.layersUpdated = true;
                 });
             };
 
-            // Action on combobox "display piechart"
-            $scope.displayPiechart = function () {
-                $scope.model.display_piechart = true;
-            };
+//            $scope.updateColorScale = function (addedLayerId) {
+//                // get layer actual object from ID
+//                var addedLayer = $scope.model.layers.filter(function (l) {
+//                    return(l._id === addedLayerId);
+//                })[0];
+//
+//                // set up defaults for mapping and tooltipFunc
+//                if (addedLayer.mapping === undefined) {
+//                    addedLayer.mapping = {
+//                        getKey: function (d) {
+//                            return d.data;
+//                        }
+//                    };
+//                }
+//
+//                if (addedLayer.tooltipFunc === undefined) {
+//                    addedLayer.tooltipFunc = function (d) {
+//                        return d.data;
+//                    };
+//                }
+//
+//                if (addedLayer.mapping.colors === undefined) {
+//                    // increment the color mapping using the default palette,
+//                    // according to the observed values
+//                    var vals = addedLayer.layer.map(addedLayer.mapping.getKey);
+//                    vals = $.grep(vals, function (v, k) {
+//                        return $.inArray(v, vals) === k;
+//                    }); // jQuery hack to get Array of unique values
+//                    // and then all that are not already in the scale domain
+//                    vals = vals.filter(function (l) {
+//                        return !($scope.model.colScale.domain().indexOf(l) > -1);
+//                    });
+//                    vals.forEach(function (d) {
+//                        $scope.model.colScale.domain().push(d);
+//                        $scope.model.colScale.domain($scope.model.colScale.domain()); // hack to register changes
+//                        $scope.model.colScale.range().push(palette[curColInd]);
+//                        $scope.model.colScale.range($scope.model.colScale.range());
+//                        curColInd = (curColInd + 1) % palette.length;
+//                    });
+//                } else {
+//                    // check that explicit mapping is not already defined in the color scale
+//                    var newKeys = Object.keys(addedLayer.mapping.colors).filter(function (l) {
+//                        return !($scope.model.colScale.domain().indexOf(l) > -1);
+//                    });
+//                    newKeys.forEach(function (k) {
+//                        $scope.model.colScale.domain().push(k);
+//                        $scope.model.colScale.domain($scope.model.colScale.domain());
+//                        $scope.model.colScale.range().push(addedLayer.mapping.colors[k]);
+//                        $scope.model.colScale.range($scope.model.colScale.range());
+//                    });
+//                }
+//
+//            };
 
-            // Action on button "display barchart"
-            $scope.displayBarchart = function () {
-                $scope.model.display_barchart = true;
-            };
-
-            // Action on button "display treemap"
-            $scope.displayTreemap = function () {
-                $scope.model.display_treemap = true;
-            };
-
-            // Action on button "display nothing"
-            $scope.displayNothing = function () {
-                $scope.model.display_piechart = false;
-                $scope.model.display_barchart = false;
-                $scope.model.display_treemap = false;
-            };
-
-            $scope.displayRepresentation = function () {
-                $scope.displayNothing();
-                if ($scope.model.selectedSummary === "piechart") {
-                    $scope.displayPiechart();
-                }
-                else if ($scope.model.selectedSummary === "barchart") {
-                    $scope.displayBarchart();
-                }
-                else if ($scope.model.selectedSummary === "treemap") {
-                    $scope.displayTreemap();
-                }
-            };
-
-            $scope.clickOnAPiechartSlice = function (sliceId) {
-                if ($scope.model.selected_slice === sliceId) {
-                    $scope.model.selected_slice = -1;
-                }
-                else {
-
-                    $scope.model.selected_slice = sliceId;
-                }
-            };
-
-            // Method used to compute slices of the piechart.
-            $scope.computeSlices = function () {
-                $scope.slices = [];
-                if ($scope.model.selected_layer != undefined) {
-                    var data = $scope.model.layers[$scope.model.selected_layer].layer;
-
-                    data.forEach(function (d, i) {
-                        var addElement = true;
-
-                        if ((d.fragment.end <= $scope.model.maximalXDisplayedValue && d.fragment.end >= $scope.model.minimalXDisplayedValue)
-                            || (d.fragment.start <= $scope.model.maximalXDisplayedValue && d.fragment.start >= $scope.model.minimalXDisplayedValue)
-                            || (($scope.model.maximalXDisplayedValue <= d.fragment.end && $scope.model.maximalXDisplayedValue >= d.fragment.start)
-                            || ($scope.model.minimalXDisplayedValue <= d.fragment.end && $scope.model.minimalXDisplayedValue >= d.fragment.start))) {
-                            var addedLayer = $scope.model.layers.filter(function (l) {
-                                return(l._id === $scope.model.layerWatch[$scope.model.selected_layer]);
-                            })[0];
-
-                            for (var i = 0, max = $scope.slices.length; i < max; i++) {
-                                if ($scope.slices[i].element == addedLayer.mapping.getKey(d)) {
-                                    addElement = false;
-                                    $scope.slices[i].spokenTime += (d.fragment.end - d.fragment.start);
-                                }
-                            }
-
-                            if (addElement) {
-                                $scope.slices.push({"element": addedLayer.mapping.getKey(d), "spokenTime": (d.fragment.end - d.fragment.start)});
-                            }
-                        }
-                    });
-                }
-
-                // Sort them (descending) in order to keep indexes correct
-                $scope.slices.sort(function (a, b) {
-                    return (b.spokenTime - a.spokenTime);
-                });
-            };
-
-            $scope.setMinimalXDisplayedValue = function (value) {
-                $scope.model.minimalXDisplayedValue = value;
-            }
-
-            $scope.setMaximalXDisplayedValue = function (value) {
-                $scope.model.maximalXDisplayedValue = value;
-            }
-
-            $scope.model.colScale = d3.scale.ordinal();// custom color scale
-
-            $scope.updateColorScale = function (addedLayerId) {
-                // get layer actual object from ID
-                var addedLayer = $scope.model.layers.filter(function (l) {
-                    return(l._id === addedLayerId);
-                })[0];
-
-                // set up defaults for mapping and tooltipFunc
-                if (addedLayer.mapping === undefined) {
-                    addedLayer.mapping = {
-                        getKey: function (d) {
-                            return d.data;
-                        }
-                    };
-                }
-
-                if (addedLayer.tooltipFunc === undefined) {
-                    addedLayer.tooltipFunc = function (d) {
-                        return d.data;
-                    };
-                }
-
-                if (addedLayer.mapping.colors === undefined) {
-                    // increment the color mapping using the default palette,
-                    // according to the observed values
-                    var vals = addedLayer.layer.map(addedLayer.mapping.getKey);
-                    vals = $.grep(vals, function (v, k) {
-                        return $.inArray(v, vals) === k;
-                    }); // jQuery hack to get Array of unique values
-                    // and then all that are not already in the scale domain
-                    vals = vals.filter(function (l) {
-                        return !($scope.model.colScale.domain().indexOf(l) > -1);
-                    });
-                    vals.forEach(function (d) {
-                        $scope.model.colScale.domain().push(d);
-                        $scope.model.colScale.domain($scope.model.colScale.domain()); // hack to register changes
-                        $scope.model.colScale.range().push(palette[curColInd]);
-                        $scope.model.colScale.range($scope.model.colScale.range());
-                        curColInd = (curColInd + 1) % palette.length;
-                    });
-                } else {
-                    // check that explicit mapping is not already defined in the color scale
-                    var newKeys = Object.keys(addedLayer.mapping.colors).filter(function (l) {
-                        return !($scope.model.colScale.domain().indexOf(l) > -1);
-                    });
-                    newKeys.forEach(function (k) {
-                        $scope.model.colScale.domain().push(k);
-                        $scope.model.colScale.domain($scope.model.colScale.domain());
-                        $scope.model.colScale.range().push(addedLayer.mapping.colors[k]);
-                        $scope.model.colScale.range($scope.model.colScale.range());
-                    });
-                }
-
-            };
-
-            // remove old Piechart
-            // remove old summary
-            // remove old summary
-            $scope.resetSummaryView = function (resetSelection) {
-                // Get the correct svg tag to append the chart
-                var vis = d3.select("#piechart").attr("width", 410).attr("height", 410);
-
-
-                // Remove old existing piechart
-                var oldGraph = vis.selectAll("g");
-
-
-                if (oldGraph) {
-                    oldGraph.remove();
-                }
-
-                // remove barchart
-                var vis = d3.select("#barchart").attr("width", 410).attr("height", 410);
-
-
-                // Remove old existing piechart
-                var oldGraph = vis.selectAll("g");
-
-
-                if (oldGraph) {
-                    oldGraph.remove();
-                }
-
-                // remove treemap
-                var vis = d3.select("#treemap").attr("width", 410).attr("height", 410);
-
-
-                // Remove old existing piechart
-                var oldGraph = vis.selectAll("g");
-
-
-                if (oldGraph) {
-                    oldGraph.remove();
-                }
-
-
-                // Remove old existing tooltips
-                var detailedView = d3.select("#detailedView").attr("width", 0).attr("height", 0);
-                var oldTooltip = detailedView.selectAll("div");
-                if (oldTooltip) {
-                    oldTooltip.remove();
-                }
-
-
-                var svgContainer = d3.select("#legend");
-
-                // Vire les anciens graphs
-                oldGraph = svgContainer.selectAll("rect");
-                if (oldGraph) {
-                    oldGraph.remove();
-                }
-
-                oldGraph = svgContainer.selectAll("text");
-                if (oldGraph) {
-                    oldGraph.remove();
-                }
-
-                if (resetSelection) {
-                    $scope.model.selected_slice = undefined;
-                    $scope.model.selected_layer = undefined;
-                    $scope.model.display_piechart = false;
-                    $scope.model.selectedSummary = "nothing";
-                    $scope.model.display_barchart = false;
-                    $scope.model.display_treemap = false;
-                }
+            $scope.computeLastLayer = function()
+            {
+                $scope.compute_regression();
             };
 
             $scope.$watch('model.selected_corpus', function (newValue, oldValue, scope) {
@@ -1036,7 +963,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     scope.get_media(scope.model.selected_corpus);
                     // blank the medium selection
                     scope.model.selected_medium = undefined;
-                    $scope.resetSummaryView(true, true, true);
+                    $scope.resetSummaryView(true);
                 }
             });
 
@@ -1048,7 +975,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if (newValue) {
                     scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
                     scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
-                    $scope.resetSummaryView(true, true, true);
+                    $scope.resetSummaryView(true);
                 }
             });
 
@@ -1062,7 +989,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_reference);
-                    $scope.resetSummaryView(true, true, true);
+                    $scope.resetSummaryView(true);
                 }
             });
 
@@ -1076,7 +1003,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_before);
-                    $scope.resetSummaryView(true, true, true);
+                    $scope.resetSummaryView(true);
                 }
             });
 
@@ -1090,9 +1017,19 @@ angular.module('myApp.controllers', ['myApp.services'])
                         scope.model.selected_corpus,
                         scope.model.selected_medium,
                         scope.model.selected_after);
-                    $scope.resetSummaryView(true, true, true);
+                    $scope.resetSummaryView(true);
                 }
             });
+
+            $scope.$watch('model.selected_reference === undefined && model.selected_hypothesis === undefined',
+                function (newValue, oldValue) {
+                    // to avoid triggering at init (only case where new and old are both true)
+                    if (!newValue) {
+                        $scope.model.restrict_toggle = 1;
+                    } else if (!oldValue) {
+                        $scope.model.restrict_toggle = 0;
+                    }
+                });
         }
     ])
 
@@ -1245,7 +1182,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     'reference': $scope.model.layers[0].layer
                 };
 
-                CMError.diff(reference_and_hypothesis).success(function (data, status) {
+                CMError.diff(reference_and_hypothesis).success(function (data) {
                     $scope.model.layers[2] = {
                         'label': 'Difference',
                         '_id': $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
@@ -1316,11 +1253,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.setMinimalXDisplayedValue = function (value) {
                 $scope.model.minimalXDisplayedValue = value;
-            }
+            };
 
             $scope.setMaximalXDisplayedValue = function (value) {
                 $scope.model.maximalXDisplayedValue = value;
-            }
+            };
 
             $scope.$watch('model.selected_corpus', function (newValue, oldValue, scope) {
                 if (newValue) {
