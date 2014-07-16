@@ -5,7 +5,7 @@
 
 angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
     directive('appVersion', ['version', function (version) {
-        return function (scope, elm, attrs) {
+        return function (scope, elm) {
             elm.text(version);
         };
     }])
@@ -13,7 +13,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
     .directive('cmVideoPlayer', ['DateUtils', function (DateUtils) {
         return {
             restrict: 'A',
-            link: function (scope, element, attrs) {
+            link: function (scope, element) {
                 scope.model.toggle_play = function (value) {
                     if (scope.model.play_state !== undefined) {
                         if (value !== undefined) {
@@ -62,10 +62,10 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
         };
     }])
 
-    .directive('cmTimeline', ['palette', 'DateUtils', '$compile', function (palette, DateUtils, $compile) {
+    .directive('cmTimeline', ['palette', 'DateUtils', function (palette, DateUtils) {
         return {
             restrict: 'A',
-            link: function (scope, element, attrs) {
+            link: function (scope, element) {
                 // definition of timeline properties
                 var margin = {}, margin2 = {}, width, height, height2;
                 var lanePadding = 5;
@@ -187,7 +187,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         ["%M:%S", function (d) {
                             return d.getSeconds();
                         }],
-                        ["%H:%M:%S", function (d) {
+                        ["%H:%M:%S", function () {
                             return true;
                         }]
                     ]);
@@ -310,9 +310,8 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         // to get actual time position, y axis space has thus to be explicitly accounted for
                         var gContainer = $($(currentLayer[0][0]).parent()[0]);
                         var yAxisContainer = gContainer.children(".y");
-                        var pointerPos = coords[0] -
-                            (gContainer.offset().left + yAxisContainer[0].getBBox().width);
-                        var margin = pointerPos;
+                        var pointerPos = coords[0] - (gContainer.offset().left + yAxisContainer[0].getBBox().width);
+//                        var margin = pointerPos;
 
                         pointerPos = xTimeScale.invert(pointerPos);
                         pointerPos = DateUtils.timestampFormat(pointerPos);
@@ -442,6 +441,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             if (d._id.indexOf("Computed") === -1) {
                                 return d._id;
                             }
+                            else {
+                                return undefined;
+                            }
                         });
 
 
@@ -468,7 +470,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         .attr("y", 0)
                         .attr("height", laneHeight)
                         .attr("class", "annot")
-                        .attr("id", function (d, i) {
+                        .attr("id", function (d) {
                             if (d._id == undefined) {
                                 console.log(d);
                             }
@@ -477,7 +479,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                     layerSel.exit().remove();
 
-                    var layerSel = focus.selectAll(".layer")
+                    layerSel = focus.selectAll(".layer")
                         .data(scope.model.layers, function (d) {
                             return d._id;
                         });
@@ -485,7 +487,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     // new layer/annot update sequence to allow annotation removal/modifications
                     layerSel.enter()
                         .append("g")
-                        .attr("id", function (d, i) {
+                        .attr("id", function (d) {
                             return d._id;
                         })
 
@@ -667,7 +669,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                     return 0.4;
                                 }
                             })
-                            .attr("fill", function (d, i) {
+                            .attr("fill", function (d) {
                                 if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d)) {
                                     return scope.model.colScale("selection_color");
                                 }
@@ -677,11 +679,17 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             });
 
                     }
-                }
+                };
 
                 //TODO moved this block to allow it to be called multiple times
-                var adaptTimeScales = function()
-                {
+                var adaptTimeScales = function () {
+                    // Reinitialises infannot and supannot
+                    infannot = undefined;
+                    supannot = undefined;
+                    // Reinitialises infannotdate and supannotdate
+                    infannotdate = undefined;
+                    supannotdate = undefined;
+
                     scope.model.layers.forEach(function (l) {
                         var curMax = d3.max(l.layer.map(function (d) {
                             return d.fragment.end;
@@ -690,9 +698,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             return d.fragment.start;
                         }));
 
-                        // Reinitialises infannot and supannot
-                        infannot = undefined;
-                        supannot = undefined;
+
                         infannot = d3.min([infannot, curMin]);
                         supannot = d3.max([supannot, curMax]);
 
@@ -703,9 +709,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             return DateUtils.parseDate(d.fragment.start);
                         }));
 
-                        // Reinitialises infannotdate and supannotdate
-                        infannotdate = undefined;
-                        supannotdate = undefined;
+
                         infannotdate = d3.min([infannotdate, curMin]);
                         supannotdate = d3.max([supannotdate, curMax]);
 
@@ -716,7 +720,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 // BUG #8946 : handle multiple additions/deletions
                 // DEPRECATED : now use model.layersUpdated
 
-                scope.$watch('model.layerWatch', function (newValue, oldValue) {
+                scope.$watch('model.layerWatch', function (newValue) {
 //					var addedLayersId = newValue.filter(function (l) {
 //						return !(oldValue.indexOf(l) > -1);
 //					});
@@ -735,7 +739,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 }, true);
 
 
-                scope.$watch('model.layersUpdated', function (newValue, oldValue) {
+                scope.$watch('model.layersUpdated', function (newValue) {
                     if (newValue === true) {
                         updateLayers();
                         scope.setMinimalXDisplayedValue(x2MsScale.domain()[0]);
@@ -753,7 +757,8 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 // restrict timeline to loaded annotations if wanted
                 scope.$watch("model.restrict_toggle", function (newValue) {
 
-                    adaptTimeScales();
+                    // not usefull
+                    //adaptTimeScales();
 
                     if (newValue === 2) {
                         if (infannot !== undefined) {
@@ -826,7 +831,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
     }
     ])
 
-    .directive('cmEditModal', ['LangUtils', function (LangUtils) {
+    .directive('cmEditModal', ['LangUtils', function () {
         // LangUtils : isarray func.
 
         // edit form based on properties in model.edit_data
@@ -836,7 +841,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
         // - if is a regular object: edit string properties with appropriate labels
         return {
             restrict: 'C',
-            link: function (scope, element, attrs) {
+            link: function (scope, element) {
 
                 scope.$watch("model.edit_flag", function (newValue) {
                     // a bit tedious procedure, to allow for extensions such as array or object data
@@ -862,6 +867,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         });
 
 //                        element.modal('show');
+
                     }
                 });
 
@@ -875,8 +881,16 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                     scope.model.layers[layer_index].layer[annot_index].data = scope.model.edit_items[0].value;
                     scope.model.layersUpdated = true;
-                    scope.compute_diff();
+                    scope.computeLastLayer();
                     element.modal('hide');
+
+                    // Forces summary view's update
+                    if (scope.model.update_SummaryView > 3) {
+                        scope.model.update_SummaryView = 0;
+                    }
+                    else {
+                        scope.model.update_SummaryView++;
+                    }
                 };
 
             }
@@ -891,7 +905,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             restrict: 'E',
             replace: true,
             template: '<svg id="barchart"></svg>',
-            link: function (scope, element, attrs) {
+            link: function (scope) {
 
                 scope.updateBarChart = function () {
 
@@ -991,7 +1005,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 scope.clickOnAPiechartSlice(i);
                             });
                         }); //allow us to style things in the slices (like text);
-                }
+                };
 
                 scope.$watch('model.selected_layer', function (newValue) {
                     if (newValue != null && newValue != "" && newValue != undefined) {
@@ -1019,12 +1033,12 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             }
         };
     }])
-    .directive('cmPiechart', ['palette', function (palette) {
+    .directive('cmPiechart', ['palette', function () {
         return {
             restrict: 'E',
             replace: true,
             template: '<svg id="piechart"></svg>',
-            link: function (scope, element, attrs) {
+            link: function (scope) {
 
                 scope.updatePiechart = function () {
 
@@ -1136,7 +1150,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     scope.updatePiechart();
                 }, true);
 
-                scope.$watch('model.selected_slice', function (newValue, oldValue) {
+                scope.$watch('model.selected_slice', function (newValue) {
                     if (newValue != undefined) {
                         scope.updatePiechart();
                     }
@@ -1157,7 +1171,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             restrict: 'E',
             replace: true,
             template: '<svg id="legend"></svg>',
-            link: function (scope, element, attrs) {
+            link: function (scope) {
 
 
                 scope.updateLegend = function () {
@@ -1301,7 +1315,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
             restrict: 'E',
             replace: true,
             template: '<svg id="treemap"></svg>',
-            link: function (scope, element, attrs) {
+            link: function (scope) {
 
                 scope.updateTreeMap = function () {
 
@@ -1375,7 +1389,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             }
                         })
                         .style("fill", function (d, i) {
-                            if (d.children) {
+                            if (d.children || i ===0) {
                                 return "white";
                             }
                             else if (i - 1 == scope.model.selected_slice) {
@@ -1419,7 +1433,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                                 scope.clickOnAPiechartSlice(i - 1);
                             });
                         });
-                    ;
+
 
 //                    node.data(treemap.nodes)
 //                        .enter().append("text").text(function (d) {
@@ -1477,7 +1491,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 onSubmit: "=ngLoginSubmit",
                 message: "="
             },
-            link: function (scope, element, attrs) {
+            link: function (scope, element) {
                 $(element)[0].onsubmit = function () {
                     $("#login-login").val($("#login", element).val());
                     $("#login-password").val($("#password", element).val());
