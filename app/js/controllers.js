@@ -362,6 +362,58 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $scope.model.maximalXDisplayedValue = value;
             };
 
+            // Method that updates an annotation's data
+            $scope.update_annotation = function (corpus_id, medium_id, layer_id, annotation_id, newValue) {
+
+                // qet the annotation to edit
+                var annotation_edited = Annotation.queryForAnUpdate({
+                    corpusId: corpus_id,
+                    mediaId: medium_id,
+                    layerId: layer_id,
+                    annotationId: annotation_id
+                });
+
+                // replace its data by the new one
+                annotation_edited.data = newValue;
+
+                // update it on server
+                Annotation.update(
+                    // update parameters
+                    {
+                        corpusId: corpus_id,
+                        mediaId: medium_id,
+                        layerId: layer_id,
+                        annotationId: annotation_id
+                    },
+                    // data to post
+                    annotation_edited,
+                    // success handling
+                    function () {
+                        console.log('Successfully update the annotation');
+                    },
+                    //error handling
+                    function (error) {
+                        console.log("ERROR: ");
+                        console.log(error);
+                    });
+
+            };
+
+            // Method that removes an annotation
+            $scope.remove_annotation= function(corpus_id, medium_id, layer_id, annotation_id)
+            {
+                // call the native remove method
+                Annotation.remove({
+                        corpusId: corpus_id,
+                        mediaId: medium_id,
+                        layerId: layer_id,
+                        annotationId: annotation_id
+                    },
+                    function () {
+                        console.log('Successfully remove the annotation')
+                    });
+            };
+
             // remove old summary
             $scope.resetSummaryView = function (resetSelection) {
                 // Get the correct svg tag to append the chart
@@ -447,6 +499,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                     return d._id;
                 }).indexOf($scope.model.edit_annot_id);
 
+                $scope.remove_annotation($scope.model.selected_corpus, $scope.model.selected_medium, $scope.model.edit_layer_id, $scope.model.edit_annot_id);
+
                 // TODO This part is the one removing brush elements
                 // Get the layer that have to be removed from the brush
                 var layerToRemove = $scope.model.layers[layer_index].layer[annot_index];
@@ -469,22 +523,29 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             var save_state;
 
-            $('#seek-bar').on('mousedown', function () {
+            $('#seek-bar').on('mousedown',function () {
                 save_state = $scope.model.play_state;
                 $scope.$apply(function () {
                     $scope.model.toggle_play(false);
                 });
 
             }).on('mouseup', function () {
-                $scope.$apply(function () {
-                    $scope.model.toggle_play(save_state);
+                    $scope.$apply(function () {
+                        $scope.model.toggle_play(save_state);
+                    });
                 });
-            });
 
-            $scope.computeLastLayer = function()
-            {
+            $scope.computeLastLayer = function () {
                 // TODO replace this in children controller;
-            }
+            };
+
+            $scope.$watch("model.play_state", function (newValue) {
+                if (newValue) {
+                    $scope.model.play_label = "Pause";
+                } else {
+                    $scope.model.play_label = "Play";
+                }
+            });
 
         }])
     .controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
@@ -692,16 +753,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                 });
             };
 
-            $scope.$watch("model.play_state", function (newValue) {
-                if (newValue) {
-                    $scope.model.play_label = "Pause";
-                } else {
-                    $scope.model.play_label = "Play";
-                }
-            });
 
-            $scope.computeLastLayer = function()
-            {
+            $scope.computeLastLayer = function () {
                 $scope.compute_diff();
             };
 
@@ -953,8 +1006,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 //
 //            };
 
-            $scope.computeLastLayer = function()
-            {
+            $scope.computeLastLayer = function () {
                 $scope.compute_regression();
             };
 

@@ -884,6 +884,8 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     scope.computeLastLayer();
                     element.modal('hide');
 
+                    // serveur update
+                    scope.update_annotation(scope.model.selected_corpus, scope.model.selected_medium,scope.model.edit_layer_id, scope.model.edit_annot_id, scope.model.edit_items[0].value);
                     // Forces summary view's update
                     if (scope.model.update_SummaryView > 3) {
                         scope.model.update_SummaryView = 0;
