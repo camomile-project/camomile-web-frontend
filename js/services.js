@@ -74,6 +74,22 @@ angular.module('myApp.services', ['ngResource'])
 						format: '.json',
 						isArray: true
 					}
+                    ,'queryForAnUpdate': {
+                        method: 'GET',
+                        withCredentials: true,
+                        format: '.json',
+                        isArray: false
+                    },
+                    'update':{
+                        method: 'PUT',
+                        withCredentials: true
+                    }
+
+                    ,'remove': {
+                        method: 'DELETE',
+                        withCredentials: true,
+                        isArray: false
+                    }
 				});
 		}
 	])
