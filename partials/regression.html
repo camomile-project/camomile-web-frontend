@@ -8,7 +8,7 @@
             <div class="col-xs-6 cm-selector">
                 <label>Corpus: </label>
                 <select class="form-control" ng-model='model.selected_corpus' ng-init="get_corpora()">
-                    <option ng-repeat='corpus in model.available_corpora' value={{corpus._id}}>{{corpus.name}}</option>
+                    <option ng-repeat='corpus in model.available_corpora | orderBy : "name"' value={{corpus._id}}>{{corpus.name}}</option>
                 </select>
             </div>
 
@@ -16,7 +16,7 @@
             <div class="col-xs-6 cm-selector" ng-show='model.selected_corpus'>
                 <label>Media: </label>
                 <select class="form-control" ng-model='model.selected_medium'>
-                    <option ng-repeat='medium in model.available_media' value={{medium._id}}>{{medium.name}}</option>
+                    <option ng-repeat='medium in model.available_media | orderBy : "name"' value={{medium._id}}>{{medium.name}}</option>
                 </select>
             </div>
 
@@ -28,7 +28,7 @@
             <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
                 <label>Reference: </label>
                 <select class="form-control" ng-model='model.selected_reference'>
-                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}
+                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.layer_type}}
                     </option>
                 </select>
             </div>
@@ -37,7 +37,7 @@
             <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
                 <label>1st Hypothesis: </label>
                 <select class="form-control" ng-model='model.selected_before'>
-                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}
+                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.layer_type}}
                     </option>
                 </select>
             </div>
@@ -46,7 +46,7 @@
             <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
                 <label>2nd Hypothesis: </label>
                 <select class="form-control" ng-model='model.selected_after'>
-                    <option ng-repeat='layer in model.available_layers' value={{layer._id}}>{{layer.layer_type}}
+                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.layer_type}}
                     </option>
                 </select>
             </div>

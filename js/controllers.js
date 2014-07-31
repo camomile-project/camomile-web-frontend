@@ -400,8 +400,8 @@ angular.module('myApp.controllers', ['myApp.services'])
             };
 
             // Method that removes an annotation
-            $scope.remove_annotation= function(corpus_id, medium_id, layer_id, annotation_id)
-            {
+            $scope.remove_annotation = function (corpus_id, medium_id, layer_id, annotation_id) {
+
                 // call the native remove method
                 Annotation.remove({
                         corpusId: corpus_id,
@@ -412,9 +412,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                     function () {
                         console.log('Successfully remove the annotation')
                     });
+
+
             };
 
-            // remove old summary
+// remove old summary
             $scope.resetSummaryView = function (resetSelection) {
                 // Get the correct svg tag to append the chart
                 var vis = d3.select("#piechart").attr("width", 410).attr("height", 410);
@@ -490,34 +492,38 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.model.remove_click = function () {
 
-                // remove annotation from currently loaded data
-                // refresh view
-                var layer_index = $scope.model.layers.map(function (d) {
-                    return d._id;
-                }).indexOf($scope.model.edit_layer_id);
-                var annot_index = $scope.model.layers[layer_index].layer.map(function (d) {
-                    return d._id;
-                }).indexOf($scope.model.edit_annot_id);
+                // check if user really wants to remove target annotation
+                if (confirm("Are you sure you want to remove this annotation ?")) {
 
-                $scope.remove_annotation($scope.model.selected_corpus, $scope.model.selected_medium, $scope.model.edit_layer_id, $scope.model.edit_annot_id);
+                    // remove annotation from currently loaded data
+                    // refresh view
+                    var layer_index = $scope.model.layers.map(function (d) {
+                        return d._id;
+                    }).indexOf($scope.model.edit_layer_id);
+                    var annot_index = $scope.model.layers[layer_index].layer.map(function (d) {
+                        return d._id;
+                    }).indexOf($scope.model.edit_annot_id);
 
-                // TODO This part is the one removing brush elements
-                // Get the layer that have to be removed from the brush
-                var layerToRemove = $scope.model.layers[layer_index].layer[annot_index];
-                // Get its corresponding rectangle in the brush
-                layerToRemove = document.getElementById('brushed' + layerToRemove._id);
-                // Removes it from the brush
-                layerToRemove.parentNode.removeChild(layerToRemove);
+                    $scope.remove_annotation($scope.model.selected_corpus, $scope.model.selected_medium, $scope.model.edit_layer_id, $scope.model.edit_annot_id);
 
-                $scope.model.layers[layer_index].layer.splice(annot_index, 1);
-                $scope.model.layersUpdated = true;
-                $scope.computeLastLayer();
+                    // TODO This part is the one removing brush elements
+                    // Get the layer that have to be removed from the brush
+                    var layerToRemove = $scope.model.layers[layer_index].layer[annot_index];
+                    // Get its corresponding rectangle in the brush
+                    layerToRemove = document.getElementById('brushed' + layerToRemove._id);
+                    // Removes it from the brush
+                    layerToRemove.parentNode.removeChild(layerToRemove);
 
-                if ($scope.model.update_SummaryView > 3) {
-                    $scope.model.update_SummaryView = 0;
-                }
-                else {
-                    $scope.model.update_SummaryView++;
+                    $scope.model.layers[layer_index].layer.splice(annot_index, 1);
+                    $scope.model.layersUpdated = true;
+                    $scope.computeLastLayer();
+
+                    if ($scope.model.update_SummaryView > 3) {
+                        $scope.model.update_SummaryView = 0;
+                    }
+                    else {
+                        $scope.model.update_SummaryView++;
+                    }
                 }
             };
 
@@ -548,7 +554,8 @@ angular.module('myApp.controllers', ['myApp.services'])
             });
 
         }])
-    .controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+    .
+    controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
         'CMError', 'defaults', 'palette', 'DataRoot', '$controller',
         function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller) {
 
