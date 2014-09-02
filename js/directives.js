@@ -872,27 +872,10 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 });
 
                 scope.model.edit_save = function () {
-                    var layer_index = scope.model.layers.map(function (d) {
-                        return d._id;
-                    }).indexOf(scope.model.edit_layer_id);
-                    var annot_index = scope.model.layers[layer_index].layer.map(function (d) {
-                        return d._id;
-                    }).indexOf(scope.model.edit_annot_id);
 
-                    scope.model.layers[layer_index].layer[annot_index].data = scope.model.edit_items[0].value;
-                    scope.model.layersUpdated = true;
-                    scope.computeLastLayer();
+                    scope.model.edit_save_element(scope.model.edit_items);
                     element.modal('hide');
 
-                    // serveur update
-                    scope.update_annotation(scope.model.selected_corpus, scope.model.selected_medium,scope.model.edit_layer_id, scope.model.edit_annot_id, scope.model.edit_items[0].value);
-                    // Forces summary view's update
-                    if (scope.model.update_SummaryView > 3) {
-                        scope.model.update_SummaryView = 0;
-                    }
-                    else {
-                        scope.model.update_SummaryView++;
-                    }
                 };
 
             }
@@ -900,7 +883,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 
     }])
-
 
     .directive('cmBarchart', ['palette', '$filter', function (palette, $filter) {
         return {
@@ -1391,7 +1373,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             }
                         })
                         .style("fill", function (d, i) {
-                            if (d.children || i ===0) {
+                            if (d.children || i === 0) {
                                 return "white";
                             }
                             else if (i - 1 == scope.model.selected_slice) {
@@ -1516,6 +1498,17 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 });
             }
         }
+    })
+    .directive('ngRightClick', function ($parse) {
+        return function (scope, element, attrs) {
+            var fn = $parse(attrs.ngRightClick);
+            element.bind('contextmenu', function (event) {
+                scope.$apply(function () {
+                    event.preventDefault();
+                    fn(scope, {$event: event});
+                });
+            });
+        };
     });
 
 

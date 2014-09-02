@@ -527,6 +527,29 @@ angular.module('myApp.controllers', ['myApp.services'])
                 }
             };
 
+            $scope.model.edit_save_element = function (edit_items) {
+                var layer_index = $scope.model.layers.map(function (d) {
+                    return d._id;
+                }).indexOf($scope.model.edit_layer_id);
+                var annot_index = $scope.model.layers[layer_index].layer.map(function (d) {
+                    return d._id;
+                }).indexOf($scope.model.edit_annot_id);
+
+                $scope.model.layers[layer_index].layer[annot_index].data = edit_items[0].value;
+                $scope.model.layersUpdated = true;
+                $scope.computeLastLayer();
+
+                // serveur update
+                $scope.update_annotation($scope.model.selected_corpus, $scope.model.selected_medium, $scope.model.edit_layer_id, $scope.model.edit_annot_id, edit_items[0].value);
+                // Forces summary view's update
+                if ($scope.model.update_SummaryView > 3) {
+                    $scope.model.update_SummaryView = 0;
+                }
+                else {
+                    $scope.model.update_SummaryView++;
+                }
+            };
+
             var save_state;
 
             $('#seek-bar').on('mousedown',function () {
@@ -1379,4 +1402,310 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
         }
-    ]);
+    ])
+    .controller('QueueCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+        'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Queue', 'QueuePush',
+        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Queue, QueuePush) {
+
+            $controller('BaseCtrl',
+                {
+                    $sce: $sce,
+                    $scope: $scope,
+                    $http: $http,
+                    Corpus: Corpus,
+                    Media: Media,
+                    Layer: Layer,
+                    Annotation: Annotation,
+                    CMError: CMError,
+                    defaults: defaults,
+                    palette: palette
+                });
+
+            $scope.queues = [];
+            $scope.model.incommingQueue = {};
+            $scope.model.outcommingQueue = {};
+            $scope.model.queueData = [];
+
+            // store the entry typed in the textbox
+            $scope.model.entryTyped = "";
+
+            // Store the selected table's line
+            $scope.model.selectedQueueLineIndex = "";
+
+            // add context menu to the table's lines
+            $scope.model.contextMenu = function (event, id) {
+                var $contextMenu = $("#contextMenu");
+
+                $scope.model.selectedQueueLineIndex = id;
+
+                $scope.model.edit_items = [
+                    {id: '', value: $scope.model.queueData.data[$scope.model.selectedQueueLineIndex]}
+                ];
+
+                $contextMenu.css({
+                    display: "block",
+                    left: event.pageX,
+                    top: event.pageY
+                });
+
+
+                return false;
+            };
+
+            // Add typed entry to queue entries
+            $scope.model.addEntry = function () {
+                $scope.model.queueData.data.push($scope.model.entryTyped);
+                $scope.model.entryTyped = "";
+            };
+
+            // Remove target element if a confirmation is given by the user
+            $scope.model.remove_click = function () {
+                if (confirm("Are you sure you want to remove this entry ?")) {
+                    $scope.model.queueData.data.splice($scope.model.selectedQueueLineIndex, 1);
+                }
+            };
+
+            // Override save method from the modal dialog
+            $scope.model.edit_save_element = function (edit_items) {
+                $scope.model.queueData[$scope.model.selectedQueueLineIndex] = edit_items[0].value;
+            };
+
+            // Initializes the data from the queue
+            $scope.model.initQueueData = function (firstInit) {
+
+                $scope.model.getQueues().$promise.then(function (data) {
+
+                    for (var queue in data) {
+                        if (data[queue].name == undefined) {
+
+                        }
+                        else if (data[queue].name === "IncommingQueue") {
+                            $scope.model.incommingQueue = data[queue];
+                        }
+                        else if (data[queue].name === "OutcommingQueue") {
+                            $scope.model.outcommingQueue = data[queue];
+                        }
+                    }
+
+                    var id = $scope.model.incommingQueue._id;
+
+
+                    // Update the next button's status
+                    $scope.model.updateNextStatus(firstInit);
+
+                    $scope.model.updateSaveStatus(firstInit == undefined);
+
+                    if (firstInit == undefined) {
+                        $scope.model.getNextQueueData(id).$promise.then(function (data) {
+
+                            $scope.model.queueData = data;
+
+                            // Update the next button's status
+                            $scope.model.updateNextStatus(firstInit);
+
+                            // Get the video
+                            $scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
+                                $scope.model.queueData.id_corpus + "/media/" + $scope.model.queueData.id_medium + "/video");
+
+                            if ($scope.model.queueData != undefined && $scope.model.queueData.fragment != undefined && $scope.model.queueData.fragment.start != undefined && $scope.model.queueData.fragment.end != undefined) {
+                                $scope.model.restrict_toggle = 1;
+
+                                $scope.model.infbndsec = $scope.model.queueData.fragment.start;
+
+                                $scope.model.duration = ($scope.model.queueData.fragment.end - $scope.model.queueData.fragment.start);
+
+                                $scope.model.supbndsec = $scope.model.duration;
+
+                                $scope.model.current_time = $scope.model.infbndsec;
+
+
+                            }
+
+                        });
+                    }
+
+                });
+            };
+
+            // Event launched when click on the save button.
+            $scope.model.saveQueueElement = function () {
+
+                var id = $scope.model.outcommingQueue._id;
+
+                $scope.model.getQueueWithId(id).$promise.then(function (data) {
+                    var outcommingQueue = data;
+                    outcommingQueue.id_list = [$scope.model.queueData];
+                    $scope.model.updateQueueOnServer(outcommingQueue);
+
+                    $scope.model.updateSaveStatus(false);
+                });
+
+
+                console.log("save");
+            };
+
+            // Event launched when click on the next button
+            $scope.model.nextQueueElement = function () {
+                $scope.model.initQueueData();
+            };
+
+            $scope.model.updateNextStatus = function (firstInit) {
+
+                var buttonNext = document.getElementById("buttonNext");
+
+                if (firstInit != undefined) {
+                    $scope.model.disableNext = false;
+                    buttonNext.innerHTML = "Start";
+                }
+                else {
+                    $scope.model.disableNext = $scope.model.queueData.data == undefined;
+                    buttonNext.innerHTML = "Next";
+                }
+
+
+                if ($scope.model.disableNext) {
+                    buttonNext.setAttribute("class", "btn btn-primary disabled");
+                }
+                else {
+                    buttonNext.setAttribute("class", "btn btn-primary");
+                }
+            };
+
+            $scope.model.updateSaveStatus = function (activate) {
+                $scope.model.disableSave = !activate;
+
+                var buttonSave = document.getElementById("buttonSave");
+                if ($scope.model.disableSave) {
+                    buttonSave.setAttribute("class", "btn btn-success disabled");
+                }
+                else {
+                    buttonSave.setAttribute("class", "btn btn-success");
+                }
+            };
+
+            $scope.model.getQueues = function () {
+//            get queues
+                return Queue.query();
+            };
+
+            $scope.model.createNewQueue = function (queueName) {
+//            create queue
+                Queue.post(
+                    {
+                        "name": queueName
+                    }
+                );
+            };
+
+            $scope.model.getQueueWithId = function (queueId) {
+//            get queue
+                return Queue.getQueue(
+                    {
+                        "queueId": queueId
+                    }
+                );
+            };
+
+            $scope.model.updateQueueOnServer = function (queue) {
+                QueuePush.update(
+                    {
+                        queueId: queue._id
+                    },
+                    // data to post
+                    queue,
+                    // success handling
+                    function () {
+                        console.log('Successfully update the annotation');
+                    },
+                    //error handling
+                    function (error) {
+                        console.log("ERROR: ");
+                        console.log(error);
+                    }
+
+                );
+            };
+
+//            get the queue's next data and remove it from the queue
+            $scope.model.getNextQueueData = function (id) {
+                // recupere le suivant en supprimant le précédent
+                return QueuePush.query(
+                    {
+                        "queueId": id
+                    }
+                );
+            };
+
+
+            $scope.model.createFakeQueue = function () {
+                // update it on server
+                // create queue
+                $scope.model.createNewQueue("IncommingQueue");
+
+                $scope.model.createNewQueue("OutcommingQueue");
+            };
+
+            $scope.model.addFakeValues = function () {
+
+                $scope.model.getQueues().$promise.then(function (data) {
+
+                    $scope.queues = data;
+
+                    for (var queue in $scope.queues) {
+                        if ($scope.queues[queue].name == undefined) {
+
+                        }
+                        else if ($scope.queues[queue].name === "IncommingQueue") {
+                            $scope.model.incommingQueue = $scope.queues[queue];
+                        }
+                        else if ($scope.queues[queue].name === "OutcommingQueue") {
+                            $scope.model.outcommingQueue = $scope.queues[queue];
+                        }
+                    }
+
+                    var id = $scope.model.incommingQueue._id;
+                    // get queue
+                    $scope.model.getQueueWithId(id).$promise.then(function (data) {
+                        var queue = data;
+
+                        queue.id_list = [
+                            {
+                                id_corpus: "52fb49016ed21ede00000009",
+                                id_medium: "52fb4ec46ed21ede00000018",
+                                data: ["Mohammed Dubois", "Pépé le ramolo"],
+                                fragment: {
+                                    start: 258.55,
+                                    end: 314.699
+                                }
+                            },
+                            {
+                                id_corpus: "52fb49016ed21ede00000009",
+                                id_medium: "52fb4ec46ed21ede00000018",
+                                data: [],
+                                fragment: {
+                                    start: 208.55,
+                                    end: 304.699
+                                }
+                            },
+                            {
+                                id_corpus: "52fb49016ed21ede00000009",
+                                id_medium: "52fb4ec46ed21ede00000018",
+                                data: [],
+                                fragment: {
+                                    start: 198.55,
+                                    end: 294.699
+                                }
+                            }
+                        ];
+
+
+                        // update it on server
+                        $scope.model.updateQueueOnServer(queue);
+                    });
+                });
+            };
+
+//            $scope.model.createFakeQueue();
+            $scope.model.addFakeValues();
+
+        }]);
