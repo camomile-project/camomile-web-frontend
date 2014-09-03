@@ -1675,28 +1675,34 @@ angular.module('myApp.controllers', ['myApp.services'])
                             {
                                 id_corpus: "52fb49016ed21ede00000009",
                                 id_medium: "52fb4ec46ed21ede00000018",
-                                data: ["Mohammed Dubois", "Pépé le ramolo"],
+                                _id: "52fe3fd811d4fade00007c2a",
+                                id_layer: "52fe3fd811d4fade00007c29",
+                                data: ["Olivier_TRUCHOT"],
                                 fragment: {
-                                    start: 258.55,
-                                    end: 314.699
+                                    start: 258.9,
+                                    end: 314.29
                                 }
                             },
                             {
                                 id_corpus: "52fb49016ed21ede00000009",
                                 id_medium: "52fb4ec46ed21ede00000018",
-                                data: [],
+                                _id: "52fe3fd811d4fade00007c2b",
+                                id_layer: "52fe3fd811d4fade00007c29",
+                                data: ["Olivier_TRUCHOT"],
                                 fragment: {
-                                    start: 208.55,
-                                    end: 304.699
+                                    start: 330.21,
+                                    end: 340.27
                                 }
                             },
                             {
-                                id_corpus: "52fb49016ed21ede00000009",
+                                id_corpus: "52fe3fd811d4fade00007c2c",
                                 id_medium: "52fb4ec46ed21ede00000018",
-                                data: [],
+                                _id: "52fb49016ed21ede00000009",
+                                id_layer: "52fe3fd811d4fade00007c29",
+                                data: ["Rachid_M_BARKI"],
                                 fragment: {
-                                    start: 198.55,
-                                    end: 294.699
+                                    start: 340.27,
+                                    end: 362.18
                                 }
                             }
                         ];
