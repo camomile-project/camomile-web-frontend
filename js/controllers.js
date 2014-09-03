@@ -1565,6 +1565,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                 if ($scope.model.disableNext) {
                     buttonNext.setAttribute("class", "btn btn-primary disabled");
+
+                    // also disable save button because nothing else to save!
+                    $scope.model.updateSaveStatus(false);
                 }
                 else {
                     buttonNext.setAttribute("class", "btn btn-primary");
