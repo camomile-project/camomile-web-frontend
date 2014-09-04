@@ -4,7 +4,7 @@
 angular.module('myApp.services', ['ngResource'])
 
 
-    .value('DataRoot', 'http://brando:3000')
+  	.value('DataRoot', 'http://localhost:3000')
 //	.value('DataRoot', 'https://flower.limsi.fr/data')
     .value('ToolRoot', 'https://flower.limsi.fr/tool')
 
