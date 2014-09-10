@@ -1313,18 +1313,27 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model.addEntry = function () {
 				$scope.model.queueData.data.push($scope.model.entryTyped);
 				$scope.model.entryTyped = "";
+
+                // reactivate save button
+                $scope.model.updateSaveStatus(true);
 			};
 
 			// Remove target element if a confirmation is given by the user
 			$scope.model.remove_click = function () {
 				if (confirm("Are you sure you want to remove this entry ?")) {
 					$scope.model.queueData.data.splice($scope.model.selectedQueueLineIndex, 1);
+
+                    // reactivate save button
+                    $scope.model.updateSaveStatus(true);
 				}
 			};
 
 			// Override save method from the modal dialog
 			$scope.model.edit_save_element = function (edit_items) {
 				$scope.model.queueData.data[$scope.model.selectedQueueLineIndex] = edit_items[0].value;
+
+                // reactivate save button
+                $scope.model.updateSaveStatus(true);
 			};
 
 			// Initializes the data from the queue
