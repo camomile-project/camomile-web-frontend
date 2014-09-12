@@ -4,8 +4,8 @@
 angular.module('myApp.services', ['ngResource'])
 
 
-  	.value('DataRoot', 'http://localhost:3000')
-//	.value('DataRoot', 'https://flower.limsi.fr/data')
+//  	.value('DataRoot', 'http://localhost:3000')
+		.value('DataRoot', 'https://flower.limsi.fr/data')
     .value('ToolRoot', 'https://flower.limsi.fr/tool')
 
     .factory('Queue', ['$resource', 'DataRoot',
@@ -177,7 +177,7 @@ angular.module('myApp.services', ['ngResource'])
 
                 logout: function () {
                     var url = DataRoot + '/logout';
-                    return $http.get(url, {
+                    return $http.post(url, {
                         withCredentials: true
                     });
                 }
