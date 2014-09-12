@@ -48,13 +48,13 @@
             </div>
             <div class="col-lg-9 col-md-12 col-xs-12">
 
-                <div class="input-group">
+                <div class="input-group" >
                     <span class="input-group-addon">Entry:</span>
                     <form ng-submit="model.addEntry()">
-                    <input type="text" class="form-control" ng-model="model.entryTyped" >
+                    <input type="text" class="form-control" ng-model="model.entryTyped" ng-disabled="model.disableSaveButtonAndAddEntry">
                     </form>
                     <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" ng-click="model.addEntry()">Add entry</button>
+                        <button class="btn btn-default" type="button" ng-click="model.addEntry()" id="addEntryButton">Add entry</button>
                     </span>
                 </div>
             </div>
@@ -86,7 +86,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="queueData in model.queueData.data" ng-right-click="model.contextMenu($event, {{$index}})">
+                            <tr ng-repeat="queueData in model.queueTableData" ng-right-click="model.contextMenu($event)">
                                 <td>
                                     {{$index}}
                                 </td>
