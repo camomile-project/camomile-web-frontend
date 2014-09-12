@@ -14,6 +14,12 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
         return {
             restrict: 'A',
             link: function (scope, element) {
+								scope.model.play_state = false;
+								scope.model.current_time = 0;
+								scope.model.restrict_toggle = 0;
+								scope.model.infbndsec = 0;
+
+
                 scope.model.toggle_play = function (value) {
                     if (scope.model.play_state !== undefined) {
                         if (value !== undefined) {
@@ -32,27 +38,33 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                 element[0].addEventListener("loadedmetadata", function () {
                     scope.$apply(function () {
-                        scope.model.play_state = false;
-                        scope.model.current_time = 0;
-                        scope.model.restrict_toggle = 0;
-                        scope.model.infbndsec = 0;
-                        scope.model.duration = element[0].duration;
-                        scope.model.supbndsec = scope.model.duration;
+												scope.model.duration = element[0].duration;
+												element[0].currentTime = scope.model.current_time;
+												if(scope.model.supbndsec === undefined) {
+													scope.model.supbndsec = scope.model.duration;
+												}
                     });
                 });
 
                 scope.$watch("model.current_time", function (newValue) {
-                    if (newValue !== undefined && element[0].readyState !== 0) {
-                        scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
-                        element[0].currentTime = newValue;
-                    }
+                    if (newValue !== undefined) {
+											scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
+											if(element[0].readyState !== 0) {
+												element[0].currentTime = newValue;
+											}
+										}
                 });
 
                 element[0].addEventListener("timeupdate", function () {
                     scope.$apply(function () {
                         // if player paused, currentTime has been changed for exogenous reasons
                         if (!element[0].paused) {
-                            scope.model.current_time = element[0].currentTime;
+														if(element[0].currentTime > scope.model.supbndsec) {
+															scope.model.toggle_play(false);
+															scope.model.current_time = scope.model.supbndsec;
+														} else{
+															scope.model.current_time = element[0].currentTime;
+														}
                         }
                     });
                 });
@@ -872,27 +884,10 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 });
 
                 scope.model.edit_save = function () {
-                    var layer_index = scope.model.layers.map(function (d) {
-                        return d._id;
-                    }).indexOf(scope.model.edit_layer_id);
-                    var annot_index = scope.model.layers[layer_index].layer.map(function (d) {
-                        return d._id;
-                    }).indexOf(scope.model.edit_annot_id);
 
-                    scope.model.layers[layer_index].layer[annot_index].data = scope.model.edit_items[0].value;
-                    scope.model.layersUpdated = true;
-                    scope.computeLastLayer();
+                    scope.model.edit_save_element(scope.model.edit_items);
                     element.modal('hide');
 
-                    // serveur update
-                    scope.update_annotation(scope.model.selected_corpus, scope.model.selected_medium,scope.model.edit_layer_id, scope.model.edit_annot_id, scope.model.edit_items[0].value);
-                    // Forces summary view's update
-                    if (scope.model.update_SummaryView > 3) {
-                        scope.model.update_SummaryView = 0;
-                    }
-                    else {
-                        scope.model.update_SummaryView++;
-                    }
                 };
 
             }
@@ -900,7 +895,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
 
     }])
-
 
     .directive('cmBarchart', ['palette', '$filter', function (palette, $filter) {
         return {
@@ -1391,7 +1385,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             }
                         })
                         .style("fill", function (d, i) {
-                            if (d.children || i ===0) {
+                            if (d.children || i === 0) {
                                 return "white";
                             }
                             else if (i - 1 == scope.model.selected_slice) {
@@ -1516,6 +1510,17 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 });
             }
         }
+    })
+    .directive('ngRightClick', function ($parse) {
+        return function (scope, element, attrs) {
+            var fn = $parse(attrs.ngRightClick);
+            element.bind('contextmenu', function (event) {
+                scope.$apply(function () {
+                    event.preventDefault();
+                    fn(scope, {$event: event});
+                });
+            });
+        };
     });
 
 

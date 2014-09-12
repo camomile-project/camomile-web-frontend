@@ -1,0 +1,171 @@
+<div ng-controller="QueueCtrl">
+    <div class="container-fluid" ng-init="model.initQueueData(true)">
+
+        <div class="row top-padding">
+            <div class="col-lg-2 col-md-pull-0 col-xs-pull-0">
+            </div>
+            <div class="col-lg-8 col-md-12 col-xs-12">
+                <div id="video-container" >
+                    <!-- video player behaviour managed by cm-video-player angular attribute -->
+                    <video id="player"
+                           cm-video-player
+                           ng-src={{model.video}}
+                           width="100%">
+                    </video>
+                    <!-- Video Controls interact with the player via the controller. -->
+                    <!-- Multiple and/or distributed controls can thus be implemented -->
+                    <div id="video-controls">
+                        <div class="row">
+                            <div class="col-md-1">
+                                <button type="button" class="video-control" id="play-pause"
+                                        ng-click="model.toggle_play()">
+                                    {{ model.play_label }}
+                                </button>
+                            </div>
+                            <div class="col-md-9">
+                                <input width="100%" type="range" id="seek-bar"
+                                       min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
+                                       step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
+                            </div>
+                            <div class="col-md-2">
+                                <label style="color: #ffffff;">{{ model.current_time_display }}</label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="container" style="display: inline-block">
+
+
+        <div class="row top-padding">
+            <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
+            </div>
+            <div class="col-lg-9 col-md-12 col-xs-12">
+
+                <div class="input-group">
+                    <span class="input-group-addon">Entry:</span>
+                    <form ng-submit="model.addEntry()">
+                    <input type="text" class="form-control" ng-model="model.entryTyped" >
+                    </form>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button" ng-click="model.addEntry()">Add entry</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!--<label>Entries</label>-->
+        <!--<textarea readonly id="annotation_entries"></textarea>-->
+        <div class="row top-padding">
+
+            <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
+            </div>
+            <div class="col-lg-9 col-md-12 col-xs-12">
+
+                <div class="panel panel-default" style="overflow:auto;height:250px;">
+                    <!-- Default panel contents -->
+                    <!--<div class="panel-heading">Entries</div>-->
+                    <!-- Table -->
+                    <table class="table table-bordered table-hover" id="clickable-table">
+                        <thead>
+                        <tr class="active">
+                            <td>
+                                #
+                            </td>
+                            <td>
+                                Entry
+                            </td>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="queueData in model.queueData.data" ng-right-click="model.contextMenu($event, {{$index}})">
+                                <td>
+                                    {{$index}}
+                                </td>
+                                <td>
+                                    {{queueData}}
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row top-padding">
+
+            <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
+            </div>
+            <div class="col-lg-9 col-md-12 col-xs-12">
+
+                <div class="btn-group btn-group-justified">
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" ng-click="model.saveQueueElement()" id="buttonSave">Save</button>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" ng-click="model.nextQueueElement()" id="buttonNext">Next</button>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" ng-click="model.debugProbe()">Debug Probe</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Added behaviour in cm-edit-modal angular class. -->
+    <div class="modal cm-edit-modal" id="modal-dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Edit element</h4>
+                </div>
+                <div class="modal-body">
+                    <div ng-repeat="item in model.edit_items">
+                        <label id="item-id">{{ item.id }}</label>
+                        <input type="text" id="item-value" ng-model="item.value"/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" ng-click="model.edit_save()">Save changes</button>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+    <!--Context menu hidden by default. Triggered on Right click to .annot rect elements (see timeline directive)-->
+    <div id="contextMenu" class="dropdown clearfix">
+        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
+            style="display:block;position:static;margin-bottom:5px;">
+            <li><a tabindex="-1" href="" ng-click="model.edit_click()">
+                <image src="/img/Edit_document.ico" align="left" width="20" height="20"
+                       style="margin-left:-15px;margin-right:5px;"></image>
+                Edit
+            </a>
+            </li>
+            <li><a tabindex="-1" href="" ng-click="model.remove_click()">
+                <image src="/img/Delete.ico" align="left" width="20" height="20"
+                       style="margin-left:-17px;margin-right:7px;"></image>
+                Remove
+            </a>
+            </li>
+        </ul>
+    </div>
+</div>
