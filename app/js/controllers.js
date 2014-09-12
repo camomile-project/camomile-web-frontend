@@ -1315,7 +1315,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $scope.model.entryTyped = "";
 
                 // reactivate save button
-                $scope.model.updateSaveButtonAndAddEntryStatus(true);
+                $scope.model.updateSaveButtonStatus(true);
             };
 
             // Remove target element if a confirmation is given by the user
@@ -1324,7 +1324,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.queueTableData.splice($scope.model.selectedQueueLineIndex, 1);
 
                     // reactivate save button
-                    $scope.model.updateSaveButtonAndAddEntryStatus(true);
+                    $scope.model.updateSaveButtonStatus(true);
                 }
             };
 
@@ -1333,7 +1333,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                 $scope.model.queueTableData[$scope.model.selectedQueueLineIndex] = edit_items[0].value;
 
                 // reactivate save button
-                $scope.model.updateSaveButtonAndAddEntryStatus(true);
+                $scope.model.updateSaveButtonStatus(true);
             };
 
             // Initializes the data from the queue
@@ -1356,7 +1356,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     // Update the next button's status
                     $scope.model.updateNextStatus(firstInit);
 
-                    $scope.model.updateSaveButtonAndAddEntryStatus(firstInit === undefined);
+                    $scope.model.updateSaveButtonStatus(firstInit === undefined);
 
                     if (firstInit === undefined) {
                         $scope.model.getNextQueueData(id).$promise.then(function (data) {
@@ -1364,6 +1364,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                             $scope.model.queueData = data;
 
                             $scope.model.initialData = [];
+
+                            $scope.model.queueTableData = [];
 
                             //copy initial data
                             for (var i in $scope.model.queueData.data) {
@@ -1404,7 +1406,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                     var dataToPush = {};
                     dataToPush["initialData"] = $scope.model.initialData;
                     dataToPush["modifiedData"] = {};
-                    var date = new Date();
+
+                    var now = new Date();
+                    var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+                    var date = new Date(now_utc.getTime());
+
                     var user = $scope.model.username;
                     var data = [];
                     for (var i in $scope.model.queueTableData) {
@@ -1419,7 +1425,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     outcomingQueue.id_list = [$scope.model.queueData];
                     $scope.model.updateQueueOnServer(outcomingQueue);
 
-                    $scope.model.updateSaveButtonAndAddEntryStatus(false);
+                    $scope.model.updateSaveButtonStatus(false);
                 });
 
 
@@ -1438,6 +1444,9 @@ angular.module('myApp.controllers', ['myApp.services'])
                 if (firstInit != undefined) {
                     $scope.model.disableNext = false;
                     buttonNext.innerHTML = "Start";
+
+                    //Also disable add entry button because nothing else to save!
+                    $scope.model.updateAddEntryButtonStatus(false);
                 }
                 else {
                     $scope.model.disableNext = $scope.model.queueData.data == undefined;
@@ -1449,33 +1458,48 @@ angular.module('myApp.controllers', ['myApp.services'])
                     buttonNext.setAttribute("class", "btn btn-primary disabled");
 
                     // also disable save button because nothing else to save!
-                    $scope.model.updateSaveButtonAndAddEntryStatus(false);
-                }
-                else {
-                    buttonNext.setAttribute("class", "btn btn-primary");
-                }
-            };
-
-            $scope.model.updateSaveButtonAndAddEntryStatus = function (activate) {
-                $scope.model.disableSaveButtonAndAddEntry = !activate;
-
-                var buttonSave = document.getElementById("buttonSave");
-                var addEntryButton = document.getElementById("addEntryButton");
-
-                if ($scope.model.disableSaveButtonAndAddEntry) {
-                    // Disables save button
-                    buttonSave.setAttribute("class", "btn btn-success disabled");
-
-                    // Disables add entry button
-                    addEntryButton.setAttribute("class", "btn btn-default disabled");
+                    $scope.model.updateSaveButtonStatus(false);
 
                     // Removes all element from table
                     $scope.model.queueTableData = undefined;
                 }
                 else {
+                    buttonNext.setAttribute("class", "btn btn-primary");
+
+                    //Also disable add entry button because nothing else to save!
+                    $scope.model.updateAddEntryButtonStatus(true);
+                }
+            };
+
+            $scope.model.updateSaveButtonStatus = function (activate) {
+                $scope.model.disableSaveButton = !activate;
+
+                var buttonSave = document.getElementById("buttonSave");
+
+                if ($scope.model.disableSaveButton) {
+                    // Disables save button
+                    buttonSave.setAttribute("class", "btn btn-success disabled");
+                }
+                else {
                     buttonSave.setAttribute("class", "btn btn-success");
+                }
+            };
+
+            $scope.model.updateAddEntryButtonStatus = function (activate) {
+                $scope.model.disableAddEntryButton = !activate;
+
+
+                var addEntryButton = document.getElementById("addEntryButton");
+
+                if ($scope.model.disableAddEntryButton) {
+                    // Disables add entry button
+                    addEntryButton.setAttribute("class", "btn btn-default disabled");
+                }
+                else {
                     addEntryButton.setAttribute("class", "btn btn-default");
-                    $scope.model.queueTableData = [];
+                    if ($scope.model.queueTableData == undefined) {
+                        $scope.model.queueTableData = [];
+                    }
                 }
             };
 
@@ -1608,7 +1632,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             };
 
 //            $scope.model.createFakeQueue();
-            $scope.model.addFakeValues();
+//            $scope.model.addFakeValues();
 
             // reinit outcoming
             // db.queues.update({ _id: ObjectId("54085dd383950d581c8bd062") },{ $set: { queue: [] } })
