@@ -1357,6 +1357,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.updateNextStatus(firstInit);
 
                     $scope.model.updateSaveButtonStatus(firstInit === undefined);
+                    $scope.model.updateAddEntryButtonStatus(firstInit === undefined);
 
                     if (firstInit === undefined) {
                         $scope.model.getNextQueueData(id).$promise.then(function (data) {
@@ -1375,6 +1376,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                             // Update the next button's status
                             $scope.model.updateNextStatus(firstInit);
+
+                            // Update the add entry button's status
+                            $scope.model.updateAddEntryButtonStatus($scope.model.initialData.length!=0);
 
                             // Get the video
                             $scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
@@ -1446,7 +1450,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     buttonNext.innerHTML = "Start";
 
                     //Also disable add entry button because nothing else to save!
-                    $scope.model.updateAddEntryButtonStatus(false);
+                    $scope.model.updateAddEntryButtonStatus(true);
                 }
                 else {
                     $scope.model.disableNext = $scope.model.queueData.data == undefined;
@@ -1460,14 +1464,16 @@ angular.module('myApp.controllers', ['myApp.services'])
                     // also disable save button because nothing else to save!
                     $scope.model.updateSaveButtonStatus(false);
 
+                    //Also disable add entry button because nothing else to save!
+                    $scope.model.updateAddEntryButtonStatus(true);
+
                     // Removes all element from table
                     $scope.model.queueTableData = undefined;
                 }
                 else {
                     buttonNext.setAttribute("class", "btn btn-primary");
 
-                    //Also disable add entry button because nothing else to save!
-                    $scope.model.updateAddEntryButtonStatus(true);
+
                 }
             };
 
