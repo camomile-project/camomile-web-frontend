@@ -1368,6 +1368,12 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                             $scope.model.queueTableData = [];
 
+                            var now = new Date();
+                            var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+                            var date = new Date(now_utc.getTime());
+
+                            $scope.model.initialDate = date;
+
                             //copy initial data
                             for (var i in $scope.model.queueData.data) {
                                 $scope.model.initialData[i] = $scope.model.queueData.data[i];
@@ -1408,7 +1414,9 @@ angular.module('myApp.controllers', ['myApp.services'])
                     var outcomingQueue = data;
 
                     var dataToPush = {};
-                    dataToPush["initialData"] = $scope.model.initialData;
+                    dataToPush["initialData"] = {};
+                    dataToPush["initialData"]["data"] = $scope.model.initialData;
+                    dataToPush["initialData"]["initialDate"] = $scope.model.initialDate;
                     dataToPush["modifiedData"] = {};
 
                     var now = new Date();
@@ -1420,7 +1428,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     for (var i in $scope.model.queueTableData) {
                         data[i] = $scope.model.queueTableData[i];
                     }
-                    dataToPush["modifiedData"]["date"] = date;
+                    dataToPush["modifiedData"]["modificationDate"] = date;
                     dataToPush["modifiedData"]["user"] = user;
                     dataToPush["modifiedData"]["data"] = data;
 
@@ -1641,7 +1649,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 //            $scope.model.addFakeValues();
 
             // reinit outcoming
-            // db.queues.update({ _id: ObjectId("54085dd383950d581c8bd062") },{ $set: { queue: [] } })
+//            db.queues.update({ _id: ObjectId("54085dd383950d581c8bd062") },{ $set: { queue: [] } })
             // db.queues.update({ _id: ObjectId("54085db083950d581c8bd061") },{ $set: { queue: [] } })
 
 
