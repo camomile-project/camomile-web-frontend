@@ -86,7 +86,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="queueData in model.queueTableData" ng-right-click="model.contextMenu($event)">
+                            <tr ng-repeat="queueData in model.queueTableData track by $index" ng-right-click="model.contextMenu($event)">
                                 <td>
                                     {{$index}}
                                 </td>
