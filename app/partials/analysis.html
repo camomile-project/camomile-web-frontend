@@ -1,0 +1,99 @@
+<div class="row" ng-controller="AnalysisCtrl">
+		<!--<div ng-click="model.probe()">Probe</div>-->
+    <div class="twelve columns">
+			<h3>{{model.pageTitle}}</h3>
+			<div ng-switch="model.pageSwitch">
+
+				<div ng-switch-when="select">
+					<ul class="button-group even-3">
+						<li class="cm-dropdown" drop-id="1" drop-title="model.selectedCorpusName" coll="model.corpora" selected-id="model.selectedCorpusId"
+								enabled-ref="true">
+							<!-- prefixes with data- seem forbidden...-->
+							<button ng-click="toggle()" data-dropdown="{{dropId()}}" class="large button dropdown" ng-disabled="!enabledRef" title="{{title}}">
+								{{title | truncate:16}}
+							</button><br/>
+							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
+								<li ng-repeat="elem in coll">
+									<a ng-click="select(elem._id)" title="{{elem.name}}">{{elem.name | truncate:30}}</a>
+								</li>
+							</ul>
+						</li>
+						<li class="cm-dropdown" drop-id="2" drop-title="model.selectedMediaName" coll="model.media" selected-id="model.selectedMediaId"
+								enabled-ref="model.selectedCorpusId">
+							<button ng-click="toggle()" data-dropdown="{{dropId()}}" class="large button dropdown" ng-disabled="!enabledRef" title="{{title}}">
+								{{title | truncate:16}}
+							</button><br/>
+							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
+								<li ng-repeat="elem in coll">
+									<a ng-click="select(elem._id)" title="{{elem.name}}">{{elem.name | truncate:30}}</a>
+								</li>
+							</ul>
+						</li>
+						<li>
+							<button ng-disabled="!(model.selectedCorpusId && model.selectedMediaId)" class="large button secondary" ng-click="model.setSwitch('analyze')">Proceed</button>
+						</li>
+					</ul>
+				</div>
+
+				<div ng-switch-when="analyze">
+					<ul class="button-group even-5">
+						<li class="cm-dropdown" drop-id="3" drop-title="model.selectedMethodName" coll="model.methods" selected-id="model.selectedMethodId" enabled-ref="true">
+							<button ng-click="toggle()" data-dropdown="{{dropId()}}" class="large button dropdown" ng-disabled="!enabledRef" title="{{title}}">
+								{{title | truncate:7}}
+							</button><br/>
+							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
+								<li ng-repeat="elem in coll">
+									<a ng-click="select($index)" title="{{elem}}">{{elem | truncate:30}}</a>
+								</li>
+							</ul>
+						</li>
+						<li class="cm-dropdown" drop-id="4" drop-title="model.selectedRefName" coll="model.availableLayers" selected-id="model.selectedRefId"
+								enabled-ref="model.selectedMethodId !== undefined">
+							<button ng-click="toggle()" data-dropdown="{{dropId()}}" class="large button dropdown" ng-disabled="!enabledRef" title="{{title}}">
+								{{title | truncate:7}}
+							</button><br/>
+							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
+								<li ng-repeat="elem in coll">
+                                    <a ng-click="!elem.available || select(elem._id)" title="{{elem.label}}"
+                                       class="{{elem.available ? '' : 'inactive'}}">{{elem.label | truncate:30}}</a>
+                                </li>
+                            </ul>
+						</li>
+						<li class="cm-dropdown" drop-id="5" drop-title="model.selectedFirstHypName" coll="model.availableLayers" selected-id="model.selectedFirstHypId"
+								enabled-ref="model.selectedMethodId !== undefined">
+							<button ng-click="toggle()" data-dropdown="{{dropId()}}" class="large button dropdown" ng-disabled="!enabledRef" title="{{title}}">
+								{{title | truncate:7}}
+							</button><br/>
+							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
+								<li ng-repeat="elem in coll">
+									<a ng-click="!elem.available || select(elem._id)" title="{{elem.label}}"
+                                       class="{{elem.available ? '' : 'inactive'}}">{{elem.label | truncate:30}}</a>
+								</li>
+							</ul>
+						</li>
+						<li class="cm-dropdown" drop-id="6" drop-title="model.selectedSecondHypName" coll="model.availableLayers" selected-id="model.selectedSecondHypId"
+								enabled-ref="model.selectedMethodName === 'Regression'">
+							<button ng-click="toggle()" data-dropdown="{{dropId()}}" class="large button dropdown" ng-disabled="!enabledRef" title="{{title}}">
+								{{title | truncate:7}}
+							</button><br/>
+							<ul id="{{dropId()}}" data-dropdown-content class="f-dropdown">
+								<li ng-repeat="elem in coll">
+									<a ng-disabled="!elem.available" ng-click="select(elem._id)" title="{{elem.label}}"
+                                       class="{{elem.available ? '' : 'inactive'}}">{{elem.label | truncate:30}}</a>
+								</li>
+							</ul>
+						</li>
+
+						<li>
+							<button class="large button secondary" ng-click="model.setSwitch('select')">Back</button>
+						</li>
+					</ul>
+                    <cm-timeline></cm-timeline>
+				</div>
+
+			</div>
+    </div>
+</div>
+
+
+
