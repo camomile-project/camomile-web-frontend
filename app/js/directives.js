@@ -483,9 +483,9 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         .attr("height", laneHeight)
                         .attr("class", "annot")
                         .attr("id", function (d) {
-                            if (d._id == undefined) {
-                                console.log(d);
-                            }
+//                            if (d._id == undefined) {
+//                                console.log(d);
+//                            }
                             return "brushed" + d._id;
                         });
 

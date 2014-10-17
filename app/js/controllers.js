@@ -1282,6 +1282,14 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.incomingQueue = {};
             $scope.model.outcomingQueue = {};
             $scope.model.queueData = [];
+            $scope.model.availableEntry = [];
+
+
+            $(function () {
+                $("#entry_input").autocomplete({
+                    source: $scope.model.availableEntry
+                });
+            });
 
             // store the entry typed in the textbox
             $scope.model.entryTyped = "";
@@ -1311,7 +1319,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             // Add typed entry to queue entries
             $scope.model.addEntry = function () {
+                $scope.model.entryTyped = document.getElementById("entry_input").value;
                 $scope.model.queueTableData.push($scope.model.entryTyped);
+                if ($scope.model.availableEntry.indexOf($scope.model.entryTyped) == -1) {
+                    $scope.model.availableEntry.push($scope.model.entryTyped);
+                }
                 $scope.model.entryTyped = "";
 
                 // reactivate save button
@@ -1322,6 +1334,9 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.remove_click = function () {
                 if (confirm("Are you sure you want to remove this entry ?")) {
                     $scope.model.queueTableData.splice($scope.model.selectedQueueLineIndex, 1);
+                    var elementIndex = $scope.model.queueTableData[$scope.model.selectedQueueLineIndex];
+                    elementIndex = $scope.model.availableEntry.indexOf(elementIndex);
+                    $scope.model.availableEntry.splice(elementIndex, 1);
 
                     // reactivate save button
                     $scope.model.updateSaveButtonStatus(true);
@@ -1368,9 +1383,10 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                             $scope.model.queueTableData = [];
 
-                            var now = new Date();
-                            var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-                            var date = new Date(now_utc.getTime());
+//                            var now = new Date();
+//                            var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+//                            var date = new Date(now_utc.getTime());
+                            var date = new Date(); // already UTC ddate in JSON Format...
 
                             $scope.model.initialDate = date;
 
@@ -1378,13 +1394,17 @@ angular.module('myApp.controllers', ['myApp.services'])
                             for (var i in $scope.model.queueData.data) {
                                 $scope.model.initialData[i] = $scope.model.queueData.data[i];
                                 $scope.model.queueTableData[i] = $scope.model.queueData.data[i];
+                                if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
+                                    $scope.model.availableEntry.push($scope.model.queueData.data[i]);
+                                }
+
                             }
 
                             // Update the next button's status
                             $scope.model.updateNextStatus(firstInit);
 
                             // Update the add entry button's status
-                            $scope.model.updateAddEntryButtonStatus($scope.model.initialData.length!=0);
+                            $scope.model.updateAddEntryButtonStatus($scope.model.initialData.length != 0);
 
                             // Get the video
                             $scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
@@ -1419,9 +1439,11 @@ angular.module('myApp.controllers', ['myApp.services'])
                     dataToPush["initialData"]["initialDate"] = $scope.model.initialDate;
                     dataToPush["modifiedData"] = {};
 
-                    var now = new Date();
-                    var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-                    var date = new Date(now_utc.getTime());
+//                    var now = new Date();
+//                    var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+//                    var date = new Date(now_utc.getTime());
+
+                    var date = new Date(); // already UTC ddate in JSON Format...
 
                     var user = $scope.model.username;
                     var data = [];

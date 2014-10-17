@@ -6,8 +6,8 @@ angular.module('myApp.services', ['ngResource'])
 
 //DB adress
 //  	.value('DataRoot', 'http://brando:3000')
-		.value('DataRoot', 'https://flower.limsi.fr/data')
-
+//		.value('DataRoot', 'https://flower.limsi.fr/data')
+    .value('DataRoot', 'https://flower.limsi.fr/crpgl/api')
     .value('ToolRoot', 'https://flower.limsi.fr/tool')
 
     .factory('Queue', ['$resource', 'DataRoot',
@@ -254,7 +254,7 @@ angular.module('myApp.services', ['ngResource'])
                 'colors': {
                     "selection_color": "#FF0000",
                     "correct": "#00FF00",
-                    "miss": "#E6FF00",
+                    "missed detection": "#E6FF00",
                     "false alarm": "#FFE600",
                     "confusion": "#FF0000"
                 },
