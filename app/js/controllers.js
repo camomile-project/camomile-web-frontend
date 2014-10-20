@@ -1260,8 +1260,8 @@ angular.module('myApp.controllers', ['myApp.services'])
         }
     ])
     .controller('QueueCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-        'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Queue', 'QueuePush',
-        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Queue, QueuePush) {
+        'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Queue', 'QueuePush', '$cookieStore',
+        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Queue, QueuePush, $cookieStore) {
 
             $controller('BaseCtrl',
                 {
@@ -1379,7 +1379,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                             $scope.model.queueData = data;
 
-                            $scope.model.initialData = [];
+                            $scope.model.inData = [];
 
                             $scope.model.queueTableData = [];
 
@@ -1392,7 +1392,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                             //copy initial data
                             for (var i in $scope.model.queueData.data) {
-                                $scope.model.initialData[i] = $scope.model.queueData.data[i];
+                                $scope.model.inData[i] = $scope.model.queueData.data[i];
                                 $scope.model.queueTableData[i] = $scope.model.queueData.data[i];
                                 if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
                                     $scope.model.availableEntry.push($scope.model.queueData.data[i]);
@@ -1404,7 +1404,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                             $scope.model.updateNextStatus(firstInit);
 
                             // Update the add entry button's status
-                            $scope.model.updateAddEntryButtonStatus($scope.model.initialData.length != 0);
+                            $scope.model.updateAddEntryButtonStatus($scope.model.inData.length != 0);
 
                             // Get the video
                             $scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
@@ -1426,48 +1426,117 @@ angular.module('myApp.controllers', ['myApp.services'])
             };
 
             // Event launched when click on the save button.
-            $scope.model.saveQueueElement = function () {
+					$scope.model.saveQueueElement = function () {
 
-                var id = $scope.model.outcomingQueue._id;
+						var id = $scope.model.outcomingQueue._id;
 
-                $scope.model.getQueueWithId(id).$promise.then(function (data) {
-                    var outcomingQueue = data;
+						$scope.model.getQueueWithId(id).$promise.then(function (data) {
+							var outcomingQueue = data;
 
-                    var dataToPush = {};
-                    dataToPush["initialData"] = {};
-                    dataToPush["initialData"]["data"] = $scope.model.initialData;
-                    dataToPush["initialData"]["initialDate"] = $scope.model.initialDate;
-                    dataToPush["modifiedData"] = {};
+							var dataToPush = {};
+							dataToPush["inData"] = {};
+							dataToPush["inData"]["data"] = $scope.model.inData;
+							dataToPush["inData"]["date"] = $scope.model.initialDate;
+							dataToPush["outData"] = {};
 
 //                    var now = new Date();
 //                    var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
 //                    var date = new Date(now_utc.getTime());
 
-                    var date = new Date(); // already UTC ddate in JSON Format...
+							var date = new Date(); // already UTC ddate in JSON Format...
 
-                    var user = $scope.model.username;
-                    var data = [];
-                    for (var i in $scope.model.queueTableData) {
-                        data[i] = $scope.model.queueTableData[i];
-                    }
-                    dataToPush["modifiedData"]["modificationDate"] = date;
-                    dataToPush["modifiedData"]["user"] = user;
-                    dataToPush["modifiedData"]["data"] = data;
+							var user = $cookieStore.get("current.user");
+							var data = [];
+							var modified = false;
 
-                    $scope.model.queueData.data = dataToPush;
+							for (var i in $scope.model.queueTableData) {
+								data[i] = $scope.model.queueTableData[i];
+							}
 
-                    outcomingQueue.id_list = [$scope.model.queueData];
-                    $scope.model.updateQueueOnServer(outcomingQueue);
+							if($scope.model.inData.length == data.length)
+							{
+								for (var i in data) {
+									if(data[i] != $scope.model.inData[i])
+									{
+										modified = true;
+									}
+								}
+							}
+							else
+							{
+								modified = true;
+							}
+							dataToPush["outData"]["date"] = date;
+							dataToPush["outData"]["duration"] = date - $scope.model.initialDate;
+							dataToPush["outData"]["user"] = user;
+							dataToPush["outData"]["data"] = data;
 
-                    $scope.model.updateSaveButtonStatus(false);
-                });
+							//status
+							if(modified){
+								dataToPush["status"] = "MODIFIED";
+							}
+							else {
+								dataToPush["status"] = "VALIDATED";
+							}
+
+							$scope.model.queueData.data = dataToPush;
+
+							outcomingQueue.id_list = [$scope.model.queueData];
+							$scope.model.updateQueueOnServer(outcomingQueue);
+
+							// call only if button have to be disabled
+//							$scope.model.updateSaveButtonStatus(false);
+						});
 
 
-                console.log("save");
-            };
+						console.log("save");
+						$scope.model.initQueueData();
+					};
 
             // Event launched when click on the next button
             $scope.model.nextQueueElement = function () {
+
+								var id = $scope.model.outcomingQueue._id;
+
+								$scope.model.getQueueWithId(id).$promise.then(function (data) {
+									var outcomingQueue = data;
+
+									var dataToPush = {};
+									dataToPush["inData"] = {};
+									dataToPush["inData"]["data"] = $scope.model.inData;
+									dataToPush["inData"]["date"] = $scope.model.initialDate;
+									dataToPush["outData"] = {};
+
+//                    var now = new Date();
+//                    var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+//                    var date = new Date(now_utc.getTime());
+
+									var date = new Date(); // already UTC ddate in JSON Format...
+
+									var user = $cookieStore.get("current.user");
+									var data = [];
+									for (var i in $scope.model.queueTableData) {
+										data[i] = $scope.model.queueTableData[i];
+									}
+									dataToPush["outData"]["date"] = date;
+									dataToPush["outData"]["duration"] = date - $scope.model.initialDate;
+									dataToPush["outData"]["user"] = user;
+									dataToPush["outData"]["data"] = data;
+
+									//status
+									dataToPush["status"] = "SKIP";
+
+									$scope.model.queueData.data = dataToPush;
+
+									outcomingQueue.id_list = [$scope.model.queueData];
+									$scope.model.updateQueueOnServer(outcomingQueue);
+
+									$scope.model.updateSaveButtonStatus(false);
+								});
+
+
+								console.log("skip");
+
                 $scope.model.initQueueData();
             };
 
@@ -1667,8 +1736,8 @@ angular.module('myApp.controllers', ['myApp.services'])
                 });
             };
 
-//            $scope.model.createFakeQueue();
-//            $scope.model.addFakeValues();
+//             $scope.model.createFakeQueue();
+           	$scope.model.addFakeValues();
 
             // reinit outcoming
 //            db.queues.update({ _id: ObjectId("5444d6bf3d55e27009e5d11b") },{ $set: { queue: [] } })
