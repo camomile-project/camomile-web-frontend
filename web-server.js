@@ -36,7 +36,7 @@ config_js = sprintf(
 )
 
 fs.writeFile(
-    'config.js', config_js, 
+    __dirname + '/app/config.js', config_js, 
     function(err) {
         if(err) {
             console.log(err);
