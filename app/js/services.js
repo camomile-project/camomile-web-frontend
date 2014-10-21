@@ -177,9 +177,9 @@ angular.module('myApp.services', ['ngResource', 'myApp.config'])
                     });
                 },
 
-                logout: function () {
+                logout: function (credentials) {
                     var url = DataRoot + '/logout';
-                    return $http.get(url, {
+                    return $http.post(url, credentials, {
                         withCredentials: true
                     });
                 }

@@ -55,6 +55,16 @@ angular.module('myApp.controllers', ['myApp.services'])
 						$cookieStore.remove("current.user");
 						Session.username = undefined;
 						$scope.model.message = undefined;
+
+						// reload page
+						window.location.reload();
+					})
+					.error(function (err) {
+						Session.isLogged = false;
+						Session.username = undefined;
+						$cookieStore.remove("current.user");
+						$scope.model.message = "Connection error";
+						console.log(err);
 					});
 			};
 
