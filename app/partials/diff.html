@@ -9,7 +9,7 @@
         <div class="container">
 
             <!-- Corpus selection -->
-            <div class="col-xs-6 cm-selector">
+            <div class="col-xs-6 cm-selector" ng-show='isLogged()'>
                 <label>Corpus: </label>
                 <select class="form-control" ng-model='model.selected_corpus' ng-init="get_corpora()">
                     <option ng-repeat='corpus in model.available_corpora  | orderBy : "name"' value={{corpus._id}}>{{corpus.name}}</option>
