@@ -19,5 +19,6 @@ angular.module(
         $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
         $routeProvider.when('/shotqueue', {templateUrl: 'partials/queue.html'});
 				$routeProvider.when('/headqueue', {templateUrl: 'partials/queue.html'});
+				$routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
         $routeProvider.otherwise({redirectTo: '/'});
     }]);

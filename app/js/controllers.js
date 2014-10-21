@@ -1396,9 +1396,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 							$scope.model.queueTableData = [];
 
-//                            var now = new Date();
-//                            var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-//                            var date = new Date(now_utc.getTime());
 							var date = new Date(); // already UTC ddate in JSON Format...
 
 							$scope.model.initialDate = date;
@@ -1410,7 +1407,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 								if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
 									$scope.model.availableEntry.push($scope.model.queueData.data[i]);
 								}
-
 							}
 
 							// Update the next button's status
@@ -1431,14 +1427,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 								$scope.model.current_time = $scope.model.infbndsec;
 
 								if($scope.model.onlyHead){
+									// at the end of video loading, draw a rectangle on head as described in "position"
 									document.getElementById("player").addEventListener("loadedmetadata", function(){
 										$scope.$apply(function(){
-											//TODO!!!!
-											var transparentPlan = d3.select("#transparent-plan");
-											// Remove old element
-											transparentPlan.selectAll("svg").remove();
 
-											// Rectangle style
+											// Remove previous rects
+											$scope.model.resetTransparentPlan();
+
+											// Rectangle style: draw a rectangle at the described position (in position)
+											var transparentPlan = d3.select("#transparent-plan");
 											transparentPlan.append("svg")
 												.style("width", "100%")
 												.style("height", "100%")
@@ -1454,6 +1451,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 												.style("fill", "none")
 												.style("stroke", "red")
 												.style("stroke-width",5);
+
 										});
 									});
 								}
@@ -1465,6 +1463,12 @@ angular.module('myApp.controllers', ['myApp.services'])
 			};
 
 
+			$scope.model.resetTransparentPlan = function()
+			{
+				var transparentPlan = d3.select("#transparent-plan");
+				// Remove old element
+				transparentPlan.selectAll("svg").remove();
+			};
 
 			// Event launched when click on the save button.
 			$scope.model.saveQueueElement = function () {
@@ -1472,17 +1476,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 				var id = $scope.model.outcomingQueue._id;
 
 				$scope.model.getQueueWithId(id).$promise.then(function (data) {
-					var outcomingQueue = data;
+					var newOutcomingQueue = data;
 
 					var dataToPush = {};
 					dataToPush["inData"] = {};
 					dataToPush["inData"]["data"] = $scope.model.inData;
 					dataToPush["inData"]["date"] = $scope.model.initialDate;
 					dataToPush["outData"] = {};
-
-//                    var now = new Date();
-//                    var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-//                    var date = new Date(now_utc.getTime());
 
 					var date = new Date(); // already UTC ddate in JSON Format...
 
@@ -1522,8 +1522,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 					$scope.model.queueData.data = dataToPush;
 
-					outcomingQueue.id_list = [$scope.model.queueData];
-					$scope.model.updateQueueOnServer(outcomingQueue);
+					newOutcomingQueue.id_list = [$scope.model.queueData];
+					$scope.model.updateQueueOnServer(newOutcomingQueue);
 
 					// call only if button have to be disabled
 //							$scope.model.updateSaveButtonStatus(false);
@@ -1537,10 +1537,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 			// Event launched when click on the next button
 			$scope.model.nextQueueElement = function () {
 
+				var buttonNext = document.getElementById("buttonNext");
+
+				// Push queue ONLY if a "Skip" as been done. NOT when "Start" has been pressed.
+				if (buttonNext.innerHTML === "Skip") {
+
 				var id = $scope.model.outcomingQueue._id;
 
 				$scope.model.getQueueWithId(id).$promise.then(function (data) {
-					var outcomingQueue = data;
+					var newOutcomingQueue = data;
 
 					var dataToPush = {};
 					dataToPush["inData"] = {};
@@ -1548,35 +1553,33 @@ angular.module('myApp.controllers', ['myApp.services'])
 					dataToPush["inData"]["date"] = $scope.model.initialDate;
 					dataToPush["outData"] = {};
 
-//                    var now = new Date();
-//                    var now_utc = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-//                    var date = new Date(now_utc.getTime());
-
 					var date = new Date(); // already UTC ddate in JSON Format...
 
 					var user = $cookieStore.get("current.user");
-					var data = [];
+					var newData = [];
 					for (var i in $scope.model.queueTableData) {
-						data[i] = $scope.model.queueTableData[i];
+						newData[i] = $scope.model.queueTableData[i];
 					}
 					dataToPush["outData"]["date"] = date;
 					dataToPush["outData"]["duration"] = date - $scope.model.initialDate;
 					dataToPush["outData"]["user"] = user;
-					dataToPush["outData"]["data"] = data;
+					dataToPush["outData"]["data"] = newData;
 
 					//status
 					dataToPush["status"] = "SKIP";
 
 					$scope.model.queueData.data = dataToPush;
 
-					outcomingQueue.id_list = [$scope.model.queueData];
-					$scope.model.updateQueueOnServer(outcomingQueue);
+					newOutcomingQueue.id_list = [$scope.model.queueData];
+					$scope.model.updateQueueOnServer(newOutcomingQueue);
 
-					$scope.model.updateSaveButtonStatus(false);
+					// call only if button have to be disabled
+					//$scope.model.updateSaveButtonStatus(false);
 				});
 
 
 				console.log("skip");
+				}
 
 				$scope.model.initQueueData();
 			};
@@ -1609,6 +1612,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 					// Removes all element from table
 					$scope.model.queueTableData = undefined;
+
 				}
 				else {
 					buttonNext.setAttribute("class", "btn btn-primary");
@@ -1640,6 +1644,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 				if ($scope.model.disableAddEntryButton) {
 					// Disables add entry button
 					addEntryButton.setAttribute("class", "btn btn-default disabled");
+
+					// Remove previous rects
+					$scope.model.resetTransparentPlan();
 				}
 				else {
 					addEntryButton.setAttribute("class", "btn btn-default");
