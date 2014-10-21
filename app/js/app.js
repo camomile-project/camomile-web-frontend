@@ -4,6 +4,7 @@
 angular.module(
         'myApp',
         ['myApp.filters',
+            'myApp.config',
             'myApp.services',
             'myApp.directives',
             'myApp.controllers',

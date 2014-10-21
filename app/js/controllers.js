@@ -1854,7 +1854,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 //
 //					});
 
-			
+
 //	            $scope.model.createFakeQueue();
 //           	$scope.model.addFakeValues();
 

@@ -1,14 +1,14 @@
 'use strict';
 
-
 angular.module('myApp.services', ['ngResource'])
-
-
-//DB adress
-//  	.value('DataRoot', 'http://localhost:3000')
-//		.value('DataRoot', 'https://flower.limsi.fr/data')
-    .value('DataRoot', 'https://flower.limsi.fr/crpgl/api')
-    .value('ToolRoot', 'https://flower.limsi.fr/tool')
+//
+//
+////DB adress
+////  	.value('DataRoot', 'http://localhost:3000')
+////		.value('DataRoot', 'https://flower.limsi.fr/data')
+//    .value('DataRoot', 'https://flower.limsi.fr/crpgl/api')
+//    .value('ToolRoot', 'https://flower.limsi.fr/tool')
+angular.module('myApp.services', ['ngResource', 'myApp.config'])
 
     .factory('Queue', ['$resource', 'DataRoot',
         function ($resource, DataRoot) {
