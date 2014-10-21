@@ -1461,13 +1461,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 													.style("height", "100%")
 													.append("rect")
 													.attr("x",function(){
-														return (($("#player").width())*data.position.left - data.position.width/2) +"px";
+														return (($("#player").width())*data.fragment.position.left - ($("#player").width()*data.fragment.position.width)/2) +"px";
 													})
 													.attr("y", function(){
-														return ($("#player").height()*data.position.top) - data.position.height/2 +"px";
+														return ($("#player").height()*data.fragment.position.top) - ($("#player").height()*data.fragment.position.height)/2 +"px";
 													})
-													.attr("width",data.position.width)
-													.attr("height",data.position.height)
+													.attr("width",$("#player").width()*data.fragment.position.width)
+													.attr("height",$("#player").height()*data.fragment.position.height)
 													.style("fill", "none")
 													.style("stroke", "red")
 													.style("stroke-width",5);
@@ -1830,14 +1830,15 @@ angular.module('myApp.controllers', ['myApp.services'])
 									data: ["Rachid_M_BARKI"],
 									fragment: {
 										start: 340.27,
-										end: 340.27
-									},
-									"position": {
-										"top": 0.3,
-										"left": 0.54,
-										"width": 60,
-										"height": 60
+										end: 340.27,
+										"position": {
+											"top": 0.3,
+											"left": 0.54,
+											"width": 0.1,
+											"height": 0.2
+										}
 									}
+
 								}
 							];
 
@@ -1888,7 +1889,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
 //	            $scope.model.createFakeQueue();
-//           	$scope.model.addFakeValues();
+           	$scope.model.addFakeValues();
 
 			// reinit outcoming
 //            db.queues.update({ _id: ObjectId("54085dd383950d581c8bd062") },{ $set: { queue: [] } })
