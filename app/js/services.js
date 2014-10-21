@@ -110,7 +110,12 @@ angular.module('myApp.services', ['ngResource'])
                         withCredentials: true,
                         format: '.json',
                         isArray: true
-                    }
+                    },
+										'get': {
+											method: 'GET',
+											withCredentials: true,
+											format: '.json'
+										}
                 });
         }
     ])

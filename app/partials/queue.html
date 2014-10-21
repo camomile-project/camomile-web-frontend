@@ -2,41 +2,54 @@
     <div class="container-fluid" ng-init="model.initQueueData(true)">
 
         <div class="row top-padding">
-            <div class="col-lg-2 col-md-pull-0 col-xs-pull-0">
-            </div>
-            <div class="col-lg-8 col-md-12 col-xs-12">
+            <div class="col-lg-2 col-md-pull-0 col-xs-pull-0"></div>
+            <div class="col-lg-8 col-md-10 col-xs-10">
                 <div id="video-container" >
                     <!-- video player behaviour managed by cm-video-player angular attribute -->
                     <video id="player"
                            cm-video-player
                            ng-src={{model.video}}
-                           width="100%">
+                           height="360px">
                     </video>
-                    <!-- Video Controls interact with the player via the controller. -->
-                    <!-- Multiple and/or distributed controls can thus be implemented -->
-                    <div id="video-controls">
-                        <div class="row">
-                            <div class="col-md-1">
+                    <div class="controls">
+                            <div id="play-button">
                                 <button type="button" class="video-control" id="play-pause"
-                                        ng-click="model.toggle_play()">
+                                    ng-click="model.toggle_play()">
                                     {{ model.play_label }}
                                 </button>
+                                <!-- use directive for quite simple way to indicate annotation to perform -->
+                                <!-- + extensible for reference layer and controls for extension to x seconds -->
                             </div>
-                            <div class="col-md-9">
-                                <input width="100%" type="range" id="seek-bar"
-                                       min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
-                                       step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
+                            <!--!!! KNOWN PROBLEM WITH INPUT RANGE TYPE-->
+                            <!--see https://github.com/angular/angular.js/issues/6726-->
+                            <div id="control-bar">
+                                <svg id="controlsvg" cm-context-bar></svg>
+                                <div id="controlsoverlay">
+                                    <input width="100%" type="range" id="seek-bar"
+                                           min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
+                                           step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
+                                </div>
                             </div>
-                            <div class="col-md-2">
-                                <label style="color: #ffffff;">{{ model.current_time_display }}</label>
+                            <div id="time-display">
+                                <label>{{ model.current_time_display }}</label>
                             </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
-
         </div>
+
+        <div class="row top-padding">
+            <div class="col-lg-1 col-md-pull-0 col-xs-pull-0"></div>
+            <div class="col-lg-3 col-md-3 col-xs-3">
+                <div class="input-group" >
+                    <span class="input-group-addon">Context: +/- </span>
+                    <input type="text" class="form-control" ng-model="model.context_size"/>
+                    <span class="input-group-addon"> s</span>
+                </div>
+            </div>
+        </div>
+
+
 
     </div>
 
@@ -168,4 +181,75 @@
             </li>
         </ul>
     </div>
+
+    <script>
+        // hack for sending events through controlsoverlay
+        function fireEvent(node, eventName, origEvent) {
+            // Make sure we use the ownerDocument from the provided node to avoid cross-window problems
+            var doc;
+            if (node.ownerDocument) {
+                doc = node.ownerDocument;
+            } else if (node.nodeType == 9){
+                // the node may be the document itself, nodeType 9 = DOCUMENT_NODE
+                doc = node;
+            } else {
+                throw new Error("Invalid node passed to fireEvent: " + node.id);
+            }
+
+            if (node.dispatchEvent) {
+                // Gecko-style approach (now the standard) takes more work
+                var eventClass = "";
+
+                // Different events have different event classes.
+                // If this switch statement can't map an eventName to an eventClass,
+                // the event firing is going to fail.
+                switch (eventName) {
+                    case "click": // Dispatching of 'click' appears to not work correctly in Safari. Use 'mousedown' or 'mouseup' instead.
+                    case "mousedown":
+                    case "mouseup":
+                    case "mouseover":
+                    case "mouseout":
+                    case "mousemove":
+                        eventClass = "MouseEvents";
+                        break;
+
+                    case "focus":
+                    case "change":
+                    case "blur":
+                    case "select":
+                        eventClass = "HTMLEvents";
+                        break;
+
+                    default:
+                        throw "fireEvent: Couldn't find an event class for event '" + eventName + "'.";
+                        break;
+                }
+                var event = doc.createEvent(eventClass);
+
+                var bubbles = eventName == "change" ? false : true;
+                event.initMouseEvent(eventName, true, true, window, 1, origEvent.screenX, origEvent.screenY,
+                        origEvent.clientX, origEvent.clientY);
+
+                event.synthetic = true; // allow detection of synthetic events
+                // The second parameter says go ahead with the default action
+                node.dispatchEvent(event, true);
+            } else  if (node.fireEvent) {
+                // IE-old school style
+                var event = doc.createEventObject();
+                event.synthetic = true; // allow detection of synthetic events
+                node.fireEvent("on" + eventName, event);
+            }
+        };
+
+        // transmit events to SVG
+        $( "#controlsoverlay" ).mousemove(function(e) {
+            fireEvent($( "#controlsvg" )[0], "mousemove", e);
+        });
+        $( "#controlsoverlay" ).mouseout(function(e) {
+            fireEvent($( "#controlsvg" )[0], "mouseout", e);
+        });
+
+    </script>
+
+
 </div>

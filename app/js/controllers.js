@@ -1291,6 +1291,9 @@ angular.module('myApp.controllers', ['myApp.services'])
                 });
             });
 
+						// default for annotation context
+						$scope.model.context_size = 5;
+
             // store the entry typed in the textbox
             $scope.model.entryTyped = "";
 
@@ -1412,10 +1415,16 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                             if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
                                 $scope.model.restrict_toggle = 2;
-                                $scope.model.infbndsec = $scope.model.queueData.fragment.start;
-                                $scope.model.supbndsec = $scope.model.queueData.fragment.end;
-                                $scope.model.duration = $scope.model.queueData.fragment.end - $scope.model.queueData.fragment.start;
-                                $scope.model.current_time = $scope.model.infbndsec;
+                                $scope.model.infbndsec = $scope.model.queueData.fragment.start - $scope.model.context_size;
+																if($scope.model.infbndsec < 0) {
+																	$scope.model.infbndsec = 0;
+																}
+                                $scope.model.supbndsec = $scope.model.queueData.fragment.end + parseInt($scope.model.context_size);
+																if($scope.model.supbndsec > $scope.model.fullDuration) {
+																	$scope.model.supbndsec = $scope.model.fullDuration;
+																}
+                                $scope.model.duration = $scope.model.supbndsec - $scope.model.queueData.infbndsec;
+                                $scope.model.current_time = $scope.model.queueData.fragment.start;
 
                             }
 
@@ -1695,39 +1704,40 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                         queue.id_list = [
                             {
-                                id_corpus: "52fb49016ed21ede00000009",
-                                id_medium: "52fb4ec46ed21ede00000018",
-                                _id: "52fe3fd811d4fade00007c2a",
-                                id_layer: "52fe3fd811d4fade00007c29",
-                                data: ["Olivier_TRUCHOT"],
-                                fragment: {
-                                    start: 258.9,
-                                    end: 314.29
-                                }
+															id_corpus: "52fe3fd811d4fade00007c2c",
+															id_medium: "52fb4ec46ed21ede00000018",
+															_id: "52fb49016ed21ede00000009",
+															id_layer: "52fe3fd811d4fade00007c29",
+															data: ["Rachid_M_BARKI"],
+															fragment: {
+																	start: 340.27,
+																	end: 362.18
+															},
+															"context": {
+																_id: "52fe49d8350185de000015ab",
+																id_corpus: "52fe3fd811d4fade00007c2c",
+																id_medium: "52fb4ec46ed21ede00000018"
+															}
                             },
-                            {
-                                id_corpus: "52fb49016ed21ede00000009",
-                                id_medium: "52fb4ec46ed21ede00000018",
-                                _id: "52fe3fd811d4fade00007c2b",
-                                id_layer: "52fe3fd811d4fade00007c29",
-                                data: ["Olivier_TRUCHOT"],
-                                fragment: {
-                                    start: 330.21,
-                                    end: 340.27
-                                }
-                            },
-                            {
-                                id_corpus: "52fe3fd811d4fade00007c2c",
-                                id_medium: "52fb4ec46ed21ede00000018",
-                                _id: "52fb49016ed21ede00000009",
-                                id_layer: "52fe3fd811d4fade00007c29",
-                                data: ["Rachid_M_BARKI"],
-                                fragment: {
-                                    start: 340.27,
-                                    end: 362.18
-                                }
-                            }
-                        ];
+														{
+															id_corpus: "52fb49016ed21ede00000009",
+															id_medium: "52fb4ec46ed21ede00000018",
+															_id: "52fe3fd811d4fade00007c2b",
+															id_layer: "52fe3fd811d4fade00007c29",
+															data: ["Olivier_TRUCHOT"],
+															fragment: {
+																	start: 330.21,
+																	end: 340.27
+															},
+															"context": {
+																_id: "52fe49d8350185de000015ab",
+																id_corpus: "52fe3fd811d4fade00007c2c",
+																id_medium: "52fb4ec46ed21ede00000018"
+															}
+
+														}
+
+												];
 
 
                         // update it on server
@@ -1737,12 +1747,36 @@ angular.module('myApp.controllers', ['myApp.services'])
             };
 
 //             $scope.model.createFakeQueue();
-           	$scope.model.addFakeValues();
+//           	$scope.model.addFakeValues();
 
             // reinit outcoming
-//            db.queues.update({ _id: ObjectId("5444d6bf3d55e27009e5d11b") },{ $set: { queue: [] } })
-            // db.queues.update({ _id: ObjectId("5444d6bf3d55e27009e5d11c") },{ $set: { queue: [] } })
+//            db.queues.update({ _id: ObjectId("54085dd383950d581c8bd062") },{ $set: { queue: [] } })
+            // db.queues.update({ _id: ObjectId("54085db083950d581c8bd061") },{ $set: { queue: [] } })
 
+						$scope.$watch('model.context_size', function(newValue) {
+							newValue = parseInt(newValue);
+							if(isNaN(newValue)) {
+								newValue = 0;
+							}
+							if ($scope.model.queueData !== undefined
+									&& $scope.model.queueData.fragment !== undefined
+									&& $scope.model.queueData.fragment.start !== undefined) {
+								$scope.model.infbndsec = $scope.model.queueData.fragment.start - newValue;
+								if($scope.model.infbndsec < 0) {
+									$scope.model.infbndsec = 0;
+								}
+								$scope.model.supbndsec = $scope.model.queueData.fragment.end + newValue;
+								if($scope.model.supbndsec > $scope.model.fullDuration) {
+									$scope.model.supbndsec = $scope.model.fullDuration;
+								}
+								$scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
+								if($scope.model.current_time < $scope.model.infbndsec) {
+									$scope.model.current_time = $scope.model.infbndsec;
+								}
+								if($scope.model.current_time > $scope.model.supbndsec) {
+									$scope.model.current_time = $scope.model.supbndsec;
+								}
+						}});
 
         }]);
 
