@@ -2,7 +2,7 @@
 
 ## GitHub Pages
 
-In order to deploy the app to GitHub Pages ([http://camomile-project.github.io/camomile-web-frontend](http://camomile-project.github.io/camomile-web-frontend), follow this two-steps process.
+In order to deploy the app to GitHub Pages ([http://camomile-project.github.io/camomile-web-frontend](http://camomile-project.github.io/camomile-web-frontend)), follow this two-steps process.
 
 **Step 1:** run web-server.js once (and kill it) to generate `app/config.js`.
 
