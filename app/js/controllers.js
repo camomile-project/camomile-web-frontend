@@ -55,6 +55,16 @@ angular.module('myApp.controllers', ['myApp.services'])
 						$cookieStore.remove("current.user");
 						Session.username = undefined;
 						$scope.model.message = undefined;
+
+						// reload page
+						window.location.reload();
+					})
+					.error(function (err) {
+						Session.isLogged = false;
+						Session.username = undefined;
+						$cookieStore.remove("current.user");
+						$scope.model.message = "Connection error";
+						console.log(err);
 					});
 			};
 
@@ -81,8 +91,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}
 	])
 	.controller('BaseCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-		'CMError', 'defaults', 'palette',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette) {
+		'CMError', 'defaults', 'palette', 'Session',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, Session) {
 
 			delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -107,6 +117,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model.play_label = "Play";
 
 			$scope.model.layers = [];
+
+			// test if user is logged or not
+			$scope.isLogged = function () {
+				return Session.isLogged;
+			};
 
 			// init color index
 			var curColInd = 0;
@@ -250,14 +265,16 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 			// get list of corpora
 			$scope.get_corpora = function () {
-				$scope.model.available_corpora = Corpus.query(function () {
-					// initializing layerWatch after corpora are loaded
-					// Adds empty layers as border effect
-					$scope.model.layerWatch = [$scope.model.layers[0]._id,
-						$scope.model.layers[1]._id,
-						$scope.model.layers[2]._id
-					];
-				});
+				if($scope.isLogged()){
+					$scope.model.available_corpora = Corpus.query(function () {
+						// initializing layerWatch after corpora are loaded
+						// Adds empty layers as border effect
+						$scope.model.layerWatch = [$scope.model.layers[0]._id,
+							$scope.model.layers[1]._id,
+							$scope.model.layers[2]._id
+						];
+					});
+				}
 			};
 
 			// get list of media for a given corpus
@@ -583,8 +600,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}])
 	.
 	controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-		'CMError', 'defaults', 'palette', 'DataRoot', '$controller',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller) {
+		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Session',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Session) {
 
 			$controller('BaseCtrl',
 				{
@@ -597,7 +614,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					Annotation: Annotation,
 					CMError: CMError,
 					defaults: defaults,
-					palette: palette
+					palette: palette,
+					Session:Session
 				});
 
 
@@ -767,8 +785,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}])
 
 	.controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-		'defaults', 'palette', 'DataRoot', '$controller',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller) {
+		'defaults', 'palette', 'DataRoot', '$controller', 'Session',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Session) {
 
 			delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -783,7 +801,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					Annotation: Annotation,
 					CMError: CMError,
 					defaults: defaults,
-					palette: palette
+					palette: palette,
+					Session:Session
 				});
 
 
@@ -1264,8 +1283,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}
 	])
 	.controller('QueueCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Queue', 'QueuePush', '$cookieStore',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Queue, QueuePush, $cookieStore) {
+		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Queue', 'QueuePush', '$cookieStore', 'Session',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Queue, QueuePush, $cookieStore, Session) {
 
 			$controller('BaseCtrl',
 				{
@@ -1278,7 +1297,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					Annotation: Annotation,
 					CMError: CMError,
 					defaults: defaults,
-					palette: palette
+					palette: palette,
+					Session:Session
 				});
 
 			$scope.queues = [];
@@ -1359,107 +1379,108 @@ angular.module('myApp.controllers', ['myApp.services'])
 			// Initializes the data from the queue
 			$scope.model.initQueueData = function (firstInit) {
 
-				$scope.model.getQueues().$promise.then(function (data) {
-
-					//$scope.model.onlyHead = $scope.model.queueMode === "HEAD";
-
-					for (var queue in data) {
-						if (!$scope.model.onlyHead && data[queue].name === "shotIncoming") {
-							$scope.model.incomingQueue = data[queue];
-						}
-						else if (!$scope.model.onlyHead && data[queue].name === "shotOutcoming") {
-							$scope.model.outcomingQueue = data[queue];
-						}
-						else if ($scope.model.onlyHead && data[queue].name === "headIncoming") {
-							$scope.model.incomingQueue = data[queue];
-						}
-						else if ($scope.model.onlyHead && data[queue].name === "headOutcoming") {
-							$scope.model.outcomingQueue = data[queue];
-						}
-					}
-
-					var id = $scope.model.incomingQueue._id;
+				if($scope.isLogged()){
+					$scope.model.getQueues().$promise.then(function (data) {
 
 
-					// Update the next button's status
-					$scope.model.updateNextStatus(firstInit);
-
-					$scope.model.updateSaveButtonStatus(firstInit === undefined);
-					$scope.model.updateAddEntryButtonStatus(firstInit === undefined);
-
-					if (firstInit === undefined) {
-						$scope.model.getNextQueueData(id).$promise.then(function (data) {
-
-							$scope.model.queueData = data;
-
-							$scope.model.inData = [];
-
-							$scope.model.queueTableData = [];
-
-							var date = new Date(); // already UTC ddate in JSON Format...
-
-							$scope.model.initialDate = date;
-
-							//copy initial data
-							for (var i in $scope.model.queueData.data) {
-								$scope.model.inData[i] = $scope.model.queueData.data[i];
-								$scope.model.queueTableData[i] = $scope.model.queueData.data[i];
-								if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
-									$scope.model.availableEntry.push($scope.model.queueData.data[i]);
-								}
+						for (var queue in data) {
+							if (!$scope.model.onlyHead && data[queue].name === "shotIncoming") {
+								$scope.model.incomingQueue = data[queue];
 							}
+							else if (!$scope.model.onlyHead && data[queue].name === "shotOutcoming") {
+								$scope.model.outcomingQueue = data[queue];
+							}
+							else if ($scope.model.onlyHead && data[queue].name === "headIncoming") {
+								$scope.model.incomingQueue = data[queue];
+							}
+							else if ($scope.model.onlyHead && data[queue].name === "headOutcoming") {
+								$scope.model.outcomingQueue = data[queue];
+							}
+						}
 
-							// Update the next button's status
-							$scope.model.updateNextStatus(firstInit);
+						var id = $scope.model.incomingQueue._id;
 
-							// Update the add entry button's status
-							$scope.model.updateAddEntryButtonStatus($scope.model.inData.length != 0);
 
-							// Get the video
-							$scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
-								$scope.model.queueData.id_corpus + "/media/" + $scope.model.queueData.id_medium + "/video");
+						// Update the next button's status
+						$scope.model.updateNextStatus(firstInit);
 
-							if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
-								$scope.model.restrict_toggle = 2;
-								$scope.model.infbndsec = $scope.model.queueData.fragment.start;
-								$scope.model.supbndsec = $scope.model.queueData.fragment.end;
-								$scope.model.duration = $scope.model.queueData.fragment.end - $scope.model.queueData.fragment.start;
-								$scope.model.current_time = $scope.model.infbndsec;
+						$scope.model.updateSaveButtonStatus(firstInit === undefined);
+						$scope.model.updateAddEntryButtonStatus(firstInit === undefined);
 
-								if($scope.model.onlyHead){
-									// at the end of video loading, draw a rectangle on head as described in "position"
-									document.getElementById("player").addEventListener("loadedmetadata", function(){
-										$scope.$apply(function(){
+						if (firstInit === undefined) {
+							$scope.model.getNextQueueData(id).$promise.then(function (data) {
 
-											// Remove previous rects
-											$scope.model.resetTransparentPlan();
+								$scope.model.queueData = data;
 
-											// Rectangle style: draw a rectangle at the described position (in position)
-											var transparentPlan = d3.select("#transparent-plan");
-											transparentPlan.append("svg")
-												.style("width", "100%")
-												.style("height", "100%")
-												.append("rect")
-												.attr("x",function(){
-													return (($("#player").width())*data.position.left - data.position.width/2) +"px";
-												})
-												.attr("y", function(){
-													return ($("#player").height()*data.position.top) - data.position.height/2 +"px";
-												})
-												.attr("width",data.position.width)
-												.attr("height",data.position.height)
-												.style("fill", "none")
-												.style("stroke", "red")
-												.style("stroke-width",5);
+								$scope.model.inData = [];
 
+								$scope.model.queueTableData = [];
+
+								var date = new Date(); // already UTC ddate in JSON Format...
+
+								$scope.model.initialDate = date;
+
+								//copy initial data
+								for (var i in $scope.model.queueData.data) {
+									$scope.model.inData[i] = $scope.model.queueData.data[i];
+									$scope.model.queueTableData[i] = $scope.model.queueData.data[i];
+									if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
+										$scope.model.availableEntry.push($scope.model.queueData.data[i]);
+									}
+								}
+
+								// Update the next button's status
+								$scope.model.updateNextStatus(firstInit);
+
+								// Update the add entry button's status
+								$scope.model.updateAddEntryButtonStatus($scope.model.inData.length != 0);
+
+								// Get the video
+								$scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
+									$scope.model.queueData.id_corpus + "/media/" + $scope.model.queueData.id_medium + "/video");
+
+								if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
+									$scope.model.restrict_toggle = 2;
+									$scope.model.infbndsec = $scope.model.queueData.fragment.start;
+									$scope.model.supbndsec = $scope.model.queueData.fragment.end;
+									$scope.model.duration = $scope.model.queueData.fragment.end - $scope.model.queueData.fragment.start;
+									$scope.model.current_time = $scope.model.infbndsec;
+
+									if($scope.model.onlyHead){
+										// at the end of video loading, draw a rectangle on head as described in "position"
+										document.getElementById("player").addEventListener("loadedmetadata", function(){
+											$scope.$apply(function(){
+
+												// Remove previous rects
+												$scope.model.resetTransparentPlan();
+
+												// Rectangle style: draw a rectangle at the described position (in position)
+												var transparentPlan = d3.select("#transparent-plan");
+												transparentPlan.append("svg")
+													.style("width", "100%")
+													.style("height", "100%")
+													.append("rect")
+													.attr("x",function(){
+														return (($("#player").width())*data.fragment.position.left - ($("#player").width()*data.fragment.position.width)/2) +"px";
+													})
+													.attr("y", function(){
+														return ($("#player").height()*data.fragment.position.top) - ($("#player").height()*data.fragment.position.height)/2 +"px";
+													})
+													.attr("width",$("#player").width()*data.fragment.position.width)
+													.attr("height",$("#player").height()*data.fragment.position.height)
+													.style("fill", "none")
+													.style("stroke", "red")
+													.style("stroke-width",5);
+
+											});
 										});
-									});
+									}
 								}
-							}
-						});
-					}
+							});
+						}
 
-				});
+					});
+				}
 			};
 
 
@@ -1713,115 +1734,120 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model.createFakeQueue = function () {
 				// update it on server
 				// create queue
-				$scope.model.createNewQueue("shotIncoming");
+				if($scope.isLogged()){
+					$scope.model.createNewQueue("shotIncoming");
 
-				$scope.model.createNewQueue("shotOutcoming");
+					$scope.model.createNewQueue("shotOutcoming");
 
-				$scope.model.createNewQueue("headIncoming");
+					$scope.model.createNewQueue("headIncoming");
 
-				$scope.model.createNewQueue("headOutcoming");
+					$scope.model.createNewQueue("headOutcoming");
+				}
 			};
 
 			$scope.model.addFakeValues = function () {
 
-				$scope.model.getQueues().$promise.then(function (data) {
+				if($scope.isLogged()){
+					$scope.model.getQueues().$promise.then(function (data) {
 
-					$scope.queues = data;
+						$scope.queues = data;
 
-					for (var queue in $scope.queues) {
-						if ($scope.queues[queue].name == undefined) {
+						for (var queue in $scope.queues) {
+							if ($scope.queues[queue].name == undefined) {
 
-						}
-						else if ($scope.queues[queue].name === "shotIncoming") {
-							$scope.model.incomingQueue = $scope.queues[queue];
-						}
-						else if ($scope.queues[queue].name === "shotOutcoming") {
-							$scope.model.outcomingQueue = $scope.queues[queue];
-						}
-						else if ($scope.queues[queue].name === "headIncoming") {
-							$scope.model.headincomingQueue = $scope.queues[queue];
-						}
-						else if ($scope.queues[queue].name === "headOutcoming") {
-							$scope.model.headoutcomingQueue = $scope.queues[queue];
-						}
-					}
-
-					var id = $scope.model.incomingQueue._id;
-					// get queue
-					$scope.model.getQueueWithId(id).$promise.then(function (data) {
-						var queue = data;
-
-						queue.id_list = [
-							{
-								id_corpus: "52fb49016ed21ede00000009",
-								id_medium: "52fb4ec46ed21ede00000018",
-								_id: "52fe3fd811d4fade00007c2a",
-								id_layer: "52fe3fd811d4fade00007c29",
-								data: ["Olivier_TRUCHOT"],
-								fragment: {
-									start: 258.9,
-									end: 314.29
-								}
-							},
-							{
-								id_corpus: "52fb49016ed21ede00000009",
-								id_medium: "52fb4ec46ed21ede00000018",
-								_id: "52fe3fd811d4fade00007c2b",
-								id_layer: "52fe3fd811d4fade00007c29",
-								data: ["Olivier_TRUCHOT"],
-								fragment: {
-									start: 330.21,
-									end: 340.27
-								}
-							},
-							{
-								id_corpus: "52fe3fd811d4fade00007c2c",
-								id_medium: "52fb4ec46ed21ede00000018",
-								_id: "52fb49016ed21ede00000009",
-								id_layer: "52fe3fd811d4fade00007c29",
-								data: ["Rachid_M_BARKI"],
-								fragment: {
-									start: 340.27,
-									end: 362.18
-								}
 							}
-						];
+							else if ($scope.queues[queue].name === "shotIncoming") {
+								$scope.model.incomingQueue = $scope.queues[queue];
+							}
+							else if ($scope.queues[queue].name === "shotOutcoming") {
+								$scope.model.outcomingQueue = $scope.queues[queue];
+							}
+							else if ($scope.queues[queue].name === "headIncoming") {
+								$scope.model.headincomingQueue = $scope.queues[queue];
+							}
+							else if ($scope.queues[queue].name === "headOutcoming") {
+								$scope.model.headoutcomingQueue = $scope.queues[queue];
+							}
+						}
 
+						var id = $scope.model.incomingQueue._id;
+						// get queue
+						$scope.model.getQueueWithId(id).$promise.then(function (data) {
+							var queue = data;
 
-						// update it on server
-						$scope.model.updateQueueOnServer(queue);
-					});
-
-					var id = $scope.model.headincomingQueue._id;
-					// get queue
-					$scope.model.getQueueWithId(id).$promise.then(function (data) {
-						var queue = data;
-
-						queue.id_list = [
-							{
-								id_corpus: "52fe3fd811d4fade00007c2c",
-								id_medium: "52fb4ec46ed21ede00000018",
-								_id: "52fb49016ed21ede00000009",
-								id_layer: "52fe3fd811d4fade00007c29",
-								data: ["Rachid_M_BARKI"],
-								fragment: {
-									start: 340.27,
-									end: 340.27
+							queue.id_list = [
+								{
+									id_corpus: "52fb49016ed21ede00000009",
+									id_medium: "52fb4ec46ed21ede00000018",
+									_id: "52fe3fd811d4fade00007c2a",
+									id_layer: "52fe3fd811d4fade00007c29",
+									data: ["Olivier_TRUCHOT"],
+									fragment: {
+										start: 258.9,
+										end: 314.29
+									}
 								},
-								"position": {
-									"top": 0.3,
-									"left": 0.54,
-									"width": 60,
-									"height": 60
+								{
+									id_corpus: "52fb49016ed21ede00000009",
+									id_medium: "52fb4ec46ed21ede00000018",
+									_id: "52fe3fd811d4fade00007c2b",
+									id_layer: "52fe3fd811d4fade00007c29",
+									data: ["Olivier_TRUCHOT"],
+									fragment: {
+										start: 330.21,
+										end: 340.27
+									}
+								},
+								{
+									id_corpus: "52fe3fd811d4fade00007c2c",
+									id_medium: "52fb4ec46ed21ede00000018",
+									_id: "52fb49016ed21ede00000009",
+									id_layer: "52fe3fd811d4fade00007c29",
+									data: ["Rachid_M_BARKI"],
+									fragment: {
+										start: 340.27,
+										end: 362.18
+									}
 								}
-							}
-						];
+							];
 
 
-						// update it on server
-						$scope.model.updateQueueOnServer(queue);
+							// update it on server
+							$scope.model.updateQueueOnServer(queue);
+						});
+
+						var id = $scope.model.headincomingQueue._id;
+						// get queue
+						$scope.model.getQueueWithId(id).$promise.then(function (data) {
+							var queue = data;
+
+							queue.id_list = [
+								{
+									id_corpus: "52fe3fd811d4fade00007c2c",
+									id_medium: "52fb4ec46ed21ede00000018",
+									_id: "52fb49016ed21ede00000009",
+									id_layer: "52fe3fd811d4fade00007c29",
+									data: ["Rachid_M_BARKI"],
+									fragment: {
+										start: 340.27,
+										end: 340.27,
+										"position": {
+											"top": 0.3,
+											"left": 0.54,
+											"width": 0.1,
+											"height": 0.2
+										}
+									}
+
+								}
+							];
+
+
+							// update it on server
+							$scope.model.updateQueueOnServer(queue);
+						});
 					});
-				});
+				}
 			};
 
 			//TODO uniquement si on veut pouvoir dessiner un rectangle au click!!!
@@ -1863,7 +1889,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
 //	            $scope.model.createFakeQueue();
-//           	$scope.model.addFakeValues();
+           	$scope.model.addFakeValues();
 
 			// reinit outcoming
 //            db.queues.update({ _id: ObjectId("54085dd383950d581c8bd062") },{ $set: { queue: [] } })

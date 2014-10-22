@@ -1,12 +1,13 @@
 # Camomile Web Front-End
 
-## GitHub Pages
+## Deploy with GitHub Pages
 
 In order to deploy the app to GitHub Pages ([http://camomile-project.github.io/camomile-web-frontend](http://camomile-project.github.io/camomile-web-frontend)), follow this two-steps process.
 
-**Step 1:** run web-server.js once (and kill it) to generate `app/config.js`.
+**Step 1:** install and run web-server.js once (and kill it) to generate `app/config.js`.
 
 ```
+$ npm install
 $ node web-server.js --camomile=blahblah.fr --pyannote=foobar.com
 ```
 
@@ -16,7 +17,9 @@ $ node web-server.js --camomile=blahblah.fr --pyannote=foobar.com
 $ ghp-import -n -p app
 ```
 
-## Docker
+[Enjoy](http://camomile-project.github.io/camomile-web-frontend)!
+
+## Deploy with Docker
 
 ```
 $ docker run -e CAMOMILE_API=https://camomile.fr/api -e PYANNOTE_API=https://pyannote.fr/tool camomile/web
@@ -33,7 +36,7 @@ $ cd camomile-web-frontend
 $ docker build -t camomile/web . 
 ```
 
-## Local setup
+## Deploy locally
 
 ### Installation 
 
