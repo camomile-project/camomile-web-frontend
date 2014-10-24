@@ -600,8 +600,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}])
 	.
 	controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Session',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Session) {
+		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter) {
 
 			$controller('BaseCtrl',
 				{
@@ -692,26 +692,22 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.compute_diff = function () {
 
 				var reference_and_hypothesis = {
-					'hypothesis': $scope.model.layers[1].layer,
-					'reference': $scope.model.layers[0].layer
+					'hypothesis': camomile2pyannoteFilter($scope.model.layers[1].layer),
+					'reference': camomile2pyannoteFilter($scope.model.layers[0].layer)
 				};
 
-				// have to check if hypothesis and reference are filled because it won't be tested server side.
-				if(reference_and_hypothesis.hypothesis.length>0 && reference_and_hypothesis.reference.length>0)
-				{
-					CMError.diff(reference_and_hypothesis).success(function (data) {
-						$scope.model.layers[2] = {
-							'label': 'Difference',
-							'_id': 'Computed_' + $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
-							'mapping': defaults.diffMapping,
-							'tooltipFunc': defaults.tooltip
-						};
+				CMError.diff(reference_and_hypothesis).success(function (data) {
+					$scope.model.layers[2] = {
+						'label': 'Difference',
+						'_id': 'Computed_' + $scope.model.layers[0]._id + '_vs_' + $scope.model.layers[1]._id,
+						'mapping': defaults.diffMapping,
+						'tooltipFunc': defaults.tooltip
+					};
 
-						$scope.model.layers[2].layer = data;
-//					$scope.model.layerWatch[2] = $scope.model.layers[2]._id;
-						$scope.model.layersUpdated = true;
-					});
-				}
+					$scope.model.layers[2].layer = pyannote2camomileFilter(data);
+					$scope.model.layersUpdated = true;
+				});
+
 			};
 
 
@@ -785,8 +781,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}])
 
 	.controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
-		'defaults', 'palette', 'DataRoot', '$controller', 'Session',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Session) {
+		'defaults', 'palette', 'DataRoot', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter) {
 
 			delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -893,9 +889,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.compute_regression = function () {
 
 				var reference_and_hypotheses = {
-					'reference': $scope.model.layers[0].layer,
-					'before': $scope.model.layers[1].layer,
-					'after': $scope.model.layers[2].layer
+					'reference': camomile2pyannoteFilter($scope.model.layers[0].layer),
+					'before': camomile2pyannoteFilter($scope.model.layers[1].layer),
+					'after': camomile2pyannoteFilter($scope.model.layers[2].layer)
 				};
 
 				CMError.regression(reference_and_hypotheses).success(function (data) {
@@ -908,7 +904,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 						'tooltipFunc': defaults.tooltip
 					};
 
-					$scope.model.layers[3].layer = data;
+					$scope.model.layers[3].layer = pyannote2camomileFilter(data);
 					$scope.model.layerWatch[3] = $scope.model.layers[3]._id;
 					$scope.model.layersUpdated = true;
 				});
@@ -994,8 +990,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}
 	])
 
-	.controller('FusionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults', 'palette',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette) {
+	.controller('FusionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults', 'palette', 'camomile2pyannoteFilter', 'pyannote2camomileFilter',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, camomile2pyannoteFilter, pyannote2camomileFilter) {
 
 			delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -1139,8 +1135,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.compute_diff = function () {
 
 				var reference_and_hypothesis = {
-					'hypothesis': $scope.model.layers[1].layer,
-					'reference': $scope.model.layers[0].layer
+					'hypothesis': camomile2pyannoteFilter($scope.model.layers[1].layer),
+					'reference': camomile2pyannoteFilter($scope.model.layers[0].layer)
 				};
 
 				CMError.diff(reference_and_hypothesis).success(function (data) {
@@ -1151,7 +1147,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 						'tooltipFunc': defaults.tooltip
 					};
 
-					$scope.model.layers[2].layer = data;
+					$scope.model.layers[2].layer = pyannote2camomileFilter(data);
 					$scope.model.layerWatch[2] = $scope.model.layers[2]._id;
 				});
 			};
