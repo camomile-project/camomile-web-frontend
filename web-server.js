@@ -71,6 +71,40 @@ function log_out(callback) {
         }); 
 };
 
+// delete one specific queue (based on its id) and callback
+function delete_one_queue(queue, callback) {
+
+    var options = {
+        method: 'DELETE',
+        url: camomile_api + '/queue/' + queue
+    };
+
+    request(
+        options, 
+        function (error, response, body) {
+            // TODO: error handling
+            console.log('   * deleted /queue/' + queue);
+            callback(error);
+        });
+};
+
+
+// delete several queues in parallel (based on their ids) and callback
+function delete_queues(queues, callback) {
+
+    console.log('Deleting queues');
+
+    async.each(
+        queues, 
+        delete_one_queue,
+        function (error) { 
+            // TODO: error handling
+            callback(error); 
+        }
+    );
+
+};
+
 // create one new queue with name `item`
 // and send queue ID to the callback
 function create_one_queue(item, callback) {
@@ -90,7 +124,8 @@ function create_one_queue(item, callback) {
         });
 };
 
-// create 4 new queues in parallel (shotIn, shotOut, headIn, headOut)
+// create 4 new queues in parallel (shotIn, shotOut, headIn, headOut),
+// remember to delete them when process is killed,
 // and send queues IDs to the next function (callback)
 function create_queues(callback) {
 
@@ -100,17 +135,32 @@ function create_queues(callback) {
         ['shotIn', 'shotOut', 'headIn', 'headOut'], 
         create_one_queue, 
         function(err, queues) {
+
             // TODO: error handling
-            queues = {
+
+            // remember to remove queues when process is sent SIGINT (Ctrl+C)
+            process.on('SIGINT', function() {
+                async.waterfall(
+                    [log_in, function(callback) { delete_queues(queues, callback); }, log_out],
+                    function (error) { 
+                        // TODO: error handling
+                        process.exit(); 
+                    }
+                );
+            });
+
+            queues_dict = {
                 'shotIn': queues[0],
                 'shotOut': queues[1],
                 'headIn': queues[2],
                 'headOut': queues[3]
             };
-            callback(null, queues);
+
+            callback(null, queues_dict);
         }
     );
 };
+
 
 // create NodeJS route "GET /config" returning front-end configuration as JSON
 // and callback (passing no results whatsoever)
