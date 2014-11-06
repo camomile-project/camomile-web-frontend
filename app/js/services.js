@@ -1,14 +1,7 @@
 'use strict';
 
-
-angular.module('myApp.services', ['ngResource'])
-
-
-//DB adress
-  	.value('DataRoot', 'http://localhost:3000')
-//		.value('DataRoot', 'https://flower.limsi.fr/data')
-//    .value('DataRoot', 'https://flower.limsi.fr/crpgl/api')
-    .value('ToolRoot', 'https://flower.limsi.fr/tool')
+// NOTE: myApp.config defines DataRoot and ToolRoot used for remote data access
+angular.module('myApp.services', ['ngResource', 'myApp.config'])
 
     .factory('Queue', ['$resource', 'DataRoot',
         function ($resource, DataRoot) {
@@ -110,12 +103,7 @@ angular.module('myApp.services', ['ngResource'])
                         withCredentials: true,
                         format: '.json',
                         isArray: true
-                    },
-										'get': {
-											method: 'GET',
-											withCredentials: true,
-											format: '.json'
-										}
+                    }
                 });
         }
     ])
@@ -182,9 +170,9 @@ angular.module('myApp.services', ['ngResource'])
                     });
                 },
 
-                logout: function () {
+                logout: function (credentials) {
                     var url = DataRoot + '/logout';
-                    return $http.get(url, {
+                    return $http.post(url, credentials, {
                         withCredentials: true
                     });
                 }

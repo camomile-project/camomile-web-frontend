@@ -225,10 +225,10 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						timescale.domain([scope.model.infbndsec, scope.model.supbndsec]);
 						targetBounds = [scope.model.queueData.fragment.start, scope.model.queueData.fragment.end];
 						updateMarker();
-						if(scope.model.queueData.context !== undefined) {
-							contextLayer = Annotation.query({corpusId: scope.model.queueData.context.id_corpus,
-																				mediaId: scope.model.queueData.context.id_medium,
-																				layerId: scope.model.queueData.context._id});
+						if(scope.model.queueData.fragment.context !== undefined) {
+							contextLayer = Annotation.query({corpusId: scope.model.queueData.fragment.context.id_corpus,
+																				mediaId: scope.model.queueData.fragment.context.id_medium,
+																				layerId: scope.model.queueData.fragment.context._id});
 							updateContext();
 						} else {
 							contextLayer = undefined;

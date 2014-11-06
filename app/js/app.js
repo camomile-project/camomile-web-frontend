@@ -4,6 +4,7 @@
 angular.module(
         'myApp',
         ['myApp.filters',
+            'myApp.config',
             'myApp.services',
             'myApp.directives',
             'myApp.controllers',
@@ -16,6 +17,8 @@ angular.module(
         $routeProvider.when('/diff', {templateUrl: 'partials/diff.html'});
         $routeProvider.when('/regression', {templateUrl: 'partials/regression.html'});
         $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
-        $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
+        $routeProvider.when('/shotqueue', {templateUrl: 'partials/queue.html'});
+				$routeProvider.when('/headqueue', {templateUrl: 'partials/queue.html'});
+				$routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
         $routeProvider.otherwise({redirectTo: '/'});
     }]);

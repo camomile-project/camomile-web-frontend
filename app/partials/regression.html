@@ -1,4 +1,4 @@
-<div ng-controller="RegressionCtrl">
+<div ng-controller="RegressionCtrl"  ng-show='isLogged()'>
 
     <div class="form-group container">
 
@@ -55,18 +55,6 @@
 
     </div>
 
-    <!--<div class="text-center container">-->
-
-        <!--<video id="player"-->
-               <!--preload="auto"-->
-               <!--width="50%"-->
-               <!--src="{{model.video}}"-->
-               <!--controls-->
-               <!--ng-show="model.selected_medium">-->
-        <!--</video>-->
-
-        <!--<cm-timeline ng-show="model.selected_medium"></cm-timeline>-->
-    <!--</div>-->
 
     <div class="container-fluid" ng-show="model.selected_medium">
 
@@ -74,33 +62,34 @@
             <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
             </div>
             <div class="col-lg-7 col-md-12 col-xs-12">
-                <div id="video-container">
+                <div id="video-container" >
                     <!-- video player behaviour managed by cm-video-player angular attribute -->
                     <video id="player"
                            cm-video-player
-                           ng-src="{{model.video}}"
-                           width="100%">
+                           ng-src={{model.video}}
+                           height="360px">
                     </video>
-                    <!-- Video Controls interact with the player via the controller. -->
-                    <!-- Multiple and/or distributed controls can thus be implemented -->
-                    <div id="video-controls">
-                        <div class="row">
-                            <div class="col-md-1">
-                                <button type="button" class="video-control" id="play-pause"
-                                        ng-click="model.toggle_play()">
-                                    {{ model.play_label }}
-                                </button>
-                            </div>
-                            <div class="col-md-9">
-                                <input width="100%" type="range" id="seek-bar" step="1"
+                    <div class="controls">
+                        <div id="play-button">
+                            <button type="button" class="video-control" id="play-pause"
+                                    ng-click="model.toggle_play()">
+                                {{ model.play_label }}
+                            </button>
+                            <!-- use directive for quite simple way to indicate annotation to perform -->
+                            <!-- + extensible for reference layer and controls for extension to x seconds -->
+                        </div>
+                        <!--!!! KNOWN PROBLEM WITH INPUT RANGE TYPE-->
+                        <!--see https://github.com/angular/angular.js/issues/6726-->
+                        <div id="control-bar">
+                            <div id="controlsoverlay">
+                                <input width="100%" type="range" id="seek-bar"
                                        min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
-                                       ng-model="model.current_time">
-                            </div>
-                            <div class="col-md-2">
-                                <label style="color: #ffffff;">{{ model.current_time_display }}</label>
+                                       step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
                             </div>
                         </div>
-
+                        <div id="time-display">
+                            <label>{{ model.current_time_display }}</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -228,4 +217,5 @@
 
 </div>
 
-</div>
+
+

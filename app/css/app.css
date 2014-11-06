@@ -1,5 +1,3 @@
-/* app css stylesheet */
-
 .whiteclr {
     background-color: #ffffff;
 }
@@ -216,5 +214,13 @@ button.video-control {
     width:90px;
     top:10px;
     color: #000000;
+}
+
+#transparent-plan{
+    background-color: rgba(0,0,0,0);
+    width:100%;
+    height:100%;
+    position: absolute;
+    z-index:1;
 }
 
