@@ -1284,8 +1284,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}
 	])
 	.controller('QueueCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Queue', 'QueuePush', '$cookieStore', 'Session',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Queue, QueuePush, $cookieStore, Session) {
+		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Queue', 'QueuePush', '$cookieStore', 'Session', '$routeParams',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Queue, QueuePush, $cookieStore, Session, $routeParams) {
 
 			$controller('BaseCtrl',
 				{
@@ -1309,7 +1309,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model.queueData = [];
 			$scope.model.availableEntry = [];
 
-			$scope.model.onlyHead = location.href.indexOf("shot") == -1;
+			$scope.model.queueType = $routeParams.type;//location.href.indexOf("shot") == -1;
 
 			$(function () {
 				$("#entry_input").autocomplete({
@@ -1318,9 +1318,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 			});
 
 			// default for annotation context
-			if($scope.model.onlyHead) {
+			if($scope.model.queueType === 'head') {
 				$scope.model.context_size = 0;
-			} else {
+			} else if($scope.model.queueType === 'shot'){
 				$scope.model.context_size = 5;
 			}
 
@@ -1393,16 +1393,16 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
 						for (var queue in data) {
-							if (!$scope.model.onlyHead && data[queue].name === "shotIncoming") {
+							if ($scope.model.queueType === 'shot' && data[queue].name === "shotIncoming") {
 								$scope.model.incomingQueue = data[queue];
 							}
-							else if (!$scope.model.onlyHead && data[queue].name === "shotOutcoming") {
+							else if ($scope.model.queueType === 'shot' && data[queue].name === "shotOutcoming") {
 								$scope.model.outcomingQueue = data[queue];
 							}
-							else if ($scope.model.onlyHead && data[queue].name === "headIncoming") {
+							else if ($scope.model.queueType === 'head' && data[queue].name === "headIncoming") {
 								$scope.model.incomingQueue = data[queue];
 							}
-							else if ($scope.model.onlyHead && data[queue].name === "headOutcoming") {
+							else if ($scope.model.queueType === 'head' && data[queue].name === "headOutcoming") {
 								$scope.model.outcomingQueue = data[queue];
 							}
 						}
@@ -1414,7 +1414,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 						$scope.model.updateNextStatus(firstInit);
 
 						$scope.model.updateSaveButtonStatus(firstInit === undefined);
-						$scope.model.updateAddEntryButtonStatus(firstInit === undefined);
+						$scope.model.updateIsDisplayedVideo(firstInit === undefined);
 
 						if (firstInit === undefined) {
 							$scope.model.getNextQueueData(id).$promise.then(function (data) {
@@ -1442,7 +1442,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 								$scope.model.updateNextStatus(firstInit);
 
 								// Update the add entry button's status
-								$scope.model.updateAddEntryButtonStatus($scope.model.inData.length != 0);
+								$scope.model.updateIsDisplayedVideo($scope.model.inData.length != 0);
 
 								// Get the video
 								$scope.model.video = $sce.trustAsResourceUrl(DataRoot + "/corpus/" +
@@ -1461,7 +1461,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 									$scope.model.duration = $scope.model.supbndsec - $scope.model.queueData.infbndsec;
 									$scope.model.current_time = $scope.model.queueData.fragment.start;
 
-									if ($scope.model.onlyHead) {
+									if ($scope.model.queueType === 'head') {
 										// at the end of video loading, draw a rectangle on head as described in "position"
 										document.getElementById("player").addEventListener("loadedmetadata", function () {
 											$scope.$apply(function () {
@@ -1625,7 +1625,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					buttonNext.innerHTML = "Start";
 
 					//Also disable add entry button because nothing else to save!
-					$scope.model.updateAddEntryButtonStatus(true);
+					$scope.model.updateIsDisplayedVideo(true);
 				}
 				else {
 					$scope.model.disableNext = $scope.model.queueData.data == undefined;
@@ -1640,7 +1640,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					$scope.model.updateSaveButtonStatus(false);
 
 					//Also disable add entry button because nothing else to save!
-					$scope.model.updateAddEntryButtonStatus(true);
+					$scope.model.updateIsDisplayedVideo(true);
 
 					// Removes all element from table
 					$scope.model.queueTableData = undefined;
@@ -1667,13 +1667,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 				}
 			};
 
-			$scope.model.updateAddEntryButtonStatus = function (activate) {
-				$scope.model.disableAddEntryButton = !activate;
+			$scope.model.updateIsDisplayedVideo = function (activate) {
+				$scope.model.isDisplayedVideo = !activate;
 
 
 				var addEntryButton = document.getElementById("addEntryButton");
 
-				if ($scope.model.disableAddEntryButton) {
+				if ($scope.model.isDisplayedVideo) {
 					// Disables add entry button
 					addEntryButton.setAttribute("class", "btn btn-default disabled");
 
@@ -1920,6 +1920,71 @@ angular.module('myApp.controllers', ['myApp.services'])
 //		db.queues.update({ _id: ObjectId("545b6ec9436f1744462a4449") },{ $set: { queue: [] } })
 //		db.queues.update({ _id: ObjectId("545b6ec9436f1744462a444c") },{ $set: { queue: [] } })
 
+            // hack for sending events through controlsoverlay
+            function fireEvent(node, eventName, origEvent) {
+                // Make sure we use the ownerDocument from the provided node to avoid cross-window problems
+                var doc;
+                if (node.ownerDocument) {
+                    doc = node.ownerDocument;
+                } else if (node.nodeType == 9){
+                    // the node may be the document itself, nodeType 9 = DOCUMENT_NODE
+                    doc = node;
+                } else {
+                    throw new Error("Invalid node passed to fireEvent: " + node.id);
+                }
+
+                if (node.dispatchEvent) {
+                    // Gecko-style approach (now the standard) takes more work
+                    var eventClass = "";
+
+                    // Different events have different event classes.
+                    // If this switch statement can't map an eventName to an eventClass,
+                    // the event firing is going to fail.
+                    switch (eventName) {
+                        case "click": // Dispatching of 'click' appears to not work correctly in Safari. Use 'mousedown' or 'mouseup' instead.
+                        case "mousedown":
+                        case "mouseup":
+                        case "mouseover":
+                        case "mouseout":
+                        case "mousemove":
+                            eventClass = "MouseEvents";
+                            break;
+
+                        case "focus":
+                        case "change":
+                        case "blur":
+                        case "select":
+                            eventClass = "HTMLEvents";
+                            break;
+
+                        default:
+                            throw "fireEvent: Couldn't find an event class for event '" + eventName + "'.";
+                            break;
+                    }
+                    var event = doc.createEvent(eventClass);
+
+                    var bubbles = eventName == "change" ? false : true;
+                    event.initMouseEvent(eventName, true, true, window, 1, origEvent.screenX, origEvent.screenY,
+                        origEvent.clientX, origEvent.clientY);
+
+                    event.synthetic = true; // allow detection of synthetic events
+                    // The second parameter says go ahead with the default action
+                    node.dispatchEvent(event, true);
+                } else  if (node.fireEvent) {
+                    // IE-old school style
+                    var event = doc.createEventObject();
+                    event.synthetic = true; // allow detection of synthetic events
+                    node.fireEvent("on" + eventName, event);
+                }
+            };
+
+            // transmit events to SVG
+            $( "#controlsoverlay" ).mousemove(function(e) {
+                fireEvent($( "#controlsvg" )[0], "mousemove", e);
+            });
+            $( "#controlsoverlay" ).mouseout(function(e) {
+                fireEvent($( "#controlsvg" )[0], "mouseout", e);
+            });
 
 			$scope.$watch('model.context_size', function(newValue) {
 				newValue = parseInt(newValue);
