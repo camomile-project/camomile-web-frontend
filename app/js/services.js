@@ -3,6 +3,24 @@
 // NOTE: myApp.config defines DataRoot and ToolRoot used for remote data access
 angular.module('myApp.services', ['ngResource', 'myApp.config'])
 
+//	.factory('Config', ['$resource', '$location', function($resource, $location) {
+//		return $resource($location.host() + 'config');
+//	}])
+//
+//	.value('DataRoot', ['Config', function(Config) {
+//		var config = Config.get();
+//		return config.$promise.then(function(data) {
+//			return data.camomile_api;
+//		});
+//	}])
+//
+//	.value('ToolRoot', ['Config', function(Config) {
+//		var config = Config.get();
+//		return config.$promise.then(function(data) {
+//			return data.pyannote_api;
+//		});
+//	}])
+
     .factory('Queue', ['$resource', 'DataRoot',
         function ($resource, DataRoot) {
             return $resource(
