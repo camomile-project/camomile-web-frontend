@@ -139,6 +139,16 @@ function create_queues(callback) {
             // TODO: error handling
 
             // remember to remove queues when process is sent SIGINT (Ctrl+C)
+						// hack to account for Win32 platforms, where SIGINT does not exist
+						if (process.platform === "win32") {
+							require("readline").createInterface({
+								input: process.stdin,
+								output: process.stdout
+							}).on("SIGINT", function () {
+									process.emit("SIGINT");
+								});
+						}
+
             process.on('SIGINT', function() {
                 async.waterfall(
                     [log_in, function(callback) { delete_queues(queues, callback); }, log_out],

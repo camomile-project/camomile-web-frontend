@@ -600,8 +600,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}])
 	.
 	controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter) {
+		'CMError', 'defaults', 'palette', 'DataRoot', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', 'Config', '$q', '$rootScope',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, DataRoot, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, Config, $q, $rootScope) {
 
 			$controller('BaseCtrl',
 				{
@@ -645,6 +645,19 @@ angular.module('myApp.controllers', ['myApp.services'])
 				defaultDiffLayer
 			];
 
+			$scope.model.dataroot = (function() {
+				var deferred = $q.defer();
+				Config.get().$promise.then(function(data) {
+					$rootScope.$apply(function() {
+						deferred.resolve(data.camomile_api);
+					});
+				});
+				return deferred.promise;
+			})();
+
+			setTimeout(function() {
+				console.log("timeout called");
+			}, 1000);
 
 			// get list of reference annotations from a given layer,
 			// replace current reference layer,
