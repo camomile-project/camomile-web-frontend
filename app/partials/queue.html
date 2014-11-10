@@ -6,7 +6,7 @@
         </div>
         <div class="col-lg-8 col-md-12 col-xs-12">
             <div id="video-container" >
-                <div id="transparent-plan" ng-show="model.onlyHead"></div>
+                <div id="transparent-plan" ng-show="model.queueType === 'head'"></div>
                 <!-- video player behaviour managed by cm-video-player angular attribute -->
                 <video id="player"
                        cm-video-player
@@ -40,12 +40,12 @@
         </div>
     </div>
 
-    <div class="row top-padding" ng-show="!model.onlyHead">
+    <div class="row top-padding" ng-show="model.queueType === 'shot'">
         <div class="col-lg-1 col-md-pull-0 col-xs-pull-0"></div>
         <div class="col-lg-3 col-md-3 col-xs-3">
             <div class="input-group" >
                 <span class="input-group-addon">Context: +/- </span>
-                <input type="text" class="form-control" ng-model="model.context_size"/>
+                <input id="context_size_input" type="text" class="form-control" ng-model="model.context_size" ng-disabled="model.isDisplayedVideo"/>
                 <span class="input-group-addon"> s</span>
             </div>
         </div>
@@ -66,7 +66,7 @@
             <div class="input-group" >
                 <span class="input-group-addon">Entry:</span>
                 <form ng-submit="model.addEntry()">
-                    <input id="entry_input" type="text" class="form-control" ng-model="model.entryTyped" ng-disabled="model.disableAddEntryButton">
+                    <input id="entry_input" type="text" class="form-control" ng-model="model.entryTyped" ng-disabled="model.isDisplayedVideo">
                 </form>
                     <span class="input-group-btn">
                         <button class="btn btn-default" type="button" ng-click="model.addEntry()" id="addEntryButton">Add entry</button>
@@ -184,72 +184,72 @@
     </ul>
 </div>
 
-<script>
-    // hack for sending events through controlsoverlay
-    function fireEvent(node, eventName, origEvent) {
-        // Make sure we use the ownerDocument from the provided node to avoid cross-window problems
-        var doc;
-        if (node.ownerDocument) {
-            doc = node.ownerDocument;
-        } else if (node.nodeType == 9){
-            // the node may be the document itself, nodeType 9 = DOCUMENT_NODE
-            doc = node;
-        } else {
-            throw new Error("Invalid node passed to fireEvent: " + node.id);
-        }
+<!--<script>-->
+    <!--// hack for sending events through controlsoverlay-->
+    <!--function fireEvent(node, eventName, origEvent) {-->
+        <!--// Make sure we use the ownerDocument from the provided node to avoid cross-window problems-->
+        <!--var doc;-->
+        <!--if (node.ownerDocument) {-->
+            <!--doc = node.ownerDocument;-->
+        <!--} else if (node.nodeType == 9){-->
+            <!--// the node may be the document itself, nodeType 9 = DOCUMENT_NODE-->
+            <!--doc = node;-->
+        <!--} else {-->
+            <!--throw new Error("Invalid node passed to fireEvent: " + node.id);-->
+        <!--}-->
 
-        if (node.dispatchEvent) {
-            // Gecko-style approach (now the standard) takes more work
-            var eventClass = "";
+        <!--if (node.dispatchEvent) {-->
+            <!--// Gecko-style approach (now the standard) takes more work-->
+            <!--var eventClass = "";-->
 
-            // Different events have different event classes.
-            // If this switch statement can't map an eventName to an eventClass,
-            // the event firing is going to fail.
-            switch (eventName) {
-                case "click": // Dispatching of 'click' appears to not work correctly in Safari. Use 'mousedown' or 'mouseup' instead.
-                case "mousedown":
-                case "mouseup":
-                case "mouseover":
-                case "mouseout":
-                case "mousemove":
-                    eventClass = "MouseEvents";
-                    break;
+            <!--// Different events have different event classes.-->
+            <!--// If this switch statement can't map an eventName to an eventClass,-->
+            <!--// the event firing is going to fail.-->
+            <!--switch (eventName) {-->
+                <!--case "click": // Dispatching of 'click' appears to not work correctly in Safari. Use 'mousedown' or 'mouseup' instead.-->
+                <!--case "mousedown":-->
+                <!--case "mouseup":-->
+                <!--case "mouseover":-->
+                <!--case "mouseout":-->
+                <!--case "mousemove":-->
+                    <!--eventClass = "MouseEvents";-->
+                    <!--break;-->
 
-                case "focus":
-                case "change":
-                case "blur":
-                case "select":
-                    eventClass = "HTMLEvents";
-                    break;
+                <!--case "focus":-->
+                <!--case "change":-->
+                <!--case "blur":-->
+                <!--case "select":-->
+                    <!--eventClass = "HTMLEvents";-->
+                    <!--break;-->
 
-                default:
-                    throw "fireEvent: Couldn't find an event class for event '" + eventName + "'.";
-                    break;
-            }
-            var event = doc.createEvent(eventClass);
+                <!--default:-->
+                    <!--throw "fireEvent: Couldn't find an event class for event '" + eventName + "'.";-->
+                    <!--break;-->
+            <!--}-->
+            <!--var event = doc.createEvent(eventClass);-->
 
-            var bubbles = eventName == "change" ? false : true;
-            event.initMouseEvent(eventName, true, true, window, 1, origEvent.screenX, origEvent.screenY,
-                    origEvent.clientX, origEvent.clientY);
+            <!--var bubbles = eventName == "change" ? false : true;-->
+            <!--event.initMouseEvent(eventName, true, true, window, 1, origEvent.screenX, origEvent.screenY,-->
+                    <!--origEvent.clientX, origEvent.clientY);-->
 
-            event.synthetic = true; // allow detection of synthetic events
-            // The second parameter says go ahead with the default action
-            node.dispatchEvent(event, true);
-        } else  if (node.fireEvent) {
-            // IE-old school style
-            var event = doc.createEventObject();
-            event.synthetic = true; // allow detection of synthetic events
-            node.fireEvent("on" + eventName, event);
-        }
-    };
+            <!--event.synthetic = true; // allow detection of synthetic events-->
+            <!--// The second parameter says go ahead with the default action-->
+            <!--node.dispatchEvent(event, true);-->
+        <!--} else  if (node.fireEvent) {-->
+            <!--// IE-old school style-->
+            <!--var event = doc.createEventObject();-->
+            <!--event.synthetic = true; // allow detection of synthetic events-->
+            <!--node.fireEvent("on" + eventName, event);-->
+        <!--}-->
+    <!--};-->
 
-    // transmit events to SVG
-    $( "#controlsoverlay" ).mousemove(function(e) {
-        fireEvent($( "#controlsvg" )[0], "mousemove", e);
-    });
-    $( "#controlsoverlay" ).mouseout(function(e) {
-        fireEvent($( "#controlsvg" )[0], "mouseout", e);
-    });
+    <!--// transmit events to SVG-->
+    <!--$( "#controlsoverlay" ).mousemove(function(e) {-->
+        <!--fireEvent($( "#controlsvg" )[0], "mousemove", e);-->
+    <!--});-->
+    <!--$( "#controlsoverlay" ).mouseout(function(e) {-->
+        <!--fireEvent($( "#controlsvg" )[0], "mouseout", e);-->
+    <!--});-->
 
-</script>
+<!--</script>-->
 </div>
