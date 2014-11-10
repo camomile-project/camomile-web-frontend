@@ -1,28 +1,17 @@
 'use strict';
-
-// NOTE: myApp.config defines DataRoot and ToolRoot used for remote data access
 angular.module('myApp.services', ['ngResource'])
 
-	.factory('Config', ['$resource', '$location', function($resource, $location) {
-		return $resource($location.protocol()+"://"+$location.host()+":"+$location.port()+'/config');
-	}])
-
 // http://stackoverflow.com/questions/19472017/angularjs-promise-not-binding-to-template-in-1-2
-// promise resolution is a problem in recent angularjs versions
-//	.factory('DataRoot', ['Config', function(Config) {
-//		return Config.get().$promise.then(function(data) {
-//			return data.camomile_api;
-//		});
-//	}])
-//
-//	.factory('ToolRoot', ['Config', function(Config) {
-//		return Config.get().pyannote_api;
-//	}])
+// getting values from resolved promises can be a problem in recent angularjs versions
+// yet, DataRoot and ToolRoot have to be obtained from asynchronous requests
+// so instead of classical service solution, we fill the rootScope at starting time (see app.js)
+//	.value('DataRoot', 'Placeholder')
+//	.value('ToolRoot', 'Placeholder')
 
-	.factory('Queue', ['$resource', 'DataRoot',
-		function ($resource, DataRoot) {
+	.factory('Queue', ['$resource', '$rootScope',
+		function ($resource, $rootScope) {
 			return $resource(
-				DataRoot + '/queue/:queueId', {
+				$rootScope.dataroot + '/queue/:queueId', {
 					queueId: '@queueId'
 				},
 				{
@@ -51,10 +40,10 @@ angular.module('myApp.services', ['ngResource'])
 		}
 	])
 
-	.factory('QueuePush', ['$resource', 'DataRoot',
-		function ($resource, DataRoot) {
+	.factory('QueuePush', ['$resource', '$rootScope',
+		function ($resource, $rootScope) {
 			return $resource(
-				DataRoot + '/queue/:queueId/next', {
+				$rootScope.dataroot + '/queue/:queueId/next', {
 					queueId: '@queueId'
 				},
 				{
@@ -73,10 +62,10 @@ angular.module('myApp.services', ['ngResource'])
 		}
 	])
 
-	.factory('Corpus', ['$resource', 'DataRoot',
-		function ($resource, DataRoot) {
+	.factory('Corpus', ['$resource', '$rootScope',
+		function ($resource, $rootScope) {
 			return $resource(
-				DataRoot + '/corpus/:corpusId', {
+				$rootScope.dataroot + '/corpus/:corpusId', {
 					corpusId: '@corpusId'
 				}, {
 					'query': {
@@ -89,10 +78,10 @@ angular.module('myApp.services', ['ngResource'])
 		}
 	])
 
-	.factory('Media', ['$resource', 'DataRoot',
-		function ($resource, DataRoot) {
+	.factory('Media', ['$resource', '$rootScope',
+		function ($resource, $rootScope) {
 			return $resource(
-				DataRoot + '/corpus/:corpusId/media/:mediaId', {
+				$rootScope.dataroot + '/corpus/:corpusId/media/:mediaId', {
 					corpusId: '@corpusId',
 					mediaId: '@mediaId'
 				}, {
@@ -106,10 +95,10 @@ angular.module('myApp.services', ['ngResource'])
 		}
 	])
 
-	.factory('Layer', ['$resource', 'DataRoot',
-		function ($resource, DataRoot) {
+	.factory('Layer', ['$resource', '$rootScope',
+		function ($resource, $rootScope) {
 			return $resource(
-				DataRoot + '/corpus/:corpusId/media/:mediaId/layer/:layerId', {
+				$rootScope.dataroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId', {
 					corpusId: '@corpusId',
 					mediaId: '@mediaId',
 					layerId: '@layerId'
@@ -124,10 +113,10 @@ angular.module('myApp.services', ['ngResource'])
 		}
 	])
 
-	.factory('Annotation', ['$resource', 'DataRoot',
-		function ($resource, DataRoot) {
+	.factory('Annotation', ['$resource', '$rootScope',
+		function ($resource, $rootScope) {
 			return $resource(
-				DataRoot + '/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId', {
+				$rootScope.dataroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId', {
 					corpusId: '@corpusId',
 					mediaId: '@mediaId',
 					layerId: '@layerId',
@@ -156,37 +145,37 @@ angular.module('myApp.services', ['ngResource'])
 		}
 	])
 
-	.factory('CMError', ['$http', 'ToolRoot',
-		function ($http, ToolRoot) {
+	.factory('CMError', ['$http', '$rootScope',
+		function ($http, $rootScope) {
 			return {
 				diff: function (hypLayers) {
-					var url = ToolRoot + '/error/diff';
+					var url = $rootScope.toolroot + '/error/diff';
 					return $http.post(url, hypLayers);
 				},
 				regression: function (hypLayers) {
-					var url = ToolRoot + '/error/regression';
+					var url = $rootScope.toolroot + '/error/regression';
 					return $http.post(url, hypLayers);
 				}
 			}
 		}
 	])
 
-	.factory('Session', ['$http', 'DataRoot',
-		function ($http, DataRoot) {
+	.factory('Session', ['$http', '$rootScope',
+		function ($http, $rootScope) {
 			return {
 
 				isLogged: false,
 				username: undefined,
 
 				login: function (credentials) {
-					var url = DataRoot + '/login';
+					var url = $rootScope.dataroot + '/login';
 					return $http.post(url, credentials, {
 						withCredentials: true
 					});
 				},
 
 				logout: function (credentials) {
-					var url = DataRoot + '/logout';
+					var url = $rootScope.dataroot + '/logout';
 					return $http.post(url, credentials, {
 						withCredentials: true
 					});

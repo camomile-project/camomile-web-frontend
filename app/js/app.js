@@ -20,4 +20,16 @@ angular.module(
 				$routeProvider.when('/headqueue', {templateUrl: 'partials/queue.html'});
 				$routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
         $routeProvider.otherwise({redirectTo: '/'});
-    }]);
+    }])
+		// Store config for data and tool access in the rootScope after promise resolution
+		.run(['$resource', '$location', '$rootScope', function($resource, $location, $rootScope) {
+			var config = $resource($location.protocol()+"://"+$location.host()+":"+$location.port()+'/config');
+			// Use callbacks to store in $rootScope
+			config.get().$promise.then(function(data) {
+				$rootScope.dataroot = data.camomile_api;
+				$rootScope.toolroot = data.pyannote_api;
+				$rootScope.queues = data.queues;
+			});
+		}]);
+
+
