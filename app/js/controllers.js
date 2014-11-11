@@ -1283,8 +1283,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}
 	])
 	.controller('QueueCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
-		'CMError', 'defaults', 'palette', '$controller', 'Queue', 'QueuePush', '$cookieStore', 'Session', '$rootScope', '$routeParams',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, $controller, Queue, QueuePush, $cookieStore, Session, $rootScope, $routeParams) {
+		'CMError', 'defaults', 'palette', '$controller', 'QueuesBrowser', 'QueueElementModifier', '$cookieStore', 'Session', '$rootScope', '$routeParams',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, $controller, QueuesBrowser, QueueElementModifier, $cookieStore, Session, $rootScope, $routeParams) {
 
 			$controller('BaseCtrl',
 				{
@@ -1659,7 +1659,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 			$scope.model.getQueueWithId = function (queueId) {
 //            get queue
-				return Queue.getQueue(
+				return QueuesBrowser.get(
 					{
 						"queueId": queueId
 					}
@@ -1667,7 +1667,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 			};
 
 			$scope.model.updateQueueOnServer = function (queue) {
-				QueuePush.update(
+				QueueElementModifier.update(
 					{
 						queueId: queue._id
 					},
@@ -1689,7 +1689,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 //            get the queue's next data and remove it from the queue
 			$scope.model.getNextQueueData = function (id) {
 				// recupere le suivant en supprimant le précédent
-				return QueuePush.query(
+				return QueueElementModifier.get(
 					{
 						"queueId": id
 					}
@@ -1831,7 +1831,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
 //	          $scope.model.createFakeQueue();
-//           	$scope.model.addFakeValues();
+           	$scope.model.addFakeValues();
 
 			// reset all queues
 //    db.queues.update({},{ $set: { queue: [] } }, {multi:true})

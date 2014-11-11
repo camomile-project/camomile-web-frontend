@@ -8,51 +8,42 @@ angular.module('myApp.services', ['ngResource'])
 //	.value('DataRoot', 'Placeholder')
 //	.value('ToolRoot', 'Placeholder')
 
-	.factory('Queue', ['$resource', '$rootScope',
+    // Service used to get a queue from its ID
+	.factory('QueuesBrowser', ['$resource', '$rootScope',
 		function ($resource, $rootScope) {
 			return $resource(
 				$rootScope.dataroot + '/queue/:queueId', {
 					queueId: '@queueId'
 				},
 				{
-					'query': {
-						method: 'GET',
-						withCredentials: true,
-						format: '.json',
-						isArray: true
-					},
-					'getQueue': {
+                    // Return a queue from queue list given the id
+					'get': {
 						method: 'GET',
 						withCredentials: true,
 						format: '.json',
 						isArray: false
-					},
-					'update': {
-						method: 'PUT',
-						withCredentials: true
-					},
-					'post':{
-						method: 'POST',
-						withCredentials: true
 					}
 				}
 			);
 		}
 	])
 
-	.factory('QueuePush', ['$resource', '$rootScope',
+    // Service used to modify an element of a queue (get will pop the element prom the queue, update will put it as last element of the queue)
+	.factory('QueueElementModifier', ['$resource', '$rootScope',
 		function ($resource, $rootScope) {
 			return $resource(
 				$rootScope.dataroot + '/queue/:queueId/next', {
 					queueId: '@queueId'
 				},
 				{
-					'query': {
+                    // Every time get is called, the returned queue's element got removed from the queue
+					'get': {
 						method: 'GET',
 						withCredentials: true,
 						format: '.json',
 						isArray: false
 					},
+                    // Allows to modify an element of a queue, putting it as last element of the queue
 					'update': {
 						method: 'PUT',
 						withCredentials: true
