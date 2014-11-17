@@ -88,8 +88,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 			}
 
-		}
-	])
+		}])
+
 	.controller('BaseCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
 		'CMError', 'defaults', 'palette', 'Session',
 		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, Session) {
@@ -252,7 +252,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 				});
 
 				oldVals.forEach(function (d) {
-//                    var mapping = $scope.model.colScale(d);
+					//var mapping = $scope.model.colScale(d);
 					var index = $scope.model.colScale.domain().indexOf(d);
 					$scope.model.colScale.domain().splice(index, 1);
 					$scope.model.colScale.domain($scope.model.colScale.domain());
@@ -433,7 +433,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 			};
 
-// remove old summary
+			// remove old summary
 			$scope.resetSummaryView = function (resetSelection) {
 				// Get the correct svg tag to append the chart
 				var vis = d3.select("#piechart").attr("width", 410).attr("height", 410);
@@ -598,8 +598,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 			}
 
 		}])
-	.
-	controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+
+	.controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
 		'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope',
 		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
 
@@ -680,7 +680,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 						layerId: layer_id
 					},
 					function () {
-//						$scope.model.layerWatch[1] = layer_id + "_1";
+						//$scope.model.layerWatch[1] = layer_id + "_1";
 						$scope.model.layersUpdated = true;
 						$scope.compute_diff();
 					});
@@ -989,8 +989,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 						$scope.model.restrict_toggle = 0;
 					}
 				});
-		}
-	])
+		}])
 
 	.controller('FusionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError', 'defaults', 'palette', 'camomile2pyannoteFilter', 'pyannote2camomileFilter',
 		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, camomile2pyannoteFilter, pyannote2camomileFilter) {
@@ -1280,8 +1279,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 			};
 
 
-		}
-	])
+		}])
+
 	.controller('QueueCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
 		'CMError', 'defaults', 'palette', '$controller', 'QueuesBrowser', 'QueueElementModifier', '$cookieStore', 'Session', '$rootScope', '$routeParams',
 		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, $controller, QueuesBrowser, QueueElementModifier, $cookieStore, Session, $rootScope, $routeParams) {
@@ -1598,7 +1597,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					$scope.model.updateQueueOnServer(newOutcomingQueue);
 
 					// call only if button have to be disabled
-//							$scope.model.updateSaveButtonStatus(false);
+				//$scope.model.updateSaveButtonStatus(false);
 				});
 
 
@@ -1658,7 +1657,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
 			$scope.model.getQueueWithId = function (queueId) {
-//            get queue
+				//get queue
 				return QueuesBrowser.get(
 					{
 						"queueId": queueId
@@ -1686,7 +1685,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 				);
 			};
 
-//            get the queue's next data and remove it from the queue
+			// get the queue's next data and remove it from the queue
 			$scope.model.getNextQueueData = function (id) {
 				// recupere le suivant en supprimant le précédent
 				return QueueElementModifier.get(
@@ -1793,48 +1792,48 @@ angular.module('myApp.controllers', ['myApp.services'])
 			};
 
 			//TODO uniquement si on veut pouvoir dessiner un rectangle au click!!!
-//					var transparentPlan = d3.select("#transparent-plan");
-//					transparentPlan.on("click", function()
-//					{
-//						var mouse = d3.mouse(this);
-//						// Remove old element
-//						transparentPlan.selectAll("svg").remove();
-//
-//						// Circle style!
-////						transparentPlan.append("svg")
-////							.style("width", "100%")
-////							.style("height", "100%")
-////							.append("circle")
-////							.attr("cx",mouse[0])
-////							.attr("cy", mouse[1])
-////							.attr("r", 30)
-////							.style("fill", "none")
-////							.style("stroke", "red")
-////							.style("stroke-width",5);
-//
-//						// Rectangle style
-//						transparentPlan.append("svg")
-//							.style("width", "100%")
-//							.style("height", "100%")
-//							.append("rect")
-//							.attr("x",mouse[0]-30)
-//							.attr("y", mouse[1]-30)
-//							.attr("width",60)
-//							.attr("height",60)
-//							.style("fill", "none")
-//							.style("stroke", "red")
-//							.style("stroke-width",5);
-//
-//						console.log(document.getElementById("player").videoWidth, document.getElementById("player").videoHeight);
-//
-//					});
+			//					var transparentPlan = d3.select("#transparent-plan");
+			//					transparentPlan.on("click", function()
+			//					{
+			//						var mouse = d3.mouse(this);
+			//						// Remove old element
+			//						transparentPlan.selectAll("svg").remove();
+			//
+			//						// Circle style!
+			////						transparentPlan.append("svg")
+			////							.style("width", "100%")
+			////							.style("height", "100%")
+			////							.append("circle")
+			////							.attr("cx",mouse[0])
+			////							.attr("cy", mouse[1])
+			////							.attr("r", 30)
+			////							.style("fill", "none")
+			////							.style("stroke", "red")
+			////							.style("stroke-width",5);
+			//
+			//						// Rectangle style
+			//						transparentPlan.append("svg")
+			//							.style("width", "100%")
+			//							.style("height", "100%")
+			//							.append("rect")
+			//							.attr("x",mouse[0]-30)
+			//							.attr("y", mouse[1]-30)
+			//							.attr("width",60)
+			//							.attr("height",60)
+			//							.style("fill", "none")
+			//							.style("stroke", "red")
+			//							.style("stroke-width",5);
+			//
+			//						console.log(document.getElementById("player").videoWidth, document.getElementById("player").videoHeight);
+			//
+			//					});
 
 
-//	          $scope.model.createFakeQueue();
+			//	          $scope.model.createFakeQueue();
            	$scope.model.addFakeValues();
 
 			// reset all queues
-//    db.queues.update({},{ $set: { queue: [] } }, {multi:true})
+			//    db.queues.update({},{ $set: { queue: [] } }, {multi:true})
 
 			// hack for sending events through controlsoverlay
 			function fireEvent(node, eventName, origEvent) {

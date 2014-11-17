@@ -72,8 +72,7 @@ angular.module('myApp.services', ['ngResource'])
 	.factory('Media', ['$resource', '$rootScope',
 		function ($resource, $rootScope) {
 			return $resource(
-				$rootScope.dataroot + '/corpus/:corpusId/media/:mediaId', {
-					corpusId: '@corpusId',
+				$rootScope.dataroot + '/media/:mediaId', {
 					mediaId: '@mediaId'
 				}, {
 					'query': {
@@ -89,9 +88,7 @@ angular.module('myApp.services', ['ngResource'])
 	.factory('Layer', ['$resource', '$rootScope',
 		function ($resource, $rootScope) {
 			return $resource(
-				$rootScope.dataroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId', {
-					corpusId: '@corpusId',
-					mediaId: '@mediaId',
+				$rootScope.dataroot + '/layer/:layerId', {
 					layerId: '@layerId'
 				}, {
 					'query': {
@@ -107,10 +104,7 @@ angular.module('myApp.services', ['ngResource'])
 	.factory('Annotation', ['$resource', '$rootScope',
 		function ($resource, $rootScope) {
 			return $resource(
-				$rootScope.dataroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId', {
-					corpusId: '@corpusId',
-					mediaId: '@mediaId',
-					layerId: '@layerId',
+				$rootScope.dataroot + '/annotation/:annotationId', {
 					annotationId: '@annotationId'
 				}, {
 					'query': {
@@ -127,7 +121,8 @@ angular.module('myApp.services', ['ngResource'])
 					'update': {
 						method: 'PUT',
 						withCredentials: true
-					}, 'remove': {
+					}, 
+					'remove': {
 						method: 'DELETE',
 						withCredentials: true,
 						isArray: false
