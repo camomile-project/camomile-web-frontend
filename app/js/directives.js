@@ -1672,7 +1672,8 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 					$("#login-password").val($("#password", element).val());
 
 					scope.onSubmit(function () {
-						$("#login-form")[0].submit();
+//					$("#login-form")[0].submit(); // wrongly redirects to root hostname
+						window.location.reload();
 					});
 					return false;
 				};
