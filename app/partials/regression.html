@@ -202,12 +202,12 @@
         <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu"
             style="display:block;position:static;margin-bottom:5px;">
             <li><a tabindex="-1" href="" ng-click="model.edit_click()">
-                <image src="/img/Edit_document.ico" align="left" width="20" height="20" style="margin-left:-15px;margin-right:5px;"></image>
+                <image src="{{ model.absUrl }}/img/Edit_document.ico" align="left" width="20" height="20" style="margin-left:-15px;margin-right:5px;"></image>
                 Edit
             </a>
             </li>
             <li><a tabindex="-1" href="" ng-click="model.remove_click()">
-                <image src="/img/Delete.ico" align="left" width="20" height="20" style="margin-left:-17px;margin-right:7px;"></image>
+                <image src="{{ model.absUrl }}/img/Delete.ico" align="left" width="20" height="20" style="margin-left:-17px;margin-right:7px;"></image>
                 Remove
             </a>
             </li>
