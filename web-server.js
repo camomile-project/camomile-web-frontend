@@ -51,7 +51,7 @@ function log_in(callback) {
         options, 
         function (error, response, body) { 
             // TODO: error handling
-            callback(null); 
+            callback(null);
         }); 
 };
 
