@@ -63,7 +63,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 						Session.username = undefined;
 						$cookieStore.remove("current.user");
 						$scope.model.message = "Connection error";
-						console.log(err);
 					});
 			};
 

@@ -23,8 +23,8 @@ angular.module(
     }])
 		// Store config for data and tool access in the rootScope after promise resolution
 		.run(['$resource', '$location', '$rootScope', function($resource, $location, $rootScope) {
-			// remove #/
-			$rootScope.absUrl = $location.absUrl().replace('/#/', '');
+			// remove /# and everything following to ensure we get host root url
+			$rootScope.absUrl = $location.absUrl().replace(/(\/#.*)/, '');
 			var config = $resource($rootScope.absUrl + '/config');
 
 			// Use callbacks to store in $rootScope
