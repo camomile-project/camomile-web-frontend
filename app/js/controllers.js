@@ -1830,7 +1830,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
 //	          $scope.model.createFakeQueue();
-           	$scope.model.addFakeValues();
+//           	$scope.model.addFakeValues();
 
 			// reset all queues
 //    db.queues.update({},{ $set: { queue: [] } }, {multi:true})
