@@ -25,6 +25,8 @@ angular.module(
 		.run(['$resource', '$location', '$rootScope', function($resource, $location, $rootScope) {
 			// remove /# and everything following to ensure we get host root url
 			$rootScope.absUrl = $location.absUrl().replace(/(\/#.*)/, '');
+			// remove potentially ending /
+			$rootScope.absUrl = $rootScope.absUrl.replace(/(\/)$/, '');
 			var config = $resource($rootScope.absUrl + '/config');
 
 			// Use callbacks to store in $rootScope
