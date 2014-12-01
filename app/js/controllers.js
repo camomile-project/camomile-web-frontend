@@ -286,11 +286,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 			};
 
 			// get list of layers for a given medium
-			$scope.get_layers = function (corpus_id, medium_id) {
+			$scope.get_layers = function (medium_id) {
 				$scope.model.available_layers = Layer.query({
-					corpusId: corpus_id,
-					mediaId: medium_id
+                    media: medium_id
 				});
+                console.log($scope.model.available_layers);
 			};
 
 
@@ -384,8 +384,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 				// qet the annotation to edit
 				var annotation_edited = Annotation.queryForAnUpdate({
-					corpusId: corpus_id,
-					mediaId: medium_id,
+//					corpusId: corpus_id,
+                    media: medium_id,
 					layerId: layer_id,
 					annotationId: annotation_id
 				});
@@ -397,8 +397,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 				Annotation.update(
 					// update parameters
 					{
-						corpusId: corpus_id,
-						mediaId: medium_id,
+//						corpusId: corpus_id,
+                        media: medium_id,
 						layerId: layer_id,
 						annotationId: annotation_id
 					},
@@ -421,8 +421,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 				// call the native remove method
 				Annotation.remove({
-						corpusId: corpus_id,
-						mediaId: medium_id,
+//						corpusId: corpus_id,
+                        media: medium_id,
 						layerId: layer_id,
 						annotationId: annotation_id
 					},
@@ -654,8 +654,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					'_id': layer_id + "_0"
 				};
 				$scope.model.layers[0].layer = Annotation.query({
-						corpusId: corpus_id,
-						mediaId: medium_id,
+//						corpusId: corpus_id,
+                        media: medium_id,
 						layerId: layer_id
 					},
 					function () {
@@ -675,8 +675,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					'_id': layer_id + "_1"
 				};
 				$scope.model.layers[1].layer = Annotation.query({
-						corpusId: corpus_id,
-						mediaId: medium_id,
+//						corpusId: corpus_id,
+                        media: medium_id,
 						layerId: layer_id
 					},
 					function () {
@@ -732,9 +732,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 				scope.model.selected_reference = undefined;
 				scope.model.selected_hypothesis = undefined;
 				if (newValue) {
-					scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
-					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/corpus/" +
-						scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
+					scope.get_layers(scope.model.selected_medium);
+					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + scope.model.selected_medium + "/video");
 					$scope.resetSummaryView(true, true, true);
 				}
 			});
@@ -841,8 +840,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					'_id': layer_id + "_0"
 				};
 				$scope.model.layers[0].layer = Annotation.query({
-						corpusId: corpus_id,
-						mediaId: medium_id,
+//						corpusId: corpus_id,
+                        media: medium_id,
 						layerId: layer_id
 					},
 					function () {
@@ -858,8 +857,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					'_id': layer_id + "_1"
 				};
 				$scope.model.layers[1].layer = Annotation.query({
-						corpusId: corpus_id,
-						mediaId: medium_id,
+//						corpusId: corpus_id,
+                        media: medium_id,
 						layerId: layer_id
 					},
 					function () {
@@ -875,8 +874,8 @@ angular.module('myApp.controllers', ['myApp.services'])
 					'_id': layer_id + "_2"
 				};
 				$scope.model.layers[2].layer = Annotation.query({
-						corpusId: corpus_id,
-						mediaId: medium_id,
+//						corpusId: corpus_id,
+                        media: medium_id,
 						layerId: layer_id
 					},
 					function () {
@@ -932,8 +931,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 				scope.model.selected_before = undefined;
 				scope.model.selected_after = undefined;
 				if (newValue) {
-					scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
-					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
+					scope.get_layers(scope.model.selected_medium);
+                    scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + scope.model.selected_medium + "/video");
+//					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
 					$scope.resetSummaryView(true);
 				}
 			});
@@ -1068,7 +1068,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 				$scope.model.available_layers = Layer.query({
 					corpusId: corpus_id,
-					mediaId: medium_id
+                    id_media: medium_id
 				});
 			};
 
@@ -1081,7 +1081,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 				};
 				$scope.model.layers[0].layer = Annotation.query({
 						corpusId: corpus_id,
-						mediaId: medium_id,
+                        id_media: medium_id,
 						layerId: layer_id
 					},
 					function () {
@@ -1100,7 +1100,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 				};
 				$scope.model.layers[1].layer = Annotation.query({
 						corpusId: corpus_id,
-						mediaId: medium_id,
+                        id_media: medium_id,
 						layerId: layer_id
 					},
 					function () {
@@ -1122,7 +1122,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 				};
 				$scope.model.layers[3 + index].layer = Annotation.query({
 						corpusId: corpus_id,
-						mediaId: medium_id,
+                        id_media: medium_id,
 						layerId: layer_id
 					},
 					function () {
@@ -1232,6 +1232,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 				scope.model.selected_monomodal = [];
 				if (newValue) {
 					scope.get_layers(scope.model.selected_corpus, scope.model.selected_medium);
+
 					scope.model.video = $sce.trustAsResourceUrl("https://flower.limsi.fr/data/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
 				}
 			});
@@ -1496,8 +1497,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					$scope.model.updateIsDisplayedVideo($scope.model.inData.length != 0);
 
 					// Get the video
-					$scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/corpus/" +
-						$scope.model.queueData.id_corpus + "/media/" + $scope.model.queueData.id_medium + "/video");
+					$scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
 
 					if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
 						$scope.model.restrict_toggle = 2;
@@ -1513,9 +1513,12 @@ angular.module('myApp.controllers', ['myApp.services'])
 						$scope.model.current_time = $scope.model.queueData.fragment.start;
 
 						if ($scope.model.queueType === 'head') {
+                            console.log("test1");
 							// at the end of video loading, draw a rectangle on head as described in "position"
 							document.getElementById("player").addEventListener("loadedmetadata", function () {
 								$scope.$apply(function () {
+
+                                    console.log("test2");
 
 									// Remove previous rects
 									$scope.model.resetTransparentPlan();
@@ -1593,7 +1596,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 					$scope.model.queueData.data = dataToPush;
 
-					newOutcomingQueue.id_list = [$scope.model.queueData];
+					newOutcomingQueue.list = [$scope.model.queueData];
 					$scope.model.updateQueueOnServer(newOutcomingQueue);
 
 					// call only if button have to be disabled
@@ -1639,7 +1642,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 						$scope.model.queueData.data = dataToPush;
 
-						newOutcomingQueue.id_list = [$scope.model.queueData];
+						newOutcomingQueue.list = [$scope.model.queueData];
 						$scope.model.updateQueueOnServer(newOutcomingQueue);
 
 						// call only if button have to be disabled
@@ -1674,7 +1677,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					queue,
 					// success handling
 					function () {
-						console.log('Successfully update the annotation');
+						console.log('Successfully update the annotation', queue);
 					},
 					//error handling
 					function (error) {
@@ -1703,52 +1706,52 @@ angular.module('myApp.controllers', ['myApp.services'])
 					$scope.model.getQueueWithId($rootScope.queues.shotIn).$promise.then(function (data) {
 						var queue = data;
 
-						queue.id_list = [
+						queue.list = [
 							{
 								id_corpus: "52fb49016ed21ede00000009",
-								id_medium: "52fb4ec46ed21ede00000018",
+								id_medium: "546cb4cc157a4908003c2e4c",
 								_id: "52fe3fd811d4fade00007c2a",
-								id_layer: "52fe3fd811d4fade00007c29",
+								id_layer: "546cb4be157a4908003c2e47",
 								data: ["Olivier_TRUCHOT"],
 								fragment: {
 									start: 258.9,
 									end: 314.29,
 									context: {
-										_id: "52fe49d8350185de000015ab",
+										_id: "546cb4be157a4908003c2e47",
 										id_corpus: "52fe3fd811d4fade00007c2c",
-										id_medium: "52fb4ec46ed21ede00000018"
+										id_medium: "546cb4cc157a4908003c2e4c"
 									}
 								}
 							},
 							{
 								id_corpus: "52fb49016ed21ede00000009",
-								id_medium: "52fb4ec46ed21ede00000018",
+								id_medium: "546cb4cc157a4908003c2e4c",
 								_id: "52fe3fd811d4fade00007c2b",
-								id_layer: "52fe3fd811d4fade00007c29",
+								id_layer: "546cb4be157a4908003c2e47",
 								data: ["Olivier_TRUCHOT"],
 								fragment: {
 									start: 330.21,
 									end: 340.27,
 									context: {
-										_id: "52fe49d8350185de000015ab",
+										_id: "546cb4be157a4908003c2e47",
 										id_corpus: "52fe3fd811d4fade00007c2c",
-										id_medium: "52fb4ec46ed21ede00000018"
+										id_medium: "546cb4cc157a4908003c2e4c"
 									}
 								}
 							},
 							{
 								id_corpus: "52fe3fd811d4fade00007c2c",
-								id_medium: "52fb4ec46ed21ede00000018",
+								id_medium: "546cb4cc157a4908003c2e4c",
 								_id: "52fb49016ed21ede00000009",
-								id_layer: "52fe3fd811d4fade00007c29",
+								id_layer: "546cb4be157a4908003c2e47",
 								data: ["Rachid_M_BARKI"],
 								fragment: {
 									start: 340.27,
 									end: 362.18,
 									context: {
-										_id: "52fe49d8350185de000015ab",
+										_id: "546cb4be157a4908003c2e47",
 										id_corpus: "52fe3fd811d4fade00007c2c",
-										id_medium: "52fb4ec46ed21ede00000018"
+										id_medium: "546cb4cc157a4908003c2e4c"
 									}
 								}
 							}
@@ -1763,12 +1766,12 @@ angular.module('myApp.controllers', ['myApp.services'])
 					$scope.model.getQueueWithId($rootScope.queues.headIn).$promise.then(function (data) {
 						var queue = data;
 
-						queue.id_list = [
+						queue.list = [
 							{
 								id_corpus: "52fe3fd811d4fade00007c2c",
-								id_medium: "52fb4ec46ed21ede00000018",
+								id_medium: "546cb4cc157a4908003c2e4c",
 								_id: "52fb49016ed21ede00000009",
-								id_layer: "52fe3fd811d4fade00007c29",
+								id_layer: "546cb4be157a4908003c2e47",
 								data: ["Rachid_M_BARKI"],
 								fragment: {
 									start: 340.27,
@@ -1831,6 +1834,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 			//	          $scope.model.createFakeQueue();
            	$scope.model.addFakeValues();
+
+            $scope.model.debugProbe = function () {
+                $scope.model.addFakeValues();
+                console.log("fakes added");
+            }
 
 			// reset all queues
 			//    db.queues.update({},{ $set: { queue: [] } }, {multi:true})

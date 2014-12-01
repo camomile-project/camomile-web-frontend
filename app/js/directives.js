@@ -226,8 +226,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						targetBounds = [scope.model.queueData.fragment.start, scope.model.queueData.fragment.end];
 						updateMarker();
 						if(scope.model.queueData.fragment.context !== undefined) {
-							contextLayer = Annotation.query({corpusId: scope.model.queueData.fragment.context.id_corpus,
-																				mediaId: scope.model.queueData.fragment.context.id_medium,
+							contextLayer = Annotation.query({id_media: scope.model.queueData.fragment.context.id_medium,
 																				layerId: scope.model.queueData.fragment.context._id});
 							updateContext();
 						} else {

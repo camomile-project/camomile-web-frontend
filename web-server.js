@@ -120,6 +120,7 @@ function create_one_queue(item, callback) {
         options, 
         function (error, response, body) {
             // TODO: error handling
+            console.log(body);
             callback(error, body._id);
         });
 };
