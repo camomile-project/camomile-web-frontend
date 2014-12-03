@@ -55,6 +55,7 @@ angular.module('myApp.services', ['ngResource'])
 		}
 	])
 
+    // Used to get the list of available corpus or the corpus with the given ID
 	.factory('Corpus', ['$resource', '$rootScope',
 		function ($resource, $rootScope) {
 			return $resource(
@@ -71,29 +72,31 @@ angular.module('myApp.services', ['ngResource'])
 		}
 	])
 
-	.factory('Media', ['$resource', '$rootScope',
-		function ($resource, $rootScope) {
-			return $resource(
+    // Used to get the list of available media for the given corpus which id is given
+    .factory('Media', ['$resource', '$rootScope',
+        function ($resource, $rootScope) {
+            return $resource(
 
-				$rootScope.dataroot + '/media/:mediaId', {
-					mediaId: '@mediaId'
+                $rootScope.dataroot + '/corpus/:corpusId/media', {
+                    corpusId: '@corpusId'
 
-				}, {
-					'query': {
-						method: 'GET',
-						withCredentials: true,
-						format: '.json',
-						isArray: true
-					}
-				});
-		}
-	])
+                }, {
+                    'query': {
+                        method: 'GET',
+                        withCredentials: true,
+                        format: '.json',
+                        isArray: true
+                    }
+                });
+        }
+    ])
 
+    // Used to get the list of layers for the given corpus which id is given
     .factory('Layer', ['$resource', '$rootScope',
         function ($resource, $rootScope) {
             return $resource(
-                $rootScope.dataroot + '/layer/:layerId', {
-                    media: '@media',
+                $rootScope.dataroot + '/corpus/:corpusId/layer', {
+                    corpusId: '@corpusId',
                     layerId: '@layerId'
                 }, {
                     'query': {
@@ -106,38 +109,25 @@ angular.module('myApp.services', ['ngResource'])
         }
     ])
 
-//	.factory('Annotation', ['$resource', '$rootScope',
-//		function ($resource, $rootScope) {
-//			return $resource(
-//				$rootScope.dataroot + '/corpus/:corpusId/media/:mediaId/layer/:layerId/annotation/:annotationId', {
-//					corpusId: '@corpusId',
-//					mediaId: '@mediaId',
-//					layerId: '@layerId',
-//					annotationId: '@annotationId'
-//				}, {
-//					'query': {
-//						method: 'GET',
-//						withCredentials: true,
-//						format: '.json',
-//						isArray: true
-//					}, 'queryForAnUpdate': {
-//						method: 'GET',
-//						withCredentials: true,
-//						format: '.json',
-//						isArray: false
-//					},
-//					'update': {
-//						method: 'PUT',
-//						withCredentials: true
-//					}, 'remove': {
-//						method: 'DELETE',
-//						withCredentials: true,
-//						isArray: false
-//					}
-//				});
-//		}
-//	])
+//    // Used to get the list of layers for the given medium which id is given or to get a particular layer with the given ID
+//    .factory('Layer', ['$resource', '$rootScope',
+//        function ($resource, $rootScope) {
+//            return $resource(
+//                $rootScope.dataroot + '/layer/:layerId', {
+//                    media: '@media',
+//                    layerId: '@layerId'
+//                }, {
+//                    'query': {
+//                        method: 'GET',
+//                        withCredentials: true,
+//                        format: '.json',
+//                        isArray: true
+//                    }
+//                });
+//        }
+//    ])
 
+    // Used to get the list of available annotations for the given layer which ID is given, or a particular annotation with the given ID
     .factory('Annotation', ['$resource', '$rootScope',
         function ($resource, $rootScope) {
             return $resource(
@@ -152,24 +142,11 @@ angular.module('myApp.services', ['ngResource'])
                         format: '.json',
                         isArray: true
                     }
-//                    , 'queryForAnUpdate': {
-//                        method: 'GET',
-//                        withCredentials: true,
-//                        format: '.json',
-//                        isArray: false
-//                    },
-//                    'update': {
-//                        method: 'PUT',
-//                        withCredentials: true
-//                    }, 'remove': {
-//                        method: 'DELETE',
-//                        withCredentials: true,
-//                        isArray: false
-//                    }
                 });
         }
     ])
 
+    // Used to modify annotations in the timeline
     .factory('AnnotationUpdater', ['$resource', '$rootScope',
         function ($resource, $rootScope) {
             return $resource(
@@ -177,12 +154,14 @@ angular.module('myApp.services', ['ngResource'])
                     annotationId: '@annotationId'
                 },
                 {
+                    // Used to get a particular annotation given its ID
                     'queryForAnUpdate': {
                         method: 'GET',
                         withCredentials: true,
                         format: '.json',
                         isArray: false
                     },
+                    // Used to update
                     'update': {
                         method: 'PUT',
                         withCredentials: true

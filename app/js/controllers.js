@@ -285,10 +285,18 @@ angular.module('myApp.controllers', ['myApp.services'])
 				});
 			};
 
+//            // get a medium for a given corpus
+//            $scope.get_medium = function (media) {
+//                return Medium.query({
+//                    media: media
+//                }, function () {
+//                });
+//            };
+
 			// get list of layers for a given medium
-			$scope.get_layers = function (medium_id) {
+			$scope.get_layers = function (corpusId) {
 				$scope.model.available_layers = Layer.query({
-                    media: medium_id
+                    corpusId: corpusId
 				});
                 console.log($scope.model.available_layers);
 			};
@@ -690,7 +698,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					'reference': camomile2pyannoteFilter($scope.model.layers[0].layer)
 				};
 
-				if (reference_and_hypothesis.hypothesis.content.length > 0 && reference_and_hypothesis.reference.content.length > 0) {
+				if ($scope.model.selected_medium != undefined && reference_and_hypothesis.hypothesis.content.length > 0 && reference_and_hypothesis.reference.content.length > 0) {
 					CMError.diff(reference_and_hypothesis).success(function (data) {
 						$scope.model.layers[2] = {
 							'label': 'Difference',
@@ -724,10 +732,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 			$scope.$watch('model.selected_medium', function (newValue, oldValue, scope) {
 				// when the medium changes, the viz is reinit, and the select box gets the new layers
-				scope.model.selected_reference = undefined;
-				scope.model.selected_hypothesis = undefined;
+                // TODO: no more necessary
+//				scope.model.selected_reference = undefined;
+//				scope.model.selected_hypothesis = undefined;
 				if (newValue) {
-					scope.get_layers(scope.model.selected_medium);
+					scope.get_layers(scope.model.selected_corpus);
 					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + scope.model.selected_medium + "/video");
 					$scope.resetSummaryView(true, true, true);
 				}
@@ -927,7 +936,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 				scope.model.selected_before = undefined;
 				scope.model.selected_after = undefined;
 				if (newValue) {
-					scope.get_layers(scope.model.selected_medium);
+					scope.get_layers(scope.model.selected_corpus);
                     scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + scope.model.selected_medium + "/video");
 //					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
 					$scope.resetSummaryView(true);
@@ -1494,7 +1503,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 					// Get the video
 					$scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
-
 					if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
 						$scope.model.restrict_toggle = 2;
 						$scope.model.infbndsec = $scope.model.queueData.fragment.start - $scope.model.context_size;
