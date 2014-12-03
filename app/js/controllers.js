@@ -20,7 +20,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model = {};
 			$scope.model.message = undefined;
 
-
 			$scope.login = function (submit) {
 				var username = $("#login").val();
 				var password = $("#password").val();
@@ -64,7 +63,6 @@ angular.module('myApp.controllers', ['myApp.services'])
 						Session.username = undefined;
 						$cookieStore.remove("current.user");
 						$scope.model.message = "Connection error";
-						console.log(err);
 					});
 			};
 
@@ -91,8 +89,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 		}])
 
 	.controller('BaseCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater',
-		'CMError', 'defaults', 'palette', 'Session',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, Session) {
+		'CMError', 'defaults', 'palette', 'Session', '$rootScope',
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, Session, $rootScope) {
+
 
 			delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -104,6 +103,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.model.display_barchart = false;
 			$scope.model.display_treemap = false;
 			$scope.model.update_SummaryView = 0;
+			$scope.model.absUrl = $rootScope.absUrl;
 
 			// reflects model.layer for watch by cm-timeline.
 			// initialized empty so that the initial watch triggers with consistent values for cm-timeline,
