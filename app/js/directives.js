@@ -226,7 +226,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 						targetBounds = [scope.model.queueData.fragment.start, scope.model.queueData.fragment.end];
 						updateMarker();
 						if(scope.model.queueData.fragment.context !== undefined) {
-							contextLayer = Annotation.query({id_media: scope.model.queueData.fragment.context.id_medium,
+							contextLayer = Annotation.query({media: scope.model.queueData.fragment.context.id_medium,
 																				layerId: scope.model.queueData.fragment.context._id});
 							updateContext();
 						} else {
@@ -739,6 +739,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 							});
 							clearSelection();
 						})
+                    //TODO: uncomment this if you want to use the context menu to allow annotation modification in the time line
 						.on('contextmenu', function (d) {
 							d3.event.preventDefault();
 

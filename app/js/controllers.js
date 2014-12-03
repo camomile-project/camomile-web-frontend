@@ -90,9 +90,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		}])
 
-	.controller('BaseCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+	.controller('BaseCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater',
 		'CMError', 'defaults', 'palette', 'Session',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, Session) {
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, Session) {
 
 			delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -383,10 +383,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.update_annotation = function (corpus_id, medium_id, layer_id, annotation_id, newValue) {
 
 				// qet the annotation to edit
-				var annotation_edited = Annotation.queryForAnUpdate({
-//					corpusId: corpus_id,
-                    media: medium_id,
-					layerId: layer_id,
+				var annotation_edited = AnnotationUpdater.queryForAnUpdate({
 					annotationId: annotation_id
 				});
 
@@ -394,12 +391,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 				annotation_edited.data = newValue;
 
 				// update it on server
-				Annotation.update(
+				AnnotationUpdater.update(
 					// update parameters
 					{
-//						corpusId: corpus_id,
-                        media: medium_id,
-						layerId: layer_id,
 						annotationId: annotation_id
 					},
 					// data to post
@@ -420,7 +414,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 			$scope.remove_annotation = function (corpus_id, medium_id, layer_id, annotation_id) {
 
 				// call the native remove method
-				Annotation.remove({
+                AnnotationUpdater.remove({
 //						corpusId: corpus_id,
                         media: medium_id,
 						layerId: layer_id,
@@ -599,9 +593,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		}])
 
-	.controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+	.controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater',
 		'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
 
 			$controller('BaseCtrl',
 				{
@@ -612,6 +606,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					Media: Media,
 					Layer: Layer,
 					Annotation: Annotation,
+                    AnnotationUpdater:AnnotationUpdater,
 					CMError: CMError,
 					defaults: defaults,
 					palette: palette,
@@ -779,9 +774,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 		}])
 
-	.controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'CMError',
+	.controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater', 'CMError',
 		'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope',
-		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
+		function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
 
 			delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -794,6 +789,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 					Media: Media,
 					Layer: Layer,
 					Annotation: Annotation,
+                    AnnotationUpdater: AnnotationUpdater,
 					CMError: CMError,
 					defaults: defaults,
 					palette: palette,

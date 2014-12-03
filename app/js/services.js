@@ -151,7 +151,33 @@ angular.module('myApp.services', ['ngResource'])
                         withCredentials: true,
                         format: '.json',
                         isArray: true
-                    }, 'queryForAnUpdate': {
+                    }
+//                    , 'queryForAnUpdate': {
+//                        method: 'GET',
+//                        withCredentials: true,
+//                        format: '.json',
+//                        isArray: false
+//                    },
+//                    'update': {
+//                        method: 'PUT',
+//                        withCredentials: true
+//                    }, 'remove': {
+//                        method: 'DELETE',
+//                        withCredentials: true,
+//                        isArray: false
+//                    }
+                });
+        }
+    ])
+
+    .factory('AnnotationUpdater', ['$resource', '$rootScope',
+        function ($resource, $rootScope) {
+            return $resource(
+                $rootScope.dataroot + '/annotation/:annotationId', {
+                    annotationId: '@annotationId'
+                },
+                {
+                    'queryForAnUpdate': {
                         method: 'GET',
                         withCredentials: true,
                         format: '.json',
