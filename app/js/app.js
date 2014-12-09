@@ -16,26 +16,24 @@ angular.module(
         $routeProvider.when('/diff', {templateUrl: 'partials/diff.html'});
         $routeProvider.when('/regression', {templateUrl: 'partials/regression.html'});
         $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
-        $routeProvider.when('/shotqueue', {templateUrl: 'partials/queue.html'});
-				$routeProvider.when('/headqueue', {templateUrl: 'partials/queue.html'});
-				$routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
+        $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
         $routeProvider.otherwise({redirectTo: '/'});
     }])
-		// Store config for data and tool access in the rootScope after promise resolution
-		.run(['$resource', '$location', '$rootScope', function($resource, $location, $rootScope) {
-			// remove /# and everything following to ensure we get host root url
-			$rootScope.absUrl = $location.absUrl().replace(/(\/#.*)/, '');
-			// remove potentially ending /
-			$rootScope.absUrl = $rootScope.absUrl.replace(/(\/)$/, '');
-			var config = $resource($rootScope.absUrl + '/config');
+    // Store config for data and tool access in the rootScope after promise resolution
+    .run(['$resource', '$location', '$rootScope', function ($resource, $location, $rootScope) {
+        // remove /# and everything following to ensure we get host root url
+        $rootScope.absUrl = $location.absUrl().replace(/(\/#.*)/, '');
+        // remove potentially ending /
+        $rootScope.absUrl = $rootScope.absUrl.replace(/(\/)$/, '');
+        var config = $resource($rootScope.absUrl + '/config');
 
-			// Use callbacks to store in $rootScope
-			config.get().$promise.then(function(data) {
-				$rootScope.dataroot = data.camomile_api;
-				$rootScope.toolroot = data.pyannote_api;
-				$rootScope.queues = data.queues;
-			});
+        // Use callbacks to store in $rootScope
+        config.get().$promise.then(function (data) {
+            $rootScope.dataroot = data.camomile_api;
+            $rootScope.toolroot = data.pyannote_api;
+            $rootScope.queues = data.queues;
+        });
 
-		}]);
+    }]);
 
 
