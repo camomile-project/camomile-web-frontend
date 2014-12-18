@@ -1503,6 +1503,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.updateSaveButtonStatus(false);
             $scope.model.updateIsDisplayedVideo(false);
 
+            $scope.model.updateTransparentPlan = false;
 
             // Initializes the data from the queue
             // rename from "initQueueData" to "popQueueElement"
@@ -1536,50 +1537,30 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.updateIsDisplayedVideo($scope.model.inData.length != 0);
 
                     // Get the video
-                    $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
-                    if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
-                        $scope.model.restrict_toggle = 2;
-                        $scope.model.infbndsec = $scope.model.queueData.fragment.start - $scope.model.context_size;
-                        if ($scope.model.infbndsec < 0) {
-                            $scope.model.infbndsec = 0;
+                    if ($scope.model.queueData.id_medium != undefined) {
+                        $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
+                        if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
+                            $scope.model.restrict_toggle = 2;
+                            $scope.model.infbndsec = $scope.model.queueData.fragment.start - $scope.model.context_size;
+                            if ($scope.model.infbndsec < 0) {
+                                $scope.model.infbndsec = 0;
+                            }
+                            $scope.model.supbndsec = $scope.model.queueData.fragment.end + parseInt($scope.model.context_size);
+                            if ($scope.model.supbndsec > $scope.model.fullDuration) {
+                                $scope.model.supbndsec = $scope.model.fullDuration;
+                            }
+                            $scope.model.duration = $scope.model.supbndsec - $scope.model.queueData.infbndsec;
+                            $scope.model.current_time = $scope.model.queueData.fragment.start;
+
+                            if ($scope.model.queueType === 'head') {
+                                // at the end of video loading, draw a rectangle on head as described in "position"
+                                $scope.model.updateTransparentPlan = true;
+                            }
                         }
-                        $scope.model.supbndsec = $scope.model.queueData.fragment.end + parseInt($scope.model.context_size);
-                        if ($scope.model.supbndsec > $scope.model.fullDuration) {
-                            $scope.model.supbndsec = $scope.model.fullDuration;
-                        }
-                        $scope.model.duration = $scope.model.supbndsec - $scope.model.queueData.infbndsec;
-                        $scope.model.current_time = $scope.model.queueData.fragment.start;
-
-                        if ($scope.model.queueType === 'head') {
-
-                            // at the end of video loading, draw a rectangle on head as described in "position"
-                            document.getElementById("player").addEventListener("loadedmetadata", function () {
-                                $scope.$apply(function () {
-
-                                    // Remove previous rects
-                                    $scope.model.resetTransparentPlan();
-
-                                    // Rectangle style: draw a rectangle at the described position (in position)
-                                    var transparentPlan = d3.select("#transparent-plan");
-                                    transparentPlan.append("svg")
-                                        .style("width", "100%")
-                                        .style("height", "100%")
-                                        .append("rect")
-                                        .attr("x", function () {
-                                            return (($("#player").width()) * data.fragment.position.left - ($("#player").width() * data.fragment.position.width) / 2) + "px";
-                                        })
-                                        .attr("y", function () {
-                                            return ($("#player").height() * data.fragment.position.top) - ($("#player").height() * data.fragment.position.height) / 2 + "px";
-                                        })
-                                        .attr("width", $("#player").width() * data.fragment.position.width)
-                                        .attr("height", $("#player").height() * data.fragment.position.height)
-                                        .style("fill", "none")
-                                        .style("stroke", "red")
-                                        .style("stroke-width", 5);
-
-                                });
-                            });
-                        }
+                    }
+                    else
+                    {
+                        $scope.model.video = undefined;
                     }
                 });
             };
@@ -1811,7 +1792,46 @@ angular.module('myApp.controllers', ['myApp.services'])
                                     end: 340.27,
                                     "position": {
                                         "top": 0.3,
-                                        "left": 0.54,
+                                        "left": 0.506,
+                                        "width": 0.1,
+                                        "height": 0.2
+                                    }
+                                }
+
+                            },
+
+                            {
+                                id_corpus: "52fb49016ed21ede00000009",
+                                id_medium: "546cb4cc157a4908003c2e4c",
+                                _id: "52fe3fd811d4fade00007c2b",
+                                id_layer: "546cb4be157a4908003c2e47",
+                                data: ["second test"],
+                                fragment: {
+                                    start: 200.27,
+                                    end: 200.27,
+                                    "position": {
+                                        "top": 0.1,
+                                        "left": 0.1,
+                                        "width": 0.1,
+                                        "height": 0.2
+                                    }
+                                }
+
+                            }
+                            ,
+
+                            {
+                                id_corpus: "52fe3fd811d4fade00007c2c",
+                                id_medium: "546cb4cc157a4908003c2e4c",
+                                _id: "52fb49016ed21ede00000009",
+                                id_layer: "546cb4be157a4908003c2e47",
+                                data: ["troisieme test"],
+                                fragment: {
+                                    start: 300.27,
+                                    end: 300.27,
+                                    "position": {
+                                        "top": 0.9,
+                                        "left": 0.9,
                                         "width": 0.1,
                                         "height": 0.2
                                     }
@@ -1866,7 +1886,7 @@ angular.module('myApp.controllers', ['myApp.services'])
 
 
             //	          $scope.model.createFakeQueue();
-//            $scope.model.addFakeValues();
+            $scope.model.addFakeValues();
 
             // reset all queues
             //    db.queues.update({},{ $set: { queue: [] } }, {multi:true})
@@ -1937,6 +1957,32 @@ angular.module('myApp.controllers', ['myApp.services'])
                 fireEvent($("#controlsvg")[0], "mouseout", e);
             });
 
+            $scope.$watch('model.updateTransparentPlan', function (newValue) {
+                if (newValue == true) {
+                    // Remove previous rects
+                    $scope.model.resetTransparentPlan();
+
+                    // Rectangle style: draw a rectangle at the described position (in position)
+                    var transparentPlan = d3.select("#transparent-plan");
+                    transparentPlan.append("svg")
+                        .style("width", "100%")
+                        .style("height", "100%")
+                        .append("rect")
+                        .attr("x", function () {
+                            return (($("#player").width()) * $scope.model.queueData.fragment.position.left - ($("#player").width() * $scope.model.queueData.fragment.position.width) / 2) + "px";
+                        })
+                        .attr("y", function () {
+                            return ($("#player").height() * $scope.model.queueData.fragment.position.top) - ($("#player").height() * $scope.model.queueData.fragment.position.height) / 2 + "px";
+                        })
+                        .attr("width", $("#player").width() * $scope.model.queueData.fragment.position.width)
+                        .attr("height", $("#player").height() * $scope.model.queueData.fragment.position.height)
+                        .style("fill", "none")
+                        .style("stroke", "red")
+                        .style("stroke-width", 5);
+
+                    $scope.model.updateTransparentPlan = false;
+                }
+            });
             $scope.$watch('model.context_size', function (newValue) {
                 newValue = parseInt(newValue);
                 if (isNaN(newValue)) {
