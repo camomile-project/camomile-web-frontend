@@ -1322,9 +1322,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
         }])
 
-    .controller('QueueCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation',
+    .controller('QueueCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Medium', 'Layer', 'Annotation',
         'CMError', 'defaults', 'palette', '$controller', 'QueuesBrowser', 'QueueElementModifier', '$cookieStore', 'Session', '$rootScope', '$routeParams',
-        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, CMError, defaults, palette, $controller, QueuesBrowser, QueueElementModifier, $cookieStore, Session, $rootScope, $routeParams) {
+        function ($sce, $scope, $http, Corpus, Media, Medium, Layer, Annotation, CMError, defaults, palette, $controller, QueuesBrowser, QueueElementModifier, $cookieStore, Session, $rootScope, $routeParams) {
 
             $controller('BaseCtrl',
                 {
@@ -1347,6 +1347,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.outcomingQueue = {};
             $scope.model.queueData = [];
             $scope.model.availableEntry = [];
+            $scope.model.videoName = "";
 
             $scope.model.queueType = $routeParams.type;//location.href.indexOf("shot") == -1;
 
@@ -1538,6 +1539,11 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                     // Get the video
                     if ($scope.model.queueData.id_medium != undefined) {
+
+                        $scope.get_medium($scope.model.queueData.id_medium);
+
+                        console.log($scope.model.videoName);
+
                         $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
                         if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
                             $scope.model.restrict_toggle = 2;
@@ -1883,11 +1889,18 @@ angular.module('myApp.controllers', ['myApp.services'])
             //
             //					});
 
+            // get list of media for a given corpus
+            $scope.get_medium = function (id_media) {
+                $scope.model.videoName = Medium.query({
+                    id_media: id_media
+                }, function () {
+                });
+            };
 
             // TODO: This have to be uncommented only for tests. it creates queues on the server. Also, latest server version do it its own way, so not necessary
             //	          $scope.model.createFakeQueue();
             //TODO:  This have to be uncommented only for tests. It add fake values in queues stored server side. Will be removed when all will be ok.
-            // $scope.model.addFakeValues();
+//            $scope.model.addFakeValues();
 
             // reset all queues
             //    db.queues.update({},{ $set: { queue: [] } }, {multi:true})
@@ -1984,6 +1997,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $scope.model.updateTransparentPlan = false;
                 }
             });
+
             $scope.$watch('model.context_size', function (newValue) {
                 newValue = parseInt(newValue);
                 if (isNaN(newValue)) {
