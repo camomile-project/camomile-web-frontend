@@ -41,54 +41,46 @@
         </div>
     </div>
 
-    <div class="row top-padding" ng-show="model.queueType === 'shot'">
-        <div class="col-lg-1 col-md-pull-0 col-xs-pull-0"></div>
-        <div class="col-lg-3 col-md-3 col-xs-3">
-            <div class="input-group">
-                <span class="input-group-addon">Context: +/- </span>
-                <input id="context_size_input" type="text" class="form-control" ng-model="model.context_size"
-                       ng-disabled="model.isDisplayedVideo"/>
-                <span class="input-group-addon"> s</span>
-            </div>
-        </div>
-
-
-        <div class="col-lg-8 col-md-3 col-xs-3">
-
-            <span id="medium_name" ng-show="model.videoName.name != undefined && model.videoName.name != ''">
-                <span>
-                    Title:
-                </span>
-
-                <b>
-                    {{model.videoName.name}}
-                </b>
-            </span>
-        </div>
-
-    </div>
-
-    <div class="row top-padding" ng-show="model.queueType === 'head'">
-        <div class="col-lg-1 col-md-pull-0 col-xs-pull-0"></div>
-        <div class="col-lg-11 col-md-3 col-xs-3">
-
-            <span id="medium_name" ng-show="model.videoName.name != undefined && model.videoName.name != ''">
-                <span>
-                    Title:
-                </span>
-
-                <b>
-                    {{model.videoName.name}}
-                </b>
-            </span>
-        </div>
-    </div>
 
 
 </div>
 
 <div class="container" style="display: inline-block">
 
+    <div class="row top-padding">
+
+        <div class="col-lg-1 col-md-pull-0 col-xs-pull-0"></div>
+
+
+            <div class="col-lg-3 col-md-3 col-xs-3" ng-show="model.queueType === 'shot'">
+                <div class="input-group">
+                    <span class="input-group-addon">Context: +/- </span>
+                    <input id="context_size_input" type="text" class="form-control" ng-model="model.context_size"
+                           ng-disabled="model.isDisplayedVideo"/>
+                    <span class="input-group-addon"> s</span>
+
+
+
+                </div>
+
+
+            </div>
+
+            <div class="col-lg-6 col-md-7 col-xs-7">
+                <div class="input-group" ng-show="model.videoMetaData.name != undefined && model.videoMetaData.name != ''">
+                    <span class="input-group-addon"><b>Title</b>:</span>
+                    <input id="plop" type="text" class="form-control" ng-model="model.videoMetaData.name"
+                           readonly="readonly"/>
+
+                    <span class="input-group-btn">
+                         <button class="btn btn-default" type="button" ng-click="model.displayDescription()" id="moreButtonId">
+                             more...
+                         </button>
+                    </span>
+                </div>
+            </div>
+
+    </div>
 
     <div class="row top-padding">
         <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
@@ -153,6 +145,7 @@
         </div>
     </div>
 </div>
+
 <div class="container">
     <div class="row top-padding">
 
@@ -198,6 +191,28 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" ng-click="model.edit_save()">Save changes</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<!-- Added behaviour in cm-edit-modal angular class. -->
+<div class="modal cm-description-modal" id="description-modal-dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Description</h4>
+            </div>
+            <div class="modal-body">
+                <div id="description-content">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
         <!-- /.modal-content -->

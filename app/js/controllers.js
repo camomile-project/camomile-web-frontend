@@ -88,9 +88,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
         }])
 
-    .controller('BaseCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater',
+    .controller('BaseCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Medium', 'Layer', 'Annotation', 'AnnotationUpdater',
         'CMError', 'defaults', 'palette', 'Session', '$rootScope',
-        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, Session, $rootScope) {
+        function ($sce, $scope, $http, Corpus, Media, Medium, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, Session, $rootScope) {
 
 
             delete $http.defaults.headers.common['X-Requested-With'];
@@ -285,13 +285,13 @@ angular.module('myApp.controllers', ['myApp.services'])
                 });
             };
 
-//            // get a medium for a given corpus
-//            $scope.get_medium = function (media) {
-//                return Medium.query({
-//                    media: media
-//                }, function () {
-//                });
-//            };
+            // get list of media for a given corpus
+            $scope.get_medium = function (id_media) {
+                $scope.model.videoMetaData = Medium.query({
+                    id_media: id_media
+                }, function () {
+                });
+            };
 
             // get list of layers for a given medium
             $scope.get_layers = function (corpusId) {
@@ -600,9 +600,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
         }])
 
-    .controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater',
+    .controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Medium', 'Layer', 'Annotation', 'AnnotationUpdater',
         'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope',
-        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
+        function ($sce, $scope, $http, Corpus, Media, Medium, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
 
             $controller('BaseCtrl',
                 {
@@ -611,6 +611,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $http: $http,
                     Corpus: Corpus,
                     Media: Media,
+                    Medium: Medium,
                     Layer: Layer,
                     Annotation: Annotation,
                     AnnotationUpdater: AnnotationUpdater,
@@ -798,9 +799,9 @@ angular.module('myApp.controllers', ['myApp.services'])
 
         }])
 
-    .controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater', 'CMError',
+    .controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Medium', 'Layer', 'Annotation', 'AnnotationUpdater', 'CMError',
         'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope',
-        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
+        function ($sce, $scope, $http, Corpus, Media, Medium, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
 
             delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -811,6 +812,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $http: $http,
                     Corpus: Corpus,
                     Media: Media,
+                    Medium: Medium,
                     Layer: Layer,
                     Annotation: Annotation,
                     AnnotationUpdater: AnnotationUpdater,
@@ -1333,6 +1335,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     $http: $http,
                     Corpus: Corpus,
                     Media: Media,
+                    Medium: Medium,
                     Layer: Layer,
                     Annotation: Annotation,
                     CMError: CMError,
@@ -1347,7 +1350,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.outcomingQueue = {};
             $scope.model.queueData = [];
             $scope.model.availableEntry = [];
-            $scope.model.videoName = "";
+            $scope.model.videoMetaData = "";
 
             $scope.model.queueType = $routeParams.type;//location.href.indexOf("shot") == -1;
 
@@ -1506,6 +1509,13 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.model.updateTransparentPlan = false;
 
+            $scope.model.description_flag = false;
+
+            $scope.model.displayDescription=function()
+            {
+                $scope.model.description_flag = true;
+            };
+
             // Initializes the data from the queue
             // rename from "initQueueData" to "popQueueElement"
             $scope.model.popQueueElement = function () {
@@ -1541,8 +1551,6 @@ angular.module('myApp.controllers', ['myApp.services'])
                     if ($scope.model.queueData.id_medium != undefined) {
 
                         $scope.get_medium($scope.model.queueData.id_medium);
-
-                        console.log($scope.model.videoName);
 
                         $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
                         if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
@@ -1888,14 +1896,6 @@ angular.module('myApp.controllers', ['myApp.services'])
             //						console.log(document.getElementById("player").videoWidth, document.getElementById("player").videoHeight);
             //
             //					});
-
-            // get list of media for a given corpus
-            $scope.get_medium = function (id_media) {
-                $scope.model.videoName = Medium.query({
-                    id_media: id_media
-                }, function () {
-                });
-            };
 
             // TODO: This have to be uncommented only for tests. it creates queues on the server. Also, latest server version do it its own way, so not necessary
             //	          $scope.model.createFakeQueue();
