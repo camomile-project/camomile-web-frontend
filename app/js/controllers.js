@@ -1698,6 +1698,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.updateQueueOnServer = function (queue) {
                 QueueElementModifier.update(
                     {
+                        // Id to give in order to know which queue has to be updated
                         queueId: queue._id
                     },
                     // data to post

@@ -33,8 +33,8 @@ angular.module('myApp.services', ['ngResource'])
 		function ($resource, $rootScope) {
 			return $resource(
 				$rootScope.dataroot + '/queue/:queueId/next', {
-					queueId: '@queueId',
-                    list:'@list'
+					queueId: '@queueId'
+//                    ,list:'@list'
 				},
 				{
                     // Every time get is called, the returned queue's element got removed from the queue
