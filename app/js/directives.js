@@ -56,7 +56,77 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                 });
 
                 scope.$watch("model.current_time", function (newValue) {
-                    if (newValue !== undefined) {
+                    if (newValue !== undefined  && element[0].id != "thumbnail") {
+                        scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
+                        if (element[0].readyState !== 0) {
+                            element[0].currentTime = newValue;
+                        }
+                    }
+                });
+
+//                scope.$watch("model.thumbnail_current_time", function (newValue) {
+//                    if (newValue !== undefined  && element[0].id === "thumbnail") {
+//                        scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
+//                        if (element[0].readyState !== 0) {
+//                            element[0].currentTime = newValue;
+//                        }
+//                    }
+//                });
+
+                element[0].addEventListener("timeupdate", function () {
+                    scope.$apply(function () {
+                        // if player paused, currentTime has been changed for exogenous reasons
+                        if (!element[0].paused) {
+                            if (element[0].currentTime > scope.model.supbndsec) {
+                                scope.model.toggle_play(false);
+                                scope.model.current_time = scope.model.supbndsec;
+                            } else {
+                                scope.model.current_time = element[0].currentTime;
+                            }
+                        }
+                    });
+                });
+
+
+            }
+        };
+    }])
+
+    .directive('cmVideoThumbnail', ['DateUtils', function (DateUtils) {
+        return {
+            restrict: 'A',
+            link: function (scope, element) {
+
+//                element[0].addEventListener("loadedmetadata", function () {
+//                    scope.$apply(function () {
+//
+//                        scope.model.duration = scope.model.fullDuration = element[0].duration;
+//
+//                        element[0].currentTime = scope.model.current_time;
+//                        if (scope.model.supbndsec === undefined) {
+//                            scope.model.supbndsec = scope.model.duration;
+//                        }
+//
+//                        // used to force the time-line to adapt its min/max
+//                        scope.model.reinit_video_size = true;
+//
+//                        // Remove previous brush and update it with new layers
+//                        scope.model.brushUpdate = true;
+//                        scope.model.brushRemove = true;
+//                    });
+//                });
+
+//                scope.$watch("model.current_time", function (newValue) {
+//                    if (newValue !== undefined  && element[0].id != "thumbnail") {
+//                        scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
+//                        if (element[0].readyState !== 0) {
+//                            element[0].currentTime = newValue;
+//                        }
+//                    }
+//                });
+
+                scope.$watch("model.thumbnail_current_time", function (newValue) {
+                    if (newValue !== undefined  && element[0].id) {
                         scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
                         if (element[0].readyState !== 0) {
                             element[0].currentTime = newValue;
@@ -136,6 +206,8 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     .attr("fill", "white");
 
                 var tooltipText = tooltip.append('text');
+                var thumbnails = d3.select("#thumbnail");
+                thumbnails.style("visibility", "hidden");
 
                 // mousemove management at SVG level
                 // if mouse is over a mark, have it appearing
@@ -176,8 +248,22 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                             tooltip.style("top", (coords[1] - 10) + "px").style("left", (coords[0] + 10) + "px")
                                 .style("visibility", "visible");
                             found = true;
+
+                            scope.$apply(function()
+                            {
+                                scope.model.thumbnail_current_time = rectSel[i].__data__.fragment.start;
+                            });
+
+                            // Context video thumbnail
+                            thumbnails.style("visibility", "visible");
+                            thumbnails.style("position", "absolute");
+                            thumbnails.style("width", (tooltipWidth + tooltipPadding*2)+"px");
+                            thumbnails.style("z-index", 10);
+                            thumbnails.style("top", ((coords[1] + tooltipHeight)) -10 + "px").style("left", (coords[0] + 10) + "px")
+
                         } else {
                             tooltip.style("visibility", "hidden");
+                            thumbnails.style("visibility", "hidden");
                         }
                         i++;
                     }
@@ -187,6 +273,7 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
 
                 d3elmt.on("mouseout", function () {
                     tooltip.style("visibility", "hidden");
+                    thumbnails.style("visibility", "hidden");
                 });
 
                 var updateMarker = function () {
