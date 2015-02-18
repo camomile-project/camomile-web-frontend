@@ -1943,7 +1943,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             // TODO: This have to be uncommented only for tests. it creates queues on the server. Also, latest server version do it its own way, so not necessary
             //	          $scope.model.createFakeQueue();
             //TODO:  This have to be uncommented only for tests. It add fake values in queues stored server side. Will be removed when all will be ok.
-            $scope.model.addFakeValues();
+//            $scope.model.addFakeValues();
 
             // reset all queues
             //    db.queues.update({},{ $set: { queue: [] } }, {multi:true})
