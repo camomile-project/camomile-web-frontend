@@ -1352,7 +1352,16 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.availableEntry = [];
             $scope.model.videoMetaData = "";
 
-            $scope.model.queueType = $routeParams.type;//location.href.indexOf("shot") == -1;
+            var DEFAULT_CONTEXT_VALUE;
+
+            $scope.model.queueType = $routeParams.type;
+
+            // Initialize the default context value
+            if ($scope.model.queueType === 'head') {
+                DEFAULT_CONTEXT_VALUE = 0;
+            } else if ($scope.model.queueType === 'shot') {
+                DEFAULT_CONTEXT_VALUE = 5;
+            }
 
             $(function () {
                 $("#entry_input").autocomplete({
@@ -1361,11 +1370,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             });
 
             // default for annotation context
-            if ($scope.model.queueType === 'head') {
-                $scope.model.context_size = 0;
-            } else if ($scope.model.queueType === 'shot') {
-                $scope.model.context_size = 5;
-            }
+            $scope.model.context_size = DEFAULT_CONTEXT_VALUE;
 
 
             // store the entry typed in the textbox
@@ -1478,14 +1483,20 @@ angular.module('myApp.controllers', ['myApp.services'])
             $scope.model.updateIsDisplayedVideo = function (activate) {
                 $scope.model.isDisplayedVideo = !activate;
                 var addEntryButton = document.getElementById("addEntryButton");
+                var defaultButton = document.getElementById("defaultButtonId");
+                var moreButton = document.getElementById("moreButtonId");
                 if ($scope.model.isDisplayedVideo) {
                     // Disables add entry button
                     addEntryButton.setAttribute("class", "btn btn-default disabled");
+                    defaultButton.setAttribute("class", "btn btn-default disabled");
+                    moreButton.setAttribute("class", "btn btn-default disabled");
                     // Remove previous rects
                     $scope.model.resetTransparentPlan();
                 }
                 else {
                     addEntryButton.setAttribute("class", "btn btn-default");
+                    defaultButton.setAttribute("class", "btn btn-default");
+                    moreButton.setAttribute("class", "btn btn-default");
                     if ($scope.model.queueTableData == undefined) {
                         $scope.model.queueTableData = [];
                     }
@@ -1511,72 +1522,100 @@ angular.module('myApp.controllers', ['myApp.services'])
 
             $scope.model.description_flag = false;
 
-            $scope.model.displayDescription=function()
-            {
+            $scope.model.displayDescription = function () {
                 $scope.model.description_flag = true;
+            };
+
+            $scope.model.defaultContextButtonClicked = function () {
+                $scope.model.context_size = DEFAULT_CONTEXT_VALUE;
             };
 
             // Initializes the data from the queue
             // rename from "initQueueData" to "popQueueElement"
             $scope.model.popQueueElement = function () {
-                // Update the next button's status
-                $scope.model.updateNextStatus();
-                $scope.model.updateSaveButtonStatus(true);
-                $scope.model.updateIsDisplayedVideo(true);
 
-                $scope.model.getNextQueueData($scope.model.incomingQueue).$promise.then(function (data) {
-                    $scope.model.queueData = data;
-                    $scope.model.inData = [];
-                    $scope.model.queueTableData = [];
+                var proceedPopQueue = true;
+                // Test if the entry has been added
+                if ($scope.model.entryTyped != "") {
+                    proceedPopQueue = false;
 
-                    var date = new Date(); // already UTC ddate in JSON Format...
-                    $scope.model.initialDate = date;
-
-
-                    //copy initial data
-                    for (var i in $scope.model.queueData.data) {
-                        $scope.model.inData[i] = $scope.model.queueData.data[i];
-                        $scope.model.queueTableData[i] = $scope.model.queueData.data[i];
-                        if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
-                            $scope.model.availableEntry.push($scope.model.queueData.data[i]);
-                        }
+                    if (confirm("Are you sure ? The entry hasn't been added")) {
+                        proceedPopQueue = true
                     }
+                }
+
+                if (proceedPopQueue) {
                     // Update the next button's status
                     $scope.model.updateNextStatus();
+                    $scope.model.updateSaveButtonStatus(true);
+                    $scope.model.updateIsDisplayedVideo(true);
 
-                    // Update the add entry button's status
-                    $scope.model.updateIsDisplayedVideo($scope.model.inData.length != 0);
+                    $scope.model.getNextQueueData($scope.model.incomingQueue).$promise.then(function (data) {
+                        $scope.model.queueData = data;
+                        $scope.model.inData = [];
+                        $scope.model.queueTableData = [];
 
-                    // Get the video
-                    if ($scope.model.queueData.id_medium != undefined) {
+                        var date = new Date(); // already UTC date in JSON Format...
+                        $scope.model.initialDate = date;
 
-                        $scope.get_medium($scope.model.queueData.id_medium);
+                        // Re init the context_size value
+                        $scope.model.context_size = DEFAULT_CONTEXT_VALUE;
 
-                        $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
-                        $scope.model.videoThumbnail = $scope.model.video;
-                        if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
-                            $scope.model.restrict_toggle = 2;
-                            $scope.model.infbndsec = $scope.model.queueData.fragment.start - $scope.model.context_size;
-                            if ($scope.model.infbndsec < 0) {
-                                $scope.model.infbndsec = 0;
-                            }
-                            $scope.model.supbndsec = $scope.model.queueData.fragment.end + parseInt($scope.model.context_size);
-                            if ($scope.model.supbndsec > $scope.model.fullDuration) {
-                                $scope.model.supbndsec = $scope.model.fullDuration;
-                            }
-                            $scope.model.duration = $scope.model.supbndsec - $scope.model.queueData.infbndsec;
-                            $scope.model.current_time = $scope.model.queueData.fragment.start;
-
-                            if ($scope.model.queueType === 'head') {
-                                // at the end of video loading, draw a rectangle on head as described in "position"
-                                $scope.model.updateTransparentPlan = true;
+                        //copy initial data
+                        for (var i in $scope.model.queueData.data) {
+                            $scope.model.inData[i] = $scope.model.queueData.data[i];
+                            $scope.model.queueTableData[i] = $scope.model.queueData.data[i];
+                            if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
+                                $scope.model.availableEntry.push($scope.model.queueData.data[i]);
                             }
                         }
-                    }
-                    else {
-                        $scope.model.video = undefined;
-                    }
-                });
+                        // Update the next button's status
+                        $scope.model.updateNextStatus();
+
+                        // Update the add entry button's status
+                        $scope.model.updateIsDisplayedVideo($scope.model.inData.length != 0);
+
+                        // Get the video
+                        if ($scope.model.queueData.id_medium != undefined) {
+
+                            $scope.get_medium($scope.model.queueData.id_medium);
+
+                            $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
+                            $scope.model.videoThumbnail = $scope.model.video;
+                            if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
+                                $scope.model.restrict_toggle = 2;
+
+                                $scope.model.current_time_temp = $scope.model.queueData.fragment.start;
+
+                                $scope.model.infbndsec = $scope.model.queueData.fragment.start - $scope.model.context_size;
+                                if ($scope.model.infbndsec < 0) {
+                                    $scope.model.infbndsec = 0;
+                                }
+                                $scope.model.supbndsec = $scope.model.queueData.fragment.end + parseInt($scope.model.context_size);
+                                if ($scope.model.supbndsec > $scope.model.fullDuration) {
+                                    $scope.model.supbndsec = $scope.model.fullDuration;
+                                }
+
+                                $scope.model.duration = $scope.model.supbndsec - $scope.model.queueData.infbndsec;
+
+                                //FIXME: C'est ici que c'est fait au "mauvais moment"
+                                $scope.model.current_time = $scope.model.queueData.fragment.start;
+
+//                                console.log("nouveau current:",$scope.model.current_time)
+
+                                if ($scope.model.queueType === 'head') {
+                                    // at the end of video loading, draw a rectangle on head as described in "position"
+                                    $scope.model.updateTransparentPlan = true;
+                                }
+
+                            }
+                        }
+                        else {
+                            $scope.model.video = undefined;
+                        }
+                    });
+                }
+
             };
 
 
@@ -1643,9 +1682,10 @@ angular.module('myApp.controllers', ['myApp.services'])
 
                 var buttonNext = document.getElementById("buttonNext");
 
+                buttonNext['data-title'] = "Skip this element and load the next one";
+
                 // Push queue ONLY if a "Skip" as been done. NOT when "Start" has been pressed.
                 if (buttonNext.innerHTML === "Skip") {
-
                     $scope.model.getQueueWithId($scope.model.outcomingQueue).$promise.then(function (data) {
                         var newOutcomingQueue = data;
 
@@ -1707,6 +1747,7 @@ angular.module('myApp.controllers', ['myApp.services'])
                     // success handling
                     function () {
                         console.log('Successfully update the annotation', queue);
+                        console.log("fin du update", $scope.model.current_time);
                     },
                     //error handling
                     function (error) {
@@ -1902,7 +1943,7 @@ angular.module('myApp.controllers', ['myApp.services'])
             // TODO: This have to be uncommented only for tests. it creates queues on the server. Also, latest server version do it its own way, so not necessary
             //	          $scope.model.createFakeQueue();
             //TODO:  This have to be uncommented only for tests. It add fake values in queues stored server side. Will be removed when all will be ok.
-            //$scope.model.addFakeValues();
+            $scope.model.addFakeValues();
 
             // reset all queues
             //    db.queues.update({},{ $set: { queue: [] } }, {multi:true})

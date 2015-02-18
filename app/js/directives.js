@@ -64,15 +64,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                     }
                 });
 
-//                scope.$watch("model.thumbnail_current_time", function (newValue) {
-//                    if (newValue !== undefined  && element[0].id === "thumbnail") {
-//                        scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
-//                        if (element[0].readyState !== 0) {
-//                            element[0].currentTime = newValue;
-//                        }
-//                    }
-//                });
-
                 element[0].addEventListener("timeupdate", function () {
                     scope.$apply(function () {
                         // if player paused, currentTime has been changed for exogenous reasons
@@ -96,34 +87,6 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
         return {
             restrict: 'A',
             link: function (scope, element) {
-
-//                element[0].addEventListener("loadedmetadata", function () {
-//                    scope.$apply(function () {
-//
-//                        scope.model.duration = scope.model.fullDuration = element[0].duration;
-//
-//                        element[0].currentTime = scope.model.current_time;
-//                        if (scope.model.supbndsec === undefined) {
-//                            scope.model.supbndsec = scope.model.duration;
-//                        }
-//
-//                        // used to force the time-line to adapt its min/max
-//                        scope.model.reinit_video_size = true;
-//
-//                        // Remove previous brush and update it with new layers
-//                        scope.model.brushUpdate = true;
-//                        scope.model.brushRemove = true;
-//                    });
-//                });
-
-//                scope.$watch("model.current_time", function (newValue) {
-//                    if (newValue !== undefined  && element[0].id != "thumbnail") {
-//                        scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
-//                        if (element[0].readyState !== 0) {
-//                            element[0].currentTime = newValue;
-//                        }
-//                    }
-//                });
 
                 scope.$watch("model.thumbnail_current_time", function (newValue) {
                     if (newValue !== undefined  && element[0].id) {
@@ -340,8 +303,16 @@ angular.module('myApp.directives', ['myApp.filters', 'myApp.services']).
                         if (contextLayer !== undefined) {
                             updateContext();
                         }
+                        scope.model.current_time = scope.model.current_time_temp;
                     }
                 }, true);
+
+//                scope.$watch('model.current_time', function (newValue) {
+//                   if(newValue)
+//                   {
+//                       console.log(newValue);
+//                   }
+//                });
 
 
             }

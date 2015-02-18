@@ -42,7 +42,6 @@
     </div>
 
 
-
 </div>
 
 <div class="container" style="display: inline-block">
@@ -52,33 +51,40 @@
         <div class="col-lg-1 col-md-pull-0 col-xs-pull-0"></div>
 
 
-            <div class="col-lg-3 col-md-3 col-xs-3" ng-show="model.queueType === 'shot'">
-                <div class="input-group">
-                    <span class="input-group-addon">Context: +/- </span>
-                    <input id="context_size_input" type="text" class="form-control" ng-model="model.context_size"
-                           ng-disabled="model.isDisplayedVideo"/>
-                    <span class="input-group-addon"> s</span>
-
-
-
-                </div>
-
-
-            </div>
-
-            <div class="col-lg-6 col-md-7 col-xs-7">
-                <div class="input-group" ng-show="model.videoMetaData.name != undefined && model.videoMetaData.name != ''">
-                    <span class="input-group-addon"><b>Title</b>:</span>
-                    <input id="plop" type="text" class="form-control" ng-model="model.videoMetaData.name"
-                           readonly="readonly"/>
-
+        <div class="col-lg-3 col-md-3 col-xs-3" ng-show="model.queueType === 'shot'">
+            <div class="input-group">
+                <span class="input-group-addon" data-title="Add X seconds before and after the video">
+                    <!--<b>Context: +/- </b></span>-->
+                <b>Context: +/- </b></span>
+                <input id="context_size_input" type="text" class="form-control" ng-model="model.context_size"
+                       ng-disabled="model.isDisplayedVideo"/>
                     <span class="input-group-btn">
-                         <button class="btn btn-default" type="button" ng-click="model.displayDescription()" id="moreButtonId">
-                             more...
+                         <button class="btn btn-default" type="button" ng-click="model.defaultContextButtonClicked()"
+                                 id="defaultButtonId" data-title="Reset the context value">
+                             Default
                          </button>
                     </span>
-                </div>
+
+
             </div>
+
+
+        </div>
+
+        <div class="col-lg-6 col-md-7 col-xs-7">
+            <div class="input-group" ng-show="model.videoMetaData.name != undefined && model.videoMetaData.name != ''">
+                <span class="input-group-addon" data-title="Display the video title"><b>Title</b>:</span>
+                <input type="text" class="form-control" ng-model="model.videoMetaData.name"
+                       readonly="readonly"/>
+
+                    <span class="input-group-btn">
+                         <button class="btn btn-default" type="button" ng-click="model.displayDescription()"
+                                 id="moreButtonId" data-title="Display more information about the video">
+                             More...
+                         </button>
+                    </span>
+            </div>
+        </div>
 
     </div>
 
@@ -88,14 +94,14 @@
         <div class="col-lg-9 col-md-12 col-xs-12">
 
             <div class="input-group">
-                <span class="input-group-addon">Entry:</span>
+                <span class="input-group-addon" data-title="Enter your own annotation here"><b>Entry:</b></span>
 
                 <form ng-submit="model.addEntry()">
                     <input id="entry_input" type="text" class="form-control" ng-model="model.entryTyped"
                            ng-disabled="model.isDisplayedVideo">
                 </form>
                     <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" ng-click="model.addEntry()" id="addEntryButton">
+                        <button class="btn btn-default" type="button" ng-click="model.addEntry()" id="addEntryButton" data-title="Add your entry to the list of annotation elements">
                             Add entry
                         </button>
                     </span>
@@ -120,11 +126,15 @@
                 <table class="table table-bordered table-hover" id="clickable-table">
                     <thead>
                     <tr class="active">
-                        <td>
-                            #
+                        <td data-title="Entry index (Right click on a line to edit/remove it)">
+                            <b>
+                                #
+                            </b>
                         </td>
-                        <td>
-                            Entry
+                        <td data-title="Entry value (Right click on a line to edit/remove it)">
+                            <b>
+                                Entry
+                            </b>
                         </td>
                     </tr>
                     </thead>
@@ -156,12 +166,12 @@
             <div class="btn-group btn-group-justified">
 
                 <div class="btn-group">
-                    <button type="button" class="btn btn-success" ng-click="model.saveQueueElement()" id="buttonSave">
+                    <button type="button" class="btn btn-success" ng-click="model.saveQueueElement()" id="buttonSave"  data-title="Save annotation and load next element">
                         Ok
                     </button>
                 </div>
                 <div class="btn-group">
-                    <button type="button" class="btn btn-primary" ng-click="model.nextQueueElement()" id="buttonNext">
+                    <button type="button" class="btn btn-primary" ng-click="model.nextQueueElement()" id="buttonNext" data-title="Get the first element to annotate">
                         Skip
                     </button>
                 </div>
