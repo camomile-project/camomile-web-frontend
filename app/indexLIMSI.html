@@ -27,7 +27,6 @@
     <script src="bower_components/angular-resource/angular-resource.js"></script>
     <script src="bower_components/angular-route/angular-route.min.js"></script>
     <script src="bower_components/angular-cookies/angular-cookies.js"></script>
-
     <script src="bower_components/d3/d3.js"></script>
 
     <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
@@ -51,30 +50,8 @@
     <script src="js/services/langUtils.js"></script>
     <script src="js/services/layer.js"></script>
     <script src="js/services/media.js"></script>
-    <script src="js/services/medium.js"></script>
     <script src="js/services/palette.js"></script>
-    <script src="js/services/queueElementModifier.js"></script>
-    <script src="js/services/queuesBrowser.js"></script>
     <script src="js/services/session.js"></script>
-
-    <!-- Filters-->
-    <script src="js/filters.js"></script>
-
-    <!-- Directives-->
-    <script src="js/directives/appVersion.js"></script>
-    <script src="js/directives/blurbtn.js"></script>
-    <script src="js/directives/cmBarchart.js"></script>
-    <script src="js/directives/cmContextBar.js"></script>
-    <script src="js/directives/cmDescriptionModal.js"></script>
-    <script src="js/directives/cmEditModal.js"></script>
-    <script src="js/directives/cmLegend.js"></script>
-    <script src="js/directives/cmPiechart.js"></script>
-    <script src="js/directives/cmTimeLine.js"></script>
-    <script src="js/directives/cmTreemap.js"></script>
-    <script src="js/directives/cmVideoPlayer.js"></script>
-    <script src="js/directives/cmVideoThumbnail.js"></script>
-    <script src="js/directives/ngLoginSubmit.js"></script>
-    <script src="js/directives/ngRightClick.js"></script>
 
     <!-- Controllers-->
     <script src="js/controllers/commonCtrl.js"></script>
@@ -83,7 +60,21 @@
     <script src="js/controllers/regressionCtrl.js"></script>
     <script src="js/controllers/fusionCtrl.js"></script>
     <script src="js/controllers/diffCtrl.js"></script>
-    <script src="js/controllers/queueCtrl.js"></script>
+
+    <!-- Filters-->
+    <script src="js/filters.js"></script>
+
+    <!-- Directives-->
+    <script src="js/directives/appVersion.js"></script>
+    <script src="js/directives/blurbtn.js"></script>
+    <script src="js/directives/cmBarchart.js"></script>
+    <script src="js/directives/cmEditModal.js"></script>
+    <script src="js/directives/cmLegend.js"></script>
+    <script src="js/directives/cmPiechart.js"></script>
+    <script src="js/directives/cmTimeLine.js"></script>
+    <script src="js/directives/cmTreemap.js"></script>
+    <script src="js/directives/cmVideoPlayer.js"></script>
+    <script src="js/directives/ngLoginSubmit.js"></script>
 
     <!-- together js -->
     <!--
@@ -92,12 +83,11 @@
     </script>
     <script src="https://togetherjs.com/togetherjs-min.js"></script>
     -->
-
 </head>
 <body>
 
 <!-- Wrap all page content here -->
-<div id="wrap" ng-controller="CommonCtrl">
+<div id="wrap">
 
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
@@ -116,8 +106,6 @@
                     <li><a href="#/diff">Diff</a></li>
                     <li><a href="#/regression">Regression</a></li>
                     <!--<li><a href="#/fusion">Fusion</a></li>-->
-                    <li><a href="#/queue?type=shot">Annotate shot</a></li>
-                    <li><a href="#/queue?type=head">Annotate head</a></li>
                 </ul>
 
                 <div ng-controller="SessionCtrl" data-ng-init="checkLoggin()">
@@ -180,6 +168,7 @@
         <p class="text-muted credit"><a href="http://camomile.limsi.fr/">Camomile Project</a></p>
     </div>
 </div>
+
 
 </body>
 </html>

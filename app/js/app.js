@@ -1,6 +1,10 @@
 'use strict';
 
 // Declare app level module which depends on filters, and services
+angular.module('myApp.controllers', ['myApp.services']);
+angular.module('myApp.directives', ['myApp.filters', 'myApp.services']);
+angular.module('myApp.services', ['ngResource']);
+
 angular.module(
         'myApp',
         ['myApp.filters',
@@ -13,18 +17,30 @@ angular.module(
             'mgcrea.ngStrap'
         ])
     .config(['$routeProvider', function ($routeProvider) {
-        $routeProvider.when('/diff', {templateUrl: 'partials/diff.html'});
+//        $routeProvider.when('/diff', {templateUrl: 'partials/diff.html'});
         $routeProvider.when('/regression', {templateUrl: 'partials/regression.html'});
         $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
         $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
+        $routeProvider.when('/diff', {templateUrl:'partials/diff.html'});
         $routeProvider.otherwise({redirectTo: '/'});
     }])
     // Store config for data and tool access in the rootScope after promise resolution
     .run(['$resource', '$location', '$rootScope', function ($resource, $location, $rootScope) {
-        // remove /# and everything following to ensure we get host root url
-        $rootScope.absUrl = $location.absUrl().replace(/(\/#.*)/, '');
+        // remove /# and everything following to ensure we get host root url (and everything between / and #)
+        $rootScope.absUrl = $location.absUrl().replace(/(\/.*#.*)/, '');
         // remove potentially ending /
         $rootScope.absUrl = $rootScope.absUrl.replace(/(\/)$/, '');
+
+        var index = $rootScope.absUrl.indexOf('lig');
+        if(index == -1)
+        {
+            index = $rootScope.absUrl.indexOf('limsi');
+        }
+        if(index != -1)
+        {
+            $rootScope.absUrl = $rootScope.absUrl.substr(0, index-1);
+        }
+
         var config = $resource($rootScope.absUrl + '/config');
 
         // Use callbacks to store in $rootScope

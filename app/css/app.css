@@ -116,8 +116,13 @@ g.slice {
     cursor: pointer;
 }
 
-rect.legend, rect.barchart-bar {
+rect.legend, rect.barchart-bar, rect.node {
     cursor: pointer;
+}
+
+#legend
+{
+    float:right;
 }
 
 
