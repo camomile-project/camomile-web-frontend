@@ -125,16 +125,16 @@ angular.module('myApp.directives').
             });
 
             var updateMarker = function () {
-                marker.datum(targetBounds)
-                    .attr('x', function (d) {
-                        return timescale(d[0]);
-                    })
-                    .attr('y', 0)
-                    .attr('width', function (d) {
-                        return timescale(d[1]) - timescale(d[0]);
-                    })
-                    .attr('height', 50)
-                    .attr('fill', "#FF0000")
+									marker.datum(targetBounds)
+										.attr('x', function (d) {
+											return timescale(d[0]);
+										})
+										.attr('y', 0)
+										.attr('width', function (d) {
+											return timescale(d[1]) - timescale(d[0]);
+										})
+										.attr('height', 50)
+										.attr('fill', "#FF0000");
 
             };
 
@@ -165,12 +165,16 @@ angular.module('myApp.directives').
             };
 
 
-            scope.$watch('model.queueData._id', function (newValue) {
-                if (newValue !== undefined) {
+            scope.$watch('model.queueData', function (newValue) {
+                if (newValue !== undefined && newValue.fragment !== undefined) {
                     timescale.domain([scope.model.infbndsec, scope.model.supbndsec]);
                     targetBounds = [scope.model.queueData.fragment.start, scope.model.queueData.fragment.end];
                     updateMarker();
-                    if (scope.model.queueData.fragment.context !== undefined) {
+                    if (scope.model.queueData.fragment.context !== undefined
+                        && scope.model.queueData.fragment.context.id_medium !== undefined
+                        && scope.model.queueData.fragment.context.id_medium !== ""
+                        && scope.model.queueData.fragment.context._id !== undefined
+                        && scope.model.queueData.fragment.context._id !== "") {
                         contextLayer = Annotation.query({media: scope.model.queueData.fragment.context.id_medium,
                             layerId: scope.model.queueData.fragment.context._id});
                         updateContext();
@@ -179,7 +183,7 @@ angular.module('myApp.directives').
                     }
 
                 }
-            });
+            }, true);
 
             scope.$watch('[model.infbndsec, model.supbndsec]', function (newValue) {
                 if (newValue[1] !== undefined) {
@@ -191,6 +195,7 @@ angular.module('myApp.directives').
                     scope.model.current_time = scope.model.current_time_temp;
                 }
             }, true);
+
 
 //                scope.$watch('model.current_time', function (newValue) {
 //                   if(newValue)

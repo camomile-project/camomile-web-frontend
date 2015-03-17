@@ -3,8 +3,8 @@
  */
 angular.module('myApp.controllers')
 
-    .controller('SessionCtrl', ['$sce', '$scope', '$http', 'Session', '$cookieStore',
-        function ($sce, $scope, $http, Session, $cookieStore) {
+    .controller('SessionCtrl', ['$sce', '$scope', '$http', 'Session', '$cookieStore','$rootScope', '$route',
+        function ($sce, $scope, $http, Session, $cookieStore,$rootScope, $route) {
 
             $scope.model = {};
             $scope.model.message = undefined;
@@ -14,6 +14,33 @@ angular.module('myApp.controllers')
                 var password = $("#password").val();
                 // get actual values in the form, as angular scope not
                 // updated from autocomplete (see index.html for info)
+
+                // FIXME new login method
+//                Camomile.setURL($rootScope.dataroot);
+//                Camomile.login(username, password, function(err)
+//                {
+//                    if(err == undefined)
+//                    {
+//                        console.log('logged in as ' + username);
+//                        Session.isLogged = true;
+//                        Session.username = username;
+//                        $cookieStore.put("current.user", username);
+//                        $scope.model.message = "Connected as " + Session.username;
+//
+//                        // reload page
+//                        $route.reload();
+//                    }
+//                    else
+//                    {
+//                        Session.isLogged = false;
+//                        Session.username = undefined;
+//                        $cookieStore.remove("current.user");
+//                        $scope.model.message = "Connection error";
+//                        console.log(err);
+//                    }
+//                });
+
+
                 Session.login({
                     username: username,
                     password: password
@@ -37,6 +64,31 @@ angular.module('myApp.controllers')
 
 
             $scope.logout = function () {
+
+                // FIXME new logout method
+//                Camomile.setURL($rootScope.dataroot);
+//                Camomile.logout(function(err)
+//                {
+//                    if(err == undefined)
+//                    {
+//                        Session.isLogged = false;
+//                        $cookieStore.remove("current.user");
+//                        Session.username = undefined;
+//                        $scope.model.message = undefined;
+//
+//                        // reload page
+//                        $route.reload();
+//                    }
+//                    else
+//                    {
+//                        Session.isLogged = false;
+//                        Session.username = undefined;
+//                        $cookieStore.remove("current.user");
+//                        $scope.model.message = "Connection error";
+//                        console.log(err);
+//                    }
+//                });
+
                 Session.logout()
                     .success(function () {
                         Session.isLogged = false;

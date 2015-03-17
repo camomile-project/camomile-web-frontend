@@ -18,7 +18,7 @@ angular.module('myApp.controllers')
             $scope.model.queueTableData = [];
             $scope.model.incomingQueue = {};
             $scope.model.outcomingQueue = {};
-            $scope.model.queueData = [];
+            $scope.model.queueData = {};
             $scope.model.availableEntry = [];
             $scope.model.videoMetaData = "";
 
@@ -267,16 +267,16 @@ angular.module('myApp.controllers')
 
                                 $scope.model.current_time_temp = $scope.model.queueData.fragment.start;
 
-                                $scope.model.infbndsec = $scope.model.queueData.fragment.start - $scope.model.context_size;
+                                $scope.model.infbndsec = parseFloat($scope.model.queueData.fragment.start) - (parseInt($scope.model.context_size) || 0);
                                 if ($scope.model.infbndsec < 0) {
                                     $scope.model.infbndsec = 0;
                                 }
-                                $scope.model.supbndsec = $scope.model.queueData.fragment.end + parseInt($scope.model.context_size);
+                                $scope.model.supbndsec = parseFloat($scope.model.queueData.fragment.end) + (parseInt($scope.model.context_size) || 0);
                                 if ($scope.model.supbndsec > $scope.model.fullDuration) {
                                     $scope.model.supbndsec = $scope.model.fullDuration;
                                 }
 
-                                $scope.model.duration = $scope.model.supbndsec - $scope.model.queueData.infbndsec;
+                                $scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
 
                                 //FIXME: C'est ici que c'est fait au "mauvais moment"
                                 $scope.model.current_time = $scope.model.queueData.fragment.start;
@@ -631,7 +631,7 @@ angular.module('myApp.controllers')
             // TODO: This have to be uncommented only for tests. it creates queues on the server. Also, latest server version do it its own way, so not necessary
             //	          $scope.model.createFakeQueue();
             //TODO:  This have to be uncommented only for tests. It add fake values in queues stored server side. Will be removed when all will be ok.
-//            $scope.model.addFakeValues();
+            $scope.model.addFakeValues();
 
             // reset all queues
             //    db.queues.update({},{ $set: { queue: [] } }, {multi:true})
@@ -741,11 +741,11 @@ angular.module('myApp.controllers')
                 if ($scope.model.queueData !== undefined
                     && $scope.model.queueData.fragment !== undefined
                     && $scope.model.queueData.fragment.start !== undefined) {
-                    $scope.model.infbndsec = $scope.model.queueData.fragment.start - newValue;
+                    $scope.model.infbndsec = parseFloat($scope.model.queueData.fragment.start) - (parseInt(newValue) || 0);
                     if ($scope.model.infbndsec < 0) {
                         $scope.model.infbndsec = 0;
                     }
-                    $scope.model.supbndsec = $scope.model.queueData.fragment.end + newValue;
+                    $scope.model.supbndsec = parseFloat($scope.model.queueData.fragment.end) + (parseInt(newValue) || 0);
                     if ($scope.model.supbndsec > $scope.model.fullDuration) {
                         $scope.model.supbndsec = $scope.model.fullDuration;
                     }
