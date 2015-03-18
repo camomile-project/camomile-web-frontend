@@ -2,7 +2,7 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.directives').
-    directive('cmContextBar', ['Annotation', function (Annotation) {
+    directive('cmContextBar', ['camomileService', function (camomileService) {
     return {
         restrict: 'A',
         link: function (scope, element) {
@@ -139,7 +139,7 @@ angular.module('myApp.directives').
             };
 
             var updateContext = function () {
-                contextLayer.$promise.then(function (data) {
+//                contextLayer.$promise.then(function (data) {
                     var curSelect = contextMarks.selectAll('.mark')
                         .data(contextLayer, function (d) {
                             return d._id;
@@ -160,7 +160,7 @@ angular.module('myApp.directives').
                         .attr('opacity', 0.5);
 
                     curSelect.exit().remove();
-                });
+//                });
 
             };
 
@@ -175,9 +175,19 @@ angular.module('myApp.directives').
                         && scope.model.queueData.fragment.context.id_medium !== ""
                         && scope.model.queueData.fragment.context._id !== undefined
                         && scope.model.queueData.fragment.context._id !== "") {
-                        contextLayer = Annotation.query({media: scope.model.queueData.fragment.context.id_medium,
-                            layerId: scope.model.queueData.fragment.context._id});
-                        updateContext();
+
+                        // Get the annotation used as context
+                        camomileService.getAnnotations(function(err, data)
+                            {
+                                scope.$apply(function(){
+                                    contextLayer = data;
+                                    updateContext();
+                                });
+                            },
+                            {
+                                layer: scope.model.queueData.fragment.context._id,
+                                media: scope.model.queueData.fragment.context.id_medium
+                            });
                     } else {
                         contextLayer = undefined;
                     }
@@ -196,15 +206,6 @@ angular.module('myApp.directives').
                 }
             }, true);
 
-
-//                scope.$watch('model.current_time', function (newValue) {
-//                   if(newValue)
-//                   {
-//                       console.log(newValue);
-//                   }
-//                });
-
-
         }
     }
-}])
+}]);

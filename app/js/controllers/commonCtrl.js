@@ -2,8 +2,8 @@
  * Created by stefas on 09/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('CommonCtrl', ['$scope', '$http','defaults', 'Session', '$rootScope',
-        function ($scope, $http, defaults, Session, $rootScope) {
+    .controller('CommonCtrl', ['$scope', '$http','defaults', 'Session', '$rootScope', 'camomileService',
+        function ($scope, $http, defaults, Session, $rootScope, camomileService) {
 
             'use strict';
 
@@ -12,6 +12,8 @@ angular.module('myApp.controllers')
             $scope.model = {};
             $scope.model.lig=true;
             $scope.model.absUrl = $rootScope.absUrl;
+
+            camomileService.setURL($rootScope.dataroot);
 
             // test if user is logged or not
             $scope.isLogged = function () {

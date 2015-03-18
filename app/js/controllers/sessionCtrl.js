@@ -3,8 +3,8 @@
  */
 angular.module('myApp.controllers')
 
-    .controller('SessionCtrl', ['$sce', '$scope', '$http', 'Session', '$cookieStore','$rootScope', '$route',
-        function ($sce, $scope, $http, Session, $cookieStore,$rootScope, $route) {
+    .controller('SessionCtrl', ['$sce', '$scope', '$http', 'Session', '$cookieStore','$rootScope', 'camomileService',
+        function ($sce, $scope, $http, Session, $cookieStore,$rootScope, camomileService) {
 
             $scope.model = {};
             $scope.model.message = undefined;
@@ -16,96 +16,107 @@ angular.module('myApp.controllers')
                 // updated from autocomplete (see index.html for info)
 
                 // FIXME new login method
-//                Camomile.setURL($rootScope.dataroot);
-//                Camomile.login(username, password, function(err)
-//                {
-//                    if(err == undefined)
-//                    {
+//                camomileService.setURL($rootScope.dataroot);
+                camomileService.login(username, password, function(err, data)
+                {
+                    $scope.$apply(function(){
+                        if(data)
+                        {
+                            console.log('logged in as ' + username);
+                            Session.isLogged = true;
+                            Session.username = username;
+                            $cookieStore.put("current.user", username);
+                            $scope.model.message = "Connected as " + Session.username;
+
+                            submit(); // hack to allow autofill and autocomplete support
+
+                        }
+                        else
+                        {
+                            Session.isLogged = false;
+                            Session.username = undefined;
+                            $cookieStore.remove("current.user");
+                            $scope.model.message = "Connection error";
+                            console.log(err);
+                        }
+                    });
+
+                }
+                    // Initialize the camomileService URL
+//                    ,$rootScope.dataroot
+                );
+
+
+//                Session.login({
+//                    username: username,
+//                    password: password
+//                })
+//                    .success(function () {
 //                        console.log('logged in as ' + username);
 //                        Session.isLogged = true;
 //                        Session.username = username;
 //                        $cookieStore.put("current.user", username);
 //                        $scope.model.message = "Connected as " + Session.username;
+//                        submit(); // hack to allow autofill and autocomplete support
 //
-//                        // reload page
-//                        $route.reload();
-//                    }
-//                    else
-//                    {
+//                    })
+//                    .error(function () {
 //                        Session.isLogged = false;
 //                        Session.username = undefined;
 //                        $cookieStore.remove("current.user");
 //                        $scope.model.message = "Connection error";
-//                        console.log(err);
-//                    }
-//                });
-
-
-                Session.login({
-                    username: username,
-                    password: password
-                })
-                    .success(function () {
-                        console.log('logged in as ' + username);
-                        Session.isLogged = true;
-                        Session.username = username;
-                        $cookieStore.put("current.user", username);
-                        $scope.model.message = "Connected as " + Session.username;
-                        submit(); // hack to allow autofill and autocomplete support
-
-                    })
-                    .error(function () {
-                        Session.isLogged = false;
-                        Session.username = undefined;
-                        $cookieStore.remove("current.user");
-                        $scope.model.message = "Connection error";
-                    });
+//                    });
             };
 
 
             $scope.logout = function () {
 
                 // FIXME new logout method
-//                Camomile.setURL($rootScope.dataroot);
-//                Camomile.logout(function(err)
-//                {
-//                    if(err == undefined)
-//                    {
+//                camomileService.setURL($rootScope.dataroot);
+                camomileService.logout(function(err, data)
+                {
+                    $scope.$apply(function()
+                    {
+                        if(data)
+                        {
+                            Session.isLogged = false;
+                            $cookieStore.remove("current.user");
+                            Session.username = undefined;
+                            $scope.model.message = undefined;
+
+                            window.location.reload();
+                            // reload page
+//                            $route.reload();
+                        }
+                        else
+                        {
+                            Session.isLogged = false;
+                            Session.username = undefined;
+                            $cookieStore.remove("current.user");
+                            $scope.model.message = "Connection error";
+                            console.log(err);
+                        }
+                    });
+
+                });
+
+//                Session.logout()
+//                    .success(function () {
 //                        Session.isLogged = false;
 //                        $cookieStore.remove("current.user");
 //                        Session.username = undefined;
 //                        $scope.model.message = undefined;
 //
 //                        // reload page
-//                        $route.reload();
-//                    }
-//                    else
-//                    {
+//                        window.location.reload();
+//                    })
+//                    .error(function (err) {
 //                        Session.isLogged = false;
 //                        Session.username = undefined;
 //                        $cookieStore.remove("current.user");
 //                        $scope.model.message = "Connection error";
 //                        console.log(err);
-//                    }
-//                });
-
-                Session.logout()
-                    .success(function () {
-                        Session.isLogged = false;
-                        $cookieStore.remove("current.user");
-                        Session.username = undefined;
-                        $scope.model.message = undefined;
-
-                        // reload page
-                        window.location.reload();
-                    })
-                    .error(function (err) {
-                        Session.isLogged = false;
-                        Session.username = undefined;
-                        $cookieStore.remove("current.user");
-                        $scope.model.message = "Connection error";
-                        console.log(err);
-                    });
+//                    });
             };
 
             $scope.isLogged = function () {
@@ -124,6 +135,7 @@ angular.module('myApp.controllers')
                     Session.username = currentUser;
                     $cookieStore.put("current.user", currentUser);
                     $scope.model.message = "Connected as " + Session.username;
+//                    camomileService.setURL($rootScope.dataroot);
                 }
 
             }

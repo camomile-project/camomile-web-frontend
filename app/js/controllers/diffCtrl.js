@@ -2,18 +2,14 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('DiffCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater',
-        'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope',
-        function ($sce, $scope, $http, Corpus, Media, Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
+    .controller('DiffCtrl', ['$sce', '$scope', '$http',
+        'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope', 'camomileService',
+        function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
             $controller('ExplorationBaseCtrl',
             {
                 $scope: $scope,
                 $http: $http,
-                Corpus: Corpus,
-                Media: Media,
-                Layer: Layer,
-                AnnotationUpdater: AnnotationUpdater,
                 defaults: defaults,
                 palette: palette,
                 Session: Session
@@ -54,17 +50,20 @@ angular.module('myApp.controllers')
                     'label': 'Reference',
                     '_id': layer_id + "_0"
                 };
-                $scope.model.layers[0].layer = Annotation.query({
-//						corpusId: corpus_id,
-                        media: medium_id,
-                        layerId: layer_id
-                    },
-                    function () {
-                        //$scope.model.layerWatch[0] = layer_id + "_0";
+
+                camomileService.getAnnotations(function(err, data)
+                {
+                    $scope.$apply(function(){
+                        $scope.model.layers[0].layer = data;
+
                         $scope.model.layersUpdated = true;
                         $scope.compute_diff();
-                    }
-                );
+                    });
+                },
+                {
+                    layer: layer_id,
+                    media: medium_id
+                });
             };
 
             // get list of hypothesis annotations from a given layer,
@@ -75,15 +74,18 @@ angular.module('myApp.controllers')
                     'label': 'Hypothesis',
                     '_id': layer_id + "_1"
                 };
-                $scope.model.layers[1].layer = Annotation.query({
-//						corpusId: corpus_id,
-                        media: medium_id,
-                        layerId: layer_id
+
+                camomileService.getAnnotations(function(err, data)
+                    {
+                        $scope.$apply(function(){
+                            $scope.model.layers[1].layer = data;
+                            $scope.model.layersUpdated = true;
+                            $scope.compute_diff();
+                        });
                     },
-                    function () {
-                        //$scope.model.layerWatch[1] = layer_id + "_1";
-                        $scope.model.layersUpdated = true;
-                        $scope.compute_diff();
+                    {
+                        layer: layer_id,
+                        media: medium_id
                     });
             };
 

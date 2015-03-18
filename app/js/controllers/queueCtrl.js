@@ -2,9 +2,9 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('QueueCtrl', ['$sce', '$scope', '$http', 'Medium',
-         'defaults', '$controller', 'QueuesBrowser', 'QueueElementModifier', '$cookieStore', 'Session', '$rootScope', '$routeParams',
-        function ($sce, $scope, $http, Medium, defaults, $controller, QueuesBrowser, QueueElementModifier, $cookieStore, Session, $rootScope, $routeParams) {
+    .controller('QueueCtrl', ['$sce', '$scope', '$http',
+        'defaults', '$controller', '$cookieStore', 'Session', '$rootScope', '$routeParams', 'camomileService',
+        function ($sce, $scope, $http, defaults, $controller, $cookieStore, Session, $rootScope, $routeParams, camomileService) {
 
             $controller('CommonCtrl',
                 {
@@ -67,14 +67,6 @@ angular.module('myApp.controllers')
 
 
                 return false;
-            };
-
-            // get list of media for a given corpus
-            $scope.get_medium = function (id_media) {
-                $scope.model.videoMetaData = Medium.query({
-                    id_media: id_media
-                }, function () {
-                });
             };
 
             // Add typed entry to queue entries
@@ -225,7 +217,8 @@ angular.module('myApp.controllers')
                     $scope.model.updateSaveButtonStatus(true);
                     $scope.model.updateIsDisplayedVideo(true);
 
-                    $scope.model.getNextQueueData($scope.model.incomingQueue).$promise.then(function (data) {
+                    // Get queue first element and pop it from the queue
+                    camomileService.dequeue($scope.model.incomingQueue, function (err, data) {
                         $scope.model.queueData = data;
                         $scope.model.inData = [];
                         $scope.model.queueTableData = [];
@@ -238,8 +231,8 @@ angular.module('myApp.controllers')
 
                         if($scope.model.queueData.data != undefined)
                         {
-                        //copy initial data
-                        //for (var i in $scope.model.queueData.data) {
+                            //copy initial data
+                            //for (var i in $scope.model.queueData.data) {
                             for (var i  = 0, maxI = $scope.model.queueData.data.length; i<maxI; i++){
                                 $scope.model.inData[i] = $scope.model.queueData.data[i];
                                 $scope.model.queueTableData[i] = $scope.model.queueData.data[i];
@@ -258,7 +251,13 @@ angular.module('myApp.controllers')
                         // Get the video
                         if ($scope.model.queueData.id_medium != undefined) {
 
-                            $scope.get_medium($scope.model.queueData.id_medium);
+                            // Get queue element medium
+                            camomileService.getMedium($scope.model.queueData.id_medium, function(err, data)
+                            {
+                                $scope.$apply(function(){
+                                    $scope.model.videoMetaData = data;
+                                });
+                            });
 
                             $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
                             $scope.model.videoThumbnail = $scope.model.video;
@@ -303,7 +302,8 @@ angular.module('myApp.controllers')
 
             // Event launched when click on the save button.
             $scope.model.saveQueueElement = function () {
-                $scope.model.getQueueWithId($scope.model.outcomingQueue).$promise.then(function (data) {
+                // Get the queue
+                camomileService.getQueue($scope.model.outcomingQueue, function (err, data) {
                     var newOutcomingQueue;
                     newOutcomingQueue = data;
 
@@ -351,7 +351,9 @@ angular.module('myApp.controllers')
                     $scope.model.queueData.data = dataToPush;
 
                     newOutcomingQueue.list = [$scope.model.queueData];
-                    $scope.model.updateQueueOnServer(newOutcomingQueue);
+
+                    // Update the queue by adding list element to the end of it
+                    camomileService.enqueue(newOutcomingQueue._id, newOutcomingQueue);
 
                     // call only if button have to be disabled
                     //$scope.model.updateSaveButtonStatus(false);
@@ -371,7 +373,8 @@ angular.module('myApp.controllers')
 
                 // Push queue ONLY if a "Skip" as been done. NOT when "Start" has been pressed.
                 if (buttonNext.innerHTML === "Skip") {
-                    $scope.model.getQueueWithId($scope.model.outcomingQueue).$promise.then(function (data) {
+                    // Get the queue
+                    camomileService.getQueue($scope.model.outcomingQueue,function (err, data) {
                         var updatedQueue;
                         updatedQueue = data;
 
@@ -400,7 +403,9 @@ angular.module('myApp.controllers')
                         $scope.model.queueData.data = dataToPush;
 
                         updatedQueue.list = [$scope.model.queueData];
-                        $scope.model.updateQueueOnServer(updatedQueue);
+
+                        // Update the queue by adding list element to the end of it
+                        camomileService.enqueue(updatedQueue._id, updatedQueue);
 
                         // call only if button have to be disabled
                         //$scope.model.updateSaveButtonStatus(false);
@@ -413,54 +418,11 @@ angular.module('myApp.controllers')
                 $scope.model.popQueueElement();
             };
 
-
-            $scope.model.getQueueWithId = function (queueId) {
-                //get queue
-                return QueuesBrowser.get(
-                    {
-                        "queueId": queueId
-                    }
-                );
-            };
-
-            $scope.model.updateQueueOnServer = function (queue) {
-                QueueElementModifier.update(
-                    {
-                        // Id to give in order to know which queue has to be updated
-                        queueId: queue._id
-                    },
-                    // data to post
-                    queue,
-                    // success handling
-                    function () {
-                        console.log('Successfully update the annotation', queue);
-                        console.log("fin du update", $scope.model.current_time);
-                    },
-                    //error handling
-                    function (error) {
-                        console.log("ERROR: ");
-                        console.log(error);
-                    }
-
-                );
-            };
-
-            // get the queue's next data and remove it from the queue
-            $scope.model.getNextQueueData = function (id) {
-                // recupere le suivant en supprimant le précédent
-                return QueueElementModifier.get(
-                    {
-                        "queueId": id
-                    }
-                );
-            };
-
-
             $scope.model.addFakeValues = function () {
 
                 if ($scope.isLogged()) {
                     // get queue
-                    $scope.model.getQueueWithId($rootScope.queues.shotIn).$promise.then(function (data) {
+                    camomileService.getQueue($rootScope.queues.shotIn,function (err, data) {
                         var queue;
                         queue = data;
 
@@ -517,11 +479,13 @@ angular.module('myApp.controllers')
 
 
                         // update it on server
-                        $scope.model.updateQueueOnServer(queue);
+                        camomileService.enqueue(queue._id, queue);
+
+
                     });
 
                     // get queue
-                    $scope.model.getQueueWithId($rootScope.queues.headIn).$promise.then(function (data) {
+                    camomileService.getQueue($rootScope.queues.headIn, function (err, data) {
                         var queue;
                         queue = data;
                         queue.list = [
@@ -586,7 +550,8 @@ angular.module('myApp.controllers')
 
 
                         // update it on server
-                        $scope.model.updateQueueOnServer(queue);
+                        camomileService.enqueue(queue._id, queue);
+
                     });
                 }
             };

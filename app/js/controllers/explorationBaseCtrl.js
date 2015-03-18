@@ -2,9 +2,9 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('ExplorationBaseCtrl', ['$scope', '$http', 'Corpus', 'Media', 'Layer', 'AnnotationUpdater',
-        'defaults', 'palette', '$controller','Session',
-        function ($scope, $http, Corpus, Media, Layer, AnnotationUpdater, defaults, palette, $controller, Session) {
+    .controller('ExplorationBaseCtrl', ['$scope', '$http',
+        'defaults', 'palette', '$controller','Session', 'camomileService', '$rootScope',
+        function ($scope, $http, defaults, palette, $controller, Session, camomileService, $rootScope) {
 
 
             'use strict';
@@ -152,30 +152,67 @@ angular.module('myApp.controllers')
             // get list of corpora
             $scope.get_corpora = function () {
                 if ($scope.isLogged()) {
-                    $scope.model.available_corpora = Corpus.query(function () {
-                        // initializing layerWatch after corpora are loaded
-                        // Adds empty layers as border effect
-                        $scope.model.layerWatch = [$scope.model.layers[0]._id,
-                            $scope.model.layers[1]._id,
-                            $scope.model.layers[2]._id
-                        ];
+
+                    camomileService.getCorpora(function(err, data)
+                    {
+                        $scope.$apply(function(){
+                            $scope.model.available_corpora = data;
+
+                            $scope.model.layerWatch = [$scope.model.layers[0]._id,
+                                $scope.model.layers[1]._id,
+                                $scope.model.layers[2]._id
+                            ];
+
+                        });
                     });
+//                    $scope.model.available_corpora = Corpus.query(function () {
+//                        // initializing layerWatch after corpora are loaded
+//                        // Adds empty layers as border effect
+//                        $scope.model.layerWatch = [$scope.model.layers[0]._id,
+//                            $scope.model.layers[1]._id,
+//                            $scope.model.layers[2]._id
+//                        ];
+//                    });
                 }
             };
 
             // get list of media for a given corpus
             $scope.get_media = function (corpus_id) {
-                $scope.model.available_media = Media.query({
-                    corpusId: corpus_id
-                }, function () {
-                });
+//                $scope.model.available_media = Media.query({
+//                    corpusId: corpus_id
+//                }, function () {
+//                });
+//                Camomile.setURL($rootScope.dataroot);
+                camomileService.getMedia(
+
+                    function(err, data)
+                    {
+                        $scope.$apply(function()
+                        {
+                            $scope.model.available_media = data;
+                        });
+                    },
+                    // Filter over corpus_id
+                    {corpus:corpus_id});
             };
 
             // get list of layers for a given medium
             $scope.get_layers = function (corpusId) {
-                $scope.model.available_layers = Layer.query({
-                    corpusId: corpusId
-                });
+//                $scope.model.available_layers = Layer.query({
+//                    corpusId: corpusId
+//                });
+//                Camomile.setURL($rootScope.dataroot);
+                camomileService.getLayers(
+                    // The callback
+                    function(err, data)
+                    {
+                        $scope.$apply(function()
+                        {
+                            $scope.model.available_layers = data;
+                        });
+                    },
+                    // Filter over corpus_id
+                    {corpus:corpusId});
             };
 
 
@@ -271,30 +308,77 @@ angular.module('myApp.controllers')
             $scope.update_annotation = function (corpus_id, medium_id, layer_id, annotation_id, newValue) {
 
                 // qet the annotation to edit
-                var annotation_edited = AnnotationUpdater.queryForAnUpdate({
-                    annotationId: annotation_id
+//                var annotation_edited = AnnotationUpdater.queryForAnUpdate({
+//                    annotationId: annotation_id
+//                });
+
+//                Camomile.setURL($rootScope.dataroot);
+                camomileService.getAnnotation(annotation_id, function(err, data)
+                {
+                    $scope.$apply(function()
+                    {
+                        var annotation_edited;
+
+                        annotation_edited = data;
+
+                        // replace its data by the new one
+                        annotation_edited.data = newValue;
+
+                        // update it on server
+                        camomileService.updateAnnotation(annotation_id, annotation_edited, function(err, data)
+                        {
+                            $scope.$apply(function()
+                            {
+                                if(data) {
+                                    console.log('Successfully update the annotation');
+                                }
+                                //error handling
+                                else if (error) {
+                                    console.log("ERROR: ");
+                                    console.log(error);
+                                }
+                            })
+                        });
+//                        AnnotationUpdater.update(
+//                            // update parameters
+//                            {
+//                                annotationId: annotation_id
+//                            },
+//                            // data to post
+//                            annotation_edited,
+//                            // success handling
+//                            function () {
+//                                console.log('Successfully update the annotation');
+//                            },
+//                            //error handling
+//                            function (error) {
+//                                console.log("ERROR: ");
+//                                console.log(error);
+//                            });
+                    });
                 });
 
-                // replace its data by the new one
-                annotation_edited.data = newValue;
 
-                // update it on server
-                AnnotationUpdater.update(
-                    // update parameters
-                    {
-                        annotationId: annotation_id
-                    },
-                    // data to post
-                    annotation_edited,
-                    // success handling
-                    function () {
-                        console.log('Successfully update the annotation');
-                    },
-                    //error handling
-                    function (error) {
-                        console.log("ERROR: ");
-                        console.log(error);
-                    });
+//                // replace its data by the new one
+//                annotation_edited.data = newValue;
+//
+//                // update it on server
+//                AnnotationUpdater.update(
+//                    // update parameters
+//                    {
+//                        annotationId: annotation_id
+//                    },
+//                    // data to post
+//                    annotation_edited,
+//                    // success handling
+//                    function () {
+//                        console.log('Successfully update the annotation');
+//                    },
+//                    //error handling
+//                    function (error) {
+//                        console.log("ERROR: ");
+//                        console.log(error);
+//                    });
 
             };
 
@@ -302,16 +386,31 @@ angular.module('myApp.controllers')
             $scope.remove_annotation = function (corpus_id, medium_id, layer_id, annotation_id) {
 
                 // call the native remove method
-                AnnotationUpdater.remove({
-//						corpusId: corpus_id,
-                        media: medium_id,
-                        layerId: layer_id,
-                        annotationId: annotation_id
-                    },
-                    function () {
-                        console.log('Successfully remove the annotation')
-                    });
+//                AnnotationUpdater.remove({
+////						corpusId: corpus_id,
+//                        media: medium_id,
+//                        layerId: layer_id,
+//                        annotationId: annotation_id
+//                    },
+//                    function () {
+//                        console.log('Successfully remove the annotation')
+//                    });
 
+//                Camomile.setURL($rootScope.dataroot);
+                camomileService.deleteAnnotation(annotation_id, function(err, data)
+                {
+                    $scope.$apply(function()
+                    {
+                        if(data)
+                        {
+                            console.log('Successfully remove the annotation');
+                        }
+                        else if(err)
+                        {
+                            console.log('Error while trying to remove the annotation')
+                        }
+                    });
+                });
 
             };
 

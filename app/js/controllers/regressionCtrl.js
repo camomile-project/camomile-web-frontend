@@ -2,9 +2,9 @@
  * Created by stefas on 04/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('RegressionCtrl', ['$sce', '$scope', '$http', 'Corpus', 'Media', 'Layer', 'Annotation', 'AnnotationUpdater', 'CMError',
-        'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope',
-        function ($sce, $scope, $http, Corpus, Media,Layer, Annotation, AnnotationUpdater, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope) {
+    .controller('RegressionCtrl', ['$sce', '$scope', '$http', 'CMError',
+        'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope', 'camomileService',
+        function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
             delete $http.defaults.headers.common['X-Requested-With'];
 
@@ -12,10 +12,6 @@ angular.module('myApp.controllers')
                 {
                     $scope: $scope,
                     $http: $http,
-                    Corpus: Corpus,
-                    Media: Media,
-                    Layer: Layer,
-                    AnnotationUpdater: AnnotationUpdater,
                     defaults: defaults,
                     palette: palette,
                     Session: Session
@@ -60,16 +56,20 @@ angular.module('myApp.controllers')
                     'label': 'Reference',
                     '_id': layer_id + "_0"
                 };
-                $scope.model.layers[0].layer = Annotation.query({
-//						corpusId: corpus_id,
-                        media: medium_id,
-                        layerId: layer_id
+
+                camomileService.getAnnotations(function(err, data)
+                    {
+                        $scope.$apply(function(){
+                            $scope.model.layers[0].layer = data;
+
+                            $scope.model.layersUpdated = true;
+                            $scope.compute_regression();
+                        });
                     },
-                    function () {
-                        $scope.model.layerWatch[0] = layer_id + "0";
-                        $scope.compute_regression();
-                    }
-                );
+                    {
+                        layer: layer_id,
+                        media: medium_id
+                    });
             };
 
             $scope.get_before_annotations = function (corpus_id, medium_id, layer_id) {
@@ -77,16 +77,20 @@ angular.module('myApp.controllers')
                     'label': 'Hypothesis 1',
                     '_id': layer_id + "_1"
                 };
-                $scope.model.layers[1].layer = Annotation.query({
-//						corpusId: corpus_id,
-                        media: medium_id,
-                        layerId: layer_id
+
+                camomileService.getAnnotations(function(err, data)
+                    {
+                        $scope.$apply(function(){
+                            $scope.model.layers[1].layer = data;
+
+                            $scope.model.layersUpdated = true;
+                            $scope.compute_regression();
+                        });
                     },
-                    function () {
-                        $scope.model.layerWatch[1] = layer_id + "1";
-                        $scope.compute_regression();
-                    }
-                );
+                    {
+                        layer: layer_id,
+                        media: medium_id
+                    });
             };
 
             $scope.get_after_annotations = function (corpus_id, medium_id, layer_id) {
@@ -94,16 +98,20 @@ angular.module('myApp.controllers')
                     'label': 'Hypothesis 2',
                     '_id': layer_id + "_2"
                 };
-                $scope.model.layers[2].layer = Annotation.query({
-//						corpusId: corpus_id,
-                        media: medium_id,
-                        layerId: layer_id
+
+                camomileService.getAnnotations(function(err, data)
+                    {
+                        $scope.$apply(function(){
+                            $scope.model.layers[2].layer = data;
+
+                            $scope.model.layersUpdated = true;
+                            $scope.compute_regression();
+                        });
                     },
-                    function () {
-                        $scope.model.layerWatch[2] = layer_id + "2";
-                        $scope.compute_regression();
-                    }
-                );
+                    {
+                        layer: layer_id,
+                        media: medium_id
+                    });
             };
 
             $scope.compute_regression = function () {
