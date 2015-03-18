@@ -1,0 +1,37 @@
+div.tooltip, div.piecharttooltip, div.treeemaptooltip {
+    position: absolute;
+    text-align: left;
+    padding: 2px;
+    font: 12px sans-serif;
+    stroke: green;
+    fill: white;
+    background: white;
+    border: solid 1px;
+    pointer-events: none;
+}
+
+
+g.slice {
+    cursor: pointer;
+}
+
+rect.legend, rect.barchart-bar, rect.node{
+    cursor: pointer;
+}
+
+.brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+
+.axis {
+    font-size: 100%;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}

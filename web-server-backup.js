@@ -1,5 +1,6 @@
 var express = require("express"),
 	app     = express(),
+	port    = parseInt(process.env.PORT, 10) || 8090,
     program = require('commander'),
     fs = require('fs'),
     request = require('request'),
@@ -11,25 +12,17 @@ var request = request.defaults({jar: true});
 
 // read parameters from command line or from environment variables 
 // (CAMOMILE_API, CAMOMILE_LOGIN, CAMOMILE_PASSWORD, PYANNOTE_API)
-
-// PBR patch : support parametrized shotIn and shotOut
 program
     .option('--camomile <url>', 'URL of Camomile server (e.g. https://camomile.fr/api)')
     .option('--login <login>',  'Login for Camomile server (for queues creation)')
     .option('--password <password>', 'Password for Camomile server')
     .option('--pyannote <url>', 'URL of PyAnnote server (e.g. https://camomile.fr/tool)')
-    .option('--port <int>', 'Local port to listen to (default: 3000)')
-    .option('--shot-in <shotIn>', 'id of shotIn queue (optional)')
-	.option('--shot-out <shotOut>', 'id of shotOut queue (optional)')
     .parse(process.argv);
 
 var camomile_api = program.camomile || process.env.CAMOMILE_API;
 var login = program.login || process.env.CAMOMILE_LOGIN;
 var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
-var port = parseInt(program.port || process.env.PORT || '3000', 10);
-var shot_in = program.shotIn;
-var shot_out = program.shotOut;
 
 // configure express app
 app.configure(function(){
@@ -148,19 +141,8 @@ function create_queues(callback) {
 
     console.log('Creating queues as user ' + login);
 
-		// PBR patch : support parametrized shotIn and shotOut
-		var queuesToCreate = [];
-		if(shot_in === undefined) {
-			queuesToCreate.push('shotIn');
-		}
-		if(shot_out === undefined) {
-			queuesToCreate.push('shotOut');
-		}
-		queuesToCreate.push('headIn');
-		queuesToCreate.push('headOut');
-
     async.map(
-        queuesToCreate,
+        ['shotIn', 'shotOut', 'headIn', 'headOut'], 
         create_one_queue, 
         function(err, queues) {
 
@@ -187,12 +169,12 @@ function create_queues(callback) {
                 );
             });
 
-            var queues_dict = {};
-						var it = 0;
-						queues_dict.shotIn = (shot_in !== undefined) ? shot_in : queues[it++];
-						queues_dict.shotOut = (shot_out !== undefined) ? shot_out : queues[it++];
-						queues_dict.headIn = queues[it++];
-						queues_dict.headOut = queues[it++];
+            queues_dict = {
+                'shotIn': queues[0],
+                'shotOut': queues[1],
+                'headIn': queues[2],
+                'headOut': queues[3]
+            };
 
             callback(null, queues_dict);
         }
