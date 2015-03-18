@@ -45,14 +45,6 @@ angular.module('myApp.controllers')
             $scope.model.selected_reference = undefined;
             $scope.model.selected_layer = undefined;
 
-
-            // hide contextmenu if clicked anywhere but on relevant targets
-            $("body").on("click", function () {
-                $("#contextMenu").hide().find("li").removeClass("disabled").children().css({
-                    "pointer-events": "auto"
-                });
-            });
-
             $scope.updateColorScale = function () {
                 // refresh color scale completely:
                 // - add new modalities

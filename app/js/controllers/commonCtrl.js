@@ -56,4 +56,11 @@ angular.module('myApp.controllers')
                 console.log("probe called");
             };
 
+            // hide contextmenu if clicked anywhere but on relevant targets
+            $("body").on("click", function () {
+                $("#contextMenu").hide().find("li").removeClass("disabled").children().css({
+                    "pointer-events": "auto"
+                });
+            });
+
         }]);
