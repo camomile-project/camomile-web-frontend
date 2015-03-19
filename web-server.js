@@ -1,6 +1,5 @@
 var express = require("express"),
 	app     = express(),
-	port    = parseInt(process.env.PORT, 10) || 8070,
     program = require('commander'),
     fs = require('fs'),
     request = require('request'),
@@ -19,14 +18,16 @@ program
     .option('--login <login>',  'Login for Camomile server (for queues creation)')
     .option('--password <password>', 'Password for Camomile server')
     .option('--pyannote <url>', 'URL of PyAnnote server (e.g. https://camomile.fr/tool)')
-		.option('--shot-in <shotIn>', 'id of shotIn queue (optional)')
-		.option('--shot-out <shotOut>', 'id of shotOut queue (optional)')
+    .option('--port <int>', 'Local port to listen to (default: 3000)')
+    .option('--shot-in <shotIn>', 'id of shotIn queue (optional)')
+	.option('--shot-out <shotOut>', 'id of shotOut queue (optional)')
     .parse(process.argv);
 
 var camomile_api = program.camomile || process.env.CAMOMILE_API;
 var login = program.login || process.env.CAMOMILE_LOGIN;
 var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
+var port = parseInt(program.port || process.env.PORT || '3000', 10);
 var shot_in = program.shotIn;
 var shot_out = program.shotOut;
 
@@ -185,8 +186,6 @@ function create_queues(callback) {
                     }
                 );
             });
-
-
 
             var queues_dict = {};
 						var it = 0;
