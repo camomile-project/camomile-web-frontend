@@ -7,13 +7,13 @@ angular.module('myApp.controllers')
         function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
             $controller('ExplorationBaseCtrl',
-            {
-                $scope: $scope,
-                $http: $http,
-                defaults: defaults,
-                palette: palette,
-                Session: Session
-            });
+                {
+                    $scope: $scope,
+                    $http: $http,
+                    defaults: defaults,
+                    palette: palette,
+                    Session: Session
+                });
 
 
             // placeholder definitions
@@ -45,31 +45,57 @@ angular.module('myApp.controllers')
             // get list of reference annotations from a given layer,
             // replace current reference layer,
             // and update difference with hypothesis when it's done
-            $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id) {
+            $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id, do_update) {
+
+                if(do_update == undefined)
+                {
+                    do_update = true;
+                }
                 $scope.model.layers[0] = {
                     'label': 'Reference',
                     '_id': layer_id + "_0"
                 };
 
                 camomileService.getAnnotations(function(err, data)
-                {
-                    $scope.$apply(function(){
-                        $scope.model.layers[0].layer = data;
+                    {
+                        if(!err)
+                        {
+                            $scope.$apply(function(){
+                                $scope.model.layers[0].layer = data;
 
-                        $scope.model.layersUpdated = true;
-                        $scope.compute_diff();
+                                if(do_update)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_diff();
+                                }
+                                else if($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_diff();
+                                }
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+
+                    },
+                    {
+                        layer: layer_id,
+                        media: medium_id
                     });
-                },
-                {
-                    layer: layer_id,
-                    media: medium_id
-                });
             };
 
             // get list of hypothesis annotations from a given layer,
             // replace current hypothesis layer,
             // and update difference with reference when it's done
-            $scope.get_hypothesis_annotations = function (corpus_id, medium_id, layer_id) {
+            $scope.get_hypothesis_annotations = function (corpus_id, medium_id, layer_id, do_update) {
+
+                if(do_update == undefined)
+                {
+                    do_update = true;
+                }
                 $scope.model.layers[1] = {
                     'label': 'Hypothesis',
                     '_id': layer_id + "_1"
@@ -77,11 +103,28 @@ angular.module('myApp.controllers')
 
                 camomileService.getAnnotations(function(err, data)
                     {
-                        $scope.$apply(function(){
-                            $scope.model.layers[1].layer = data;
-                            $scope.model.layersUpdated = true;
-                            $scope.compute_diff();
-                        });
+                        if(!err)
+                        {
+                            $scope.$apply(function(){
+                                $scope.model.layers[1].layer = data;
+                                if(do_update)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_diff();
+                                }
+                                else if($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_diff();
+                                }
+
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+
                     },
                     {
                         layer: layer_id,
@@ -93,12 +136,16 @@ angular.module('myApp.controllers')
             // and replace diff layer.
             $scope.compute_diff = function () {
 
-                var reference_and_hypothesis = {
-                    'hypothesis': camomile2pyannoteFilter($scope.model.layers[1].layer),
-                    'reference': camomile2pyannoteFilter($scope.model.layers[0].layer)
-                };
+                if ($scope.model.selected_medium != undefined
+                    && $scope.model.layers[1].layer != undefined
+                    && $scope.model.layers[1].layer.length > 0
+                    && $scope.model.layers[0].layer != undefined
+                    && $scope.model.layers[0].layer.length > 0) {
+                    var reference_and_hypothesis = {
+                        'hypothesis': camomile2pyannoteFilter($scope.model.layers[1].layer),
+                        'reference': camomile2pyannoteFilter($scope.model.layers[0].layer)
+                    };
 
-                if ($scope.model.selected_medium != undefined && reference_and_hypothesis.reference.content.length > 0 && reference_and_hypothesis.hypothesis.content.length > 0) {
                     CMError.diff(reference_and_hypothesis).success(function (data) {
                         $scope.model.layers[2] = {
                             'label': 'Difference',
@@ -144,12 +191,12 @@ angular.module('myApp.controllers')
 
                     // re-initialize the reference is needed
                     if (scope.model.selected_reference != undefined) {
-                        $scope.get_reference_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference);
+                        $scope.get_reference_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference, false);
                     }
 
                     // re-initialize the hypothesis is needed
                     if (scope.model.selected_hypothesis != undefined) {
-                        $scope.get_hypothesis_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_hypothesis);
+                        $scope.get_hypothesis_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_hypothesis, false);
                     }
 
                     $scope.resetSummaryView(true);

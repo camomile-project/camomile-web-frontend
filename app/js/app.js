@@ -41,14 +41,14 @@ angular.module(
             $rootScope.absUrl = $rootScope.absUrl.substr(0, index-1);
         }
 
-        var config = $resource($rootScope.absUrl + '/config');
-
-        // Use callbacks to store in $rootScope
-        config.get().$promise.then(function (data) {
-            $rootScope.dataroot = data.camomile_api;
-            $rootScope.toolroot = data.pyannote_api;
-            $rootScope.queues = data.queues;
-        });
+//        var config = $resource($rootScope.absUrl + '/config');
+//
+//        // Use callbacks to store in $rootScope
+//        config.get().$promise.then(function (data) {
+//            $rootScope.dataroot = data.camomile_api;
+//            $rootScope.toolroot = data.pyannote_api;
+//            $rootScope.queues = data.queues;
+//        });
 
     }]);
 

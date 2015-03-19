@@ -51,7 +51,12 @@ angular.module('myApp.controllers')
                 defaultRegressionLayer
             ];
 
-            $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id) {
+            $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id, do_update) {
+
+                if(do_update == undefined)
+                {
+                    do_update = true;
+                }
                 $scope.model.layers[0] = {
                     'label': 'Reference',
                     '_id': layer_id + "_0"
@@ -59,12 +64,30 @@ angular.module('myApp.controllers')
 
                 camomileService.getAnnotations(function(err, data)
                     {
-                        $scope.$apply(function(){
-                            $scope.model.layers[0].layer = data;
+                        if(!err)
+                        {
+                            $scope.$apply(function(){
+                                $scope.model.layers[0].layer = data;
 
-                            $scope.model.layersUpdated = true;
-                            $scope.compute_regression();
-                        });
+                                if(do_update)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_regression();
+                                }
+                                else if($scope.model.layers[0].layer != undefined
+                                    && $scope.model.layers[1].layer != undefined
+                                    && $scope.model.layers[2].layer != undefined)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_regression();
+                                }
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+
                     },
                     {
                         layer: layer_id,
@@ -72,7 +95,12 @@ angular.module('myApp.controllers')
                     });
             };
 
-            $scope.get_before_annotations = function (corpus_id, medium_id, layer_id) {
+            $scope.get_before_annotations = function (corpus_id, medium_id, layer_id, do_update) {
+
+                if(do_update == undefined)
+                {
+                    do_update = true;
+                }
                 $scope.model.layers[1] = {
                     'label': 'Hypothesis 1',
                     '_id': layer_id + "_1"
@@ -80,12 +108,30 @@ angular.module('myApp.controllers')
 
                 camomileService.getAnnotations(function(err, data)
                     {
-                        $scope.$apply(function(){
-                            $scope.model.layers[1].layer = data;
+                        if(!err)
+                        {
+                            $scope.$apply(function(){
+                                $scope.model.layers[1].layer = data;
 
-                            $scope.model.layersUpdated = true;
-                            $scope.compute_regression();
-                        });
+                                if(do_update)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_regression();
+                                }
+                                else if($scope.model.layers[0].layer != undefined
+                                    && $scope.model.layers[1].layer != undefined
+                                    && $scope.model.layers[2].layer != undefined)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_regression();
+                                }
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+
                     },
                     {
                         layer: layer_id,
@@ -93,7 +139,13 @@ angular.module('myApp.controllers')
                     });
             };
 
-            $scope.get_after_annotations = function (corpus_id, medium_id, layer_id) {
+            $scope.get_after_annotations = function (corpus_id, medium_id, layer_id, do_update) {
+
+                if(do_update == undefined)
+                {
+                    do_update = true;
+                }
+
                 $scope.model.layers[2] = {
                     'label': 'Hypothesis 2',
                     '_id': layer_id + "_2"
@@ -101,12 +153,30 @@ angular.module('myApp.controllers')
 
                 camomileService.getAnnotations(function(err, data)
                     {
-                        $scope.$apply(function(){
-                            $scope.model.layers[2].layer = data;
+                        if(!err)
+                        {
+                            $scope.$apply(function(){
+                                $scope.model.layers[2].layer = data;
 
-                            $scope.model.layersUpdated = true;
-                            $scope.compute_regression();
-                        });
+                                if(do_update)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_regression();
+                                }
+                                else if($scope.model.layers[0].layer != undefined
+                                    && $scope.model.layers[1].layer != undefined
+                                    && $scope.model.layers[2].layer != undefined)
+                                {
+                                    $scope.model.layersUpdated = true;
+                                    $scope.compute_regression();
+                                }
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+
                     },
                     {
                         layer: layer_id,
@@ -170,17 +240,15 @@ angular.module('myApp.controllers')
                     scope.get_layers(scope.model.selected_corpus);
 
                     if (scope.model.selected_reference != undefined) {
-                        $scope.get_reference_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference);
+                        $scope.get_reference_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference, false);
                     }
                     if (scope.model.selected_before != undefined) {
-                        $scope.get_before_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_before);
+                        $scope.get_before_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_before, false);
                     }
 
                     if (scope.model.selected_after != undefined) {
-                        $scope.get_after_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_after);
+                        $scope.get_after_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_after, false);
                     }
-
-//                    scope.compute_regression();
 
 //					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
                     $scope.resetSummaryView(true);

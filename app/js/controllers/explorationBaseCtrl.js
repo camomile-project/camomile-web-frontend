@@ -3,8 +3,8 @@
  */
 angular.module('myApp.controllers')
     .controller('ExplorationBaseCtrl', ['$scope', '$http',
-        'defaults', 'palette', '$controller','Session', 'camomileService', '$rootScope',
-        function ($scope, $http, defaults, palette, $controller, Session, camomileService, $rootScope) {
+        'defaults', 'palette', '$controller','Session', 'camomileService',
+        function ($scope, $http, defaults, palette, $controller, Session, camomileService) {
 
 
             'use strict';
@@ -147,15 +147,23 @@ angular.module('myApp.controllers')
 
                     camomileService.getCorpora(function(err, data)
                     {
-                        $scope.$apply(function(){
-                            $scope.model.available_corpora = data;
+                        if(!err)
+                        {
+                            $scope.$apply(function(){
+                                $scope.model.available_corpora = data;
 
-                            $scope.model.layerWatch = [$scope.model.layers[0]._id,
-                                $scope.model.layers[1]._id,
-                                $scope.model.layers[2]._id
-                            ];
+                                $scope.model.layerWatch = [$scope.model.layers[0]._id,
+                                    $scope.model.layers[1]._id,
+                                    $scope.model.layers[2]._id
+                                ];
 
-                        });
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+
                     });
 //                    $scope.model.available_corpora = Corpus.query(function () {
 //                        // initializing layerWatch after corpora are loaded
@@ -176,13 +184,20 @@ angular.module('myApp.controllers')
 //                });
 //                Camomile.setURL($rootScope.dataroot);
                 camomileService.getMedia(
-
                     function(err, data)
                     {
-                        $scope.$apply(function()
+                        if(!err)
                         {
-                            $scope.model.available_media = data;
-                        });
+                            $scope.$apply(function()
+                            {
+                                $scope.model.available_media = data;
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+
                     },
                     // Filter over corpus_id
                     {corpus:corpus_id});
@@ -198,10 +213,18 @@ angular.module('myApp.controllers')
                     // The callback
                     function(err, data)
                     {
-                        $scope.$apply(function()
+                        if(!err)
                         {
-                            $scope.model.available_layers = data;
-                        });
+                            $scope.$apply(function()
+                            {
+                                $scope.model.available_layers = data;
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
+
                     },
                     // Filter over corpus_id
                     {corpus:corpusId});
@@ -262,11 +285,12 @@ angular.module('myApp.controllers')
                     var data = $scope.model.layers[$scope.model.selected_layer];
 
                     data.layer.forEach(function (d) {
+
                         var addElement = true;
-                        if ((d.fragment.end <= $scope.model.maximalXDisplayedValue && d.fragment.end >= $scope.model.minimalXDisplayedValue)
-                            || (d.fragment.start <= $scope.model.maximalXDisplayedValue && d.fragment.start >= $scope.model.minimalXDisplayedValue)
-                            || (($scope.model.maximalXDisplayedValue <= d.fragment.end && $scope.model.maximalXDisplayedValue >= d.fragment.start)
-                            || ($scope.model.minimalXDisplayedValue <= d.fragment.end && $scope.model.minimalXDisplayedValue >= d.fragment.start))) {
+                        if ((d.fragment.end <= $scope.model.xMsScale.domain()[1] && d.fragment.end >= $scope.model.xMsScale.domain()[0])
+                            || (d.fragment.start <= $scope.model.xMsScale.domain()[1] && d.fragment.start >= $scope.model.xMsScale.domain()[0])
+                            || (($scope.model.xMsScale.domain()[1] <= d.fragment.end && $scope.model.xMsScale.domain()[1] >= d.fragment.start)
+                            || ($scope.model.xMsScale.domain()[0] <= d.fragment.end && $scope.model.xMsScale.domain()[0] >= d.fragment.start))) {
 
                             for (var i = 0, max = $scope.model.slices.length; i < max; i++) {
                                 if ($scope.model.slices[i].element == data.mapping.getKey(d)) {
@@ -307,47 +331,47 @@ angular.module('myApp.controllers')
 //                Camomile.setURL($rootScope.dataroot);
                 camomileService.getAnnotation(annotation_id, function(err, data)
                 {
-                    $scope.$apply(function()
+                    if(!err)
                     {
-                        var annotation_edited;
-
-                        annotation_edited = data;
-
-                        // replace its data by the new one
-                        annotation_edited.data = newValue;
-
-                        // update it on server
-                        camomileService.updateAnnotation(annotation_id, annotation_edited, function(err, data)
+                        $scope.$apply(function()
                         {
-                            $scope.$apply(function()
+                            var annotation_edited;
+
+                            annotation_edited = data;
+
+                            // replace its data by the new one
+                            annotation_edited.data = newValue;
+
+                            // update it on server
+                            camomileService.updateAnnotation(annotation_id, annotation_edited, function(err, data)
                             {
-                                if(data) {
-                                    console.log('Successfully update the annotation');
+                                if(!err)
+                                {
+                                    $scope.$apply(function()
+                                    {
+                                        if(data) {
+                                            console.log('Successfully update the annotation');
+                                        }
+                                        //error handling
+                                        else if (error) {
+                                            console.log("ERROR: ");
+                                            console.log(error);
+                                        }
+                                    });
                                 }
-                                //error handling
-                                else if (error) {
-                                    console.log("ERROR: ");
-                                    console.log(error);
+                                else
+                                {
+                                    alert(data.message);
                                 }
-                            })
+
+                            });
                         });
-//                        AnnotationUpdater.update(
-//                            // update parameters
-//                            {
-//                                annotationId: annotation_id
-//                            },
-//                            // data to post
-//                            annotation_edited,
-//                            // success handling
-//                            function () {
-//                                console.log('Successfully update the annotation');
-//                            },
-//                            //error handling
-//                            function (error) {
-//                                console.log("ERROR: ");
-//                                console.log(error);
-//                            });
-                    });
+                    }
+                    else
+                    {
+                        alert(data.message);
+                    }
+
                 });
 
 
@@ -391,17 +415,25 @@ angular.module('myApp.controllers')
 //                Camomile.setURL($rootScope.dataroot);
                 camomileService.deleteAnnotation(annotation_id, function(err, data)
                 {
-                    $scope.$apply(function()
+                    if(!err)
                     {
-                        if(data)
+                        $scope.$apply(function()
                         {
-                            console.log('Successfully remove the annotation');
-                        }
-                        else if(err)
-                        {
-                            console.log('Error while trying to remove the annotation')
-                        }
-                    });
+                            if(data)
+                            {
+                                console.log('Successfully remove the annotation');
+                            }
+                            else if(err)
+                            {
+                                console.log('Error while trying to remove the annotation')
+                            }
+                        });
+                    }
+                    else
+                    {
+                        alert(data.message);
+                    }
+
                 });
 
             };

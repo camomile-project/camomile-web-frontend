@@ -586,29 +586,8 @@ angular.module('myApp.directives')
                             return "scale(" + margin.left / maxTickLength + "," + margin.left / maxTickLength + ")";
                         });
 
-                    var min = 9999999999, max = 0;
-                    scope.model.layers.forEach(function(d)
-                    {
-
-                        if(d.layer.length > 0)
-                        {
-                            d.layer.forEach(function(element)
-                            {
-                                min = Math.min(min,element.fragment.start);
-                                max = Math.max(max, element.fragment.end);
-                            });
-                        }
-                    });
-                    scope.model.duration = scope.model.fullDuration = Math.ceil(max-min);
-
-                    if (scope.model.supbndsec === undefined) {
-                        scope.model.supbndsec = scope.model.duration;
-                    }
-
-                    // used to force the time-line to adapt its min/max
-                    scope.model.reinit_video_size = true;
-
                     scope.model.xMsScale.domain(x2MsScale.domain());
+                    xTimeScale.domain(x2TimeScale.domain());
                 };
 
                 var updateLayerSelectedItem = function (selectedSliceValue) {
@@ -846,6 +825,7 @@ angular.module('myApp.directives')
 
                 // to refresh playback marker position on brush events
                 scope.$watch("model.xMsScale.domain()", function (newValue) {
+
                     if (newValue !== undefined && scope.model.play_state !== undefined) {
                         lineElement.attr("x1", scope.model.xMsScale(scope.model.current_time)).attr("x2",
                             scope.model.xMsScale(scope.model.current_time));

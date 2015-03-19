@@ -220,84 +220,109 @@ angular.module('myApp.controllers')
 
                     // Get queue first element and pop it from the queue
                     camomileService.dequeue($scope.model.incomingQueue, function (err, data) {
-                        $scope.model.queueData = data;
-                        $scope.model.inData = [];
-                        $scope.model.queueTableData = [];
+                        if(!err)
+                        {
+                            $scope.model.queueData = data;
+                            $scope.model.inData = [];
+                            $scope.model.queueTableData = [];
 
 //                        var date = new Date(); // already UTC date in JSON Format...
-                        $scope.model.initialDate  = new Date(); // already UTC date in JSON Format...
+                            $scope.model.initialDate  = new Date(); // already UTC date in JSON Format...
 
-                        // Re init the context_size value
-                        $scope.model.context_size = DEFAULT_CONTEXT_VALUE;
+                            // Re init the context_size value
+                            $scope.model.context_size = DEFAULT_CONTEXT_VALUE;
 
-                        if($scope.model.queueData.data != undefined)
-                        {
-                            //copy initial data
-                            //for (var i in $scope.model.queueData.data) {
-                            for (var i  = 0, maxI = $scope.model.queueData.data.length; i<maxI; i++){
-                                $scope.model.inData[i] = $scope.model.queueData.data[i];
-                                $scope.model.queueTableData[i] = $scope.model.queueData.data[i];
-                                if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
-                                    $scope.model.availableEntry.push($scope.model.queueData.data[i]);
+                            if($scope.model.queueData.data != undefined)
+                            {
+                                //copy initial data
+                                //for (var i in $scope.model.queueData.data) {
+                                for (var i  = 0, maxI = $scope.model.queueData.data.length; i<maxI; i++){
+                                    $scope.model.inData[i] = $scope.model.queueData.data[i];
+                                    $scope.model.queueTableData[i] = $scope.model.queueData.data[i];
+                                    if ($scope.model.availableEntry.indexOf($scope.model.queueData.data[i]) == -1) {
+                                        $scope.model.availableEntry.push($scope.model.queueData.data[i]);
+                                    }
                                 }
                             }
-                        }
 
-                        // Update the next button's status
-                        $scope.model.updateNextStatus();
+                            // Update the next button's status
+                            $scope.model.updateNextStatus();
 
-                        // Update the add entry button's status
-                        $scope.model.updateIsDisplayedVideo($scope.model.inData.length != 0);
+                            // Update the add entry button's status
+                            $scope.model.updateIsDisplayedVideo($scope.model.inData.length != 0);
 
-                        // Get the video
-                        if ($scope.model.queueData.id_medium != undefined) {
+                            // Get the video
+                            if ($scope.model.queueData.id_medium != undefined) {
 
-                            // Get queue element medium
-                            camomileService.getMedium($scope.model.queueData.id_medium, function(err, data)
-                            {
-                                $scope.$apply(function(){
-                                    $scope.model.videoMetaData = data;
+                                // Get queue element medium
+                                camomileService.getMedium($scope.model.queueData.id_medium, function(err, data)
+                                {
+                                    if(!err)
+                                    {
+                                        $scope.$apply(function(){
+                                            $scope.model.videoMetaData = data;
+                                        });
+                                    }
+                                    else
+                                    {
+                                        alert(data.message);
+                                    }
+
                                 });
-                            });
 
-                            $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
-                            $scope.model.videoThumbnail = $scope.model.video;
-                            if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
-                                $scope.model.restrict_toggle = 2;
+                                $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
+                                $scope.model.videoThumbnail = $scope.model.video;
+                                if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
+                                    $scope.model.restrict_toggle = 2;
 
-                                $scope.model.current_time_temp = $scope.model.queueData.fragment.start;
+                                    $scope.model.current_time_temp = $scope.model.queueData.fragment.start;
 
-                                $scope.model.infbndsec = parseFloat($scope.model.queueData.fragment.start) - (parseInt($scope.model.context_size) || 0);
-                                if ($scope.model.infbndsec < 0) {
-                                    $scope.model.infbndsec = 0;
-                                }
-                                $scope.model.supbndsec = parseFloat($scope.model.queueData.fragment.end) + (parseInt($scope.model.context_size) || 0);
-                                if ($scope.model.supbndsec > $scope.model.fullDuration) {
-                                    $scope.model.supbndsec = $scope.model.fullDuration;
-                                }
+                                    $scope.model.infbndsec = parseFloat($scope.model.queueData.fragment.start) - (parseInt($scope.model.context_size) || 0);
+                                    if ($scope.model.infbndsec < 0) {
+                                        $scope.model.infbndsec = 0;
+                                    }
+                                    $scope.model.supbndsec = parseFloat($scope.model.queueData.fragment.end) + (parseInt($scope.model.context_size) || 0);
+                                    if ($scope.model.supbndsec > $scope.model.fullDuration) {
+                                        $scope.model.supbndsec = $scope.model.fullDuration;
+                                    }
 
-                                $scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
+                                    $scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
 
-                                //FIXME: C'est ici que c'est fait au "mauvais moment"
-                                $scope.model.current_time = $scope.model.queueData.fragment.start;
+                                    //FIXME: C'est ici que c'est fait au "mauvais moment"
+                                    $scope.model.current_time = $scope.model.queueData.fragment.start;
 
 //                                console.log("nouveau current:",$scope.model.current_time)
 
-                                //TODO: Commenter le test pour mettre le plan transparent partout
-                                if ($scope.model.queueType === 'head') {
-                                    // at the end of video loading, draw a rectangle on head as described in "position"
-                                    $scope.model.updateTransparentPlan = true;
+                                    //TODO: Commenter le test pour mettre le plan transparent partout
+                                    if ($scope.model.queueType === 'head') {
+                                        // at the end of video loading, draw a rectangle on head as described in "position"
+                                        $scope.model.updateTransparentPlan = true;
+                                    }
+
                                 }
-
                             }
-                        }
-                        else {
-                            $scope.model.video = undefined;
-                        }
+                            else {
+                                $scope.model.video = undefined;
+                            }
 
+                        }
+                        else
+                        {
+                            console.log("désactiver tout")
+                            $scope.$apply(function(){
+                                $scope.model.video = undefined;
+                                $scope.model.isDisplayedVideo = false;
+                                $scope.model.queueTableData = [];
+                                $scope.model.queueData.data = [];
+                                document.getElementById("buttonNext").setAttribute("class", "btn btn-primary disabled");
+                                $scope.model.updateSaveButtonStatus(false);
+                                $scope.model.updateIsDisplayedVideo(false);
+                            })
+
+
+                        }
                     });
                 }
-
             };
 
 
@@ -305,59 +330,73 @@ angular.module('myApp.controllers')
             $scope.model.saveQueueElement = function () {
                 // Get the queue
                 camomileService.getQueue($scope.model.outcomingQueue, function (err, data) {
-                    var newOutcomingQueue;
-                    newOutcomingQueue = data;
 
-                    var dataToPush = {};
-                    dataToPush["inData"] = {};
-                    dataToPush["inData"]["data"] = $scope.model.inData;
-                    dataToPush["inData"]["date"] = $scope.model.initialDate;
-                    dataToPush["outData"] = {};
+                    if(!err)
+                    {
+                        var newOutcomingQueue;
+                        newOutcomingQueue = data;
 
-                    var date = new Date(); // already UTC ddate in JSON Format...
+                        var dataToPush = {};
+                        dataToPush["inData"] = {};
+                        dataToPush["inData"]["data"] = $scope.model.inData;
+                        dataToPush["inData"]["date"] = $scope.model.initialDate;
+                        dataToPush["outData"] = {};
 
-                    var user = $cookieStore.get("current.user");
-                    var newData = [];
-                    var modified = false;
+                        var date = new Date(); // already UTC ddate in JSON Format...
+
+                        var user = $cookieStore.get("current.user");
+                        var newData = [];
+                        var modified = false;
 
 //                    for (var i in $scope.model.queueTableData) {
-                    for (var i = 0, maxI = $scope.model.queueTableData.length; i< maxI; i++) {
-                        newData[i] = $scope.model.queueTableData[i];
-                    }
+                        for (var i = 0, maxI = $scope.model.queueTableData.length; i< maxI; i++) {
+                            newData[i] = $scope.model.queueTableData[i];
+                        }
 
-                    if ($scope.model.inData.length == newData.length) {
+                        if ($scope.model.inData.length == newData.length) {
 //                        for (var j in newData) {
-                        for (var j = 0, maxJ = newData.length; j < maxJ; j++) {
-                            if (newData[j] != $scope.model.inData[j]) {
-                                modified = true;
+                            for (var j = 0, maxJ = newData.length; j < maxJ; j++) {
+                                if (newData[j] != $scope.model.inData[j]) {
+                                    modified = true;
+                                }
                             }
                         }
+                        else {
+                            modified = true;
+                        }
+                        dataToPush["outData"]["date"] = date;
+                        dataToPush["outData"]["duration"] = date - $scope.model.initialDate;
+                        dataToPush["outData"]["user"] = user;
+                        dataToPush["outData"]["data"] = newData;
+
+                        //status
+                        if (modified) {
+                            dataToPush["status"] = "MODIFIED";
+                        }
+                        else {
+                            dataToPush["status"] = "VALIDATED";
+                        }
+
+                        $scope.model.queueData.data = dataToPush;
+
+                        newOutcomingQueue.list = [$scope.model.queueData];
+
+                        // Update the queue by adding list element to the end of it
+                        camomileService.enqueue(newOutcomingQueue._id, newOutcomingQueue, function(err, data){
+                            if(err)
+                            {
+                                console.log(err, data);
+                            }
+                        });
+
+                        // call only if button have to be disabled
+                        //$scope.model.updateSaveButtonStatus(false);
                     }
-                    else {
-                        modified = true;
-                    }
-                    dataToPush["outData"]["date"] = date;
-                    dataToPush["outData"]["duration"] = date - $scope.model.initialDate;
-                    dataToPush["outData"]["user"] = user;
-                    dataToPush["outData"]["data"] = newData;
-
-                    //status
-                    if (modified) {
-                        dataToPush["status"] = "MODIFIED";
-                    }
-                    else {
-                        dataToPush["status"] = "VALIDATED";
+                    else
+                    {
+                        alert(data.message);
                     }
 
-                    $scope.model.queueData.data = dataToPush;
-
-                    newOutcomingQueue.list = [$scope.model.queueData];
-
-                    // Update the queue by adding list element to the end of it
-                    camomileService.enqueue(newOutcomingQueue._id, newOutcomingQueue);
-
-                    // call only if button have to be disabled
-                    //$scope.model.updateSaveButtonStatus(false);
                 });
 
 
@@ -376,40 +415,54 @@ angular.module('myApp.controllers')
                 if (buttonNext.innerHTML === "Skip") {
                     // Get the queue
                     camomileService.getQueue($scope.model.outcomingQueue,function (err, data) {
-                        var updatedQueue;
-                        updatedQueue = data;
 
-                        var dataToPush = {};
-                        dataToPush["inData"] = {};
-                        dataToPush["inData"]["data"] = $scope.model.inData;
-                        dataToPush["inData"]["date"] = $scope.model.initialDate;
-                        dataToPush["outData"] = {};
+                        if(!err)
+                        {
+                            var updatedQueue;
+                            updatedQueue = data;
 
-                        var date = new Date(); // already UTC ddate in JSON Format...
+                            var dataToPush = {};
+                            dataToPush["inData"] = {};
+                            dataToPush["inData"]["data"] = $scope.model.inData;
+                            dataToPush["inData"]["date"] = $scope.model.initialDate;
+                            dataToPush["outData"] = {};
 
-                        var user = $cookieStore.get("current.user");
-                        var newData = [];
+                            var date = new Date(); // already UTC ddate in JSON Format...
+
+                            var user = $cookieStore.get("current.user");
+                            var newData = [];
 //                        for (var i in $scope.model.queueTableData) {
-                        for (var i = 0, maxI = $scope.model.queueTableData.length; i< maxI; i++) {
-                            newData[i] = $scope.model.queueTableData[i];
+                            for (var i = 0, maxI = $scope.model.queueTableData.length; i< maxI; i++) {
+                                newData[i] = $scope.model.queueTableData[i];
+                            }
+                            dataToPush["outData"]["date"] = date;
+                            dataToPush["outData"]["duration"] = date - $scope.model.initialDate;
+                            dataToPush["outData"]["user"] = user;
+                            dataToPush["outData"]["data"] = newData;
+
+                            //status
+                            dataToPush["status"] = "SKIP";
+
+                            $scope.model.queueData.data = dataToPush;
+
+                            updatedQueue.list = [$scope.model.queueData];
+
+                            // Update the queue by adding list element to the end of it
+                            camomileService.enqueue(updatedQueue._id, updatedQueue, function(err, data){
+                                if(err)
+                                {
+                                    console.log(err, data);
+                                }
+                            });
+
+                            // call only if button have to be disabled
+                            //$scope.model.updateSaveButtonStatus(false);
                         }
-                        dataToPush["outData"]["date"] = date;
-                        dataToPush["outData"]["duration"] = date - $scope.model.initialDate;
-                        dataToPush["outData"]["user"] = user;
-                        dataToPush["outData"]["data"] = newData;
+                        else
+                        {
+                            alert(data.message);
+                        }
 
-                        //status
-                        dataToPush["status"] = "SKIP";
-
-                        $scope.model.queueData.data = dataToPush;
-
-                        updatedQueue.list = [$scope.model.queueData];
-
-                        // Update the queue by adding list element to the end of it
-                        camomileService.enqueue(updatedQueue._id, updatedQueue);
-
-                        // call only if button have to be disabled
-                        //$scope.model.updateSaveButtonStatus(false);
                     });
 
 
@@ -424,135 +477,157 @@ angular.module('myApp.controllers')
                 if ($scope.isLogged()) {
                     // get queue
                     camomileService.getQueue($rootScope.queues.shotIn,function (err, data) {
-                        var queue;
-                        queue = data;
 
-                        queue.list = [
-                            {
-                                id_corpus: "52fb49016ed21ede00000009",
-                                id_medium: "546cb4cc157a4908003c2e4c",
-                                _id: "52fe3fd811d4fade00007c2a",
-                                id_layer: "546cb4be157a4908003c2e47",
-                                data: ["Olivier_TRUCHOT"],
-                                fragment: {
-                                    start: 258.9,
-                                    end: 314.29,
-                                    context: {
-                                        _id: "546cb4be157a4908003c2e47",
-                                        id_corpus: "52fe3fd811d4fade00007c2c",
-                                        id_medium: "546cb4cc157a4908003c2e4c"
+                        if(!err)
+                        {
+                            var queue;
+                            queue = data;
+
+                            queue.list = [
+                                {
+                                    id_corpus: "52fb49016ed21ede00000009",
+                                    id_medium: "546cb4cc157a4908003c2e4c",
+                                    _id: "52fe3fd811d4fade00007c2a",
+                                    id_layer: "546cb4be157a4908003c2e47",
+                                    data: ["Olivier_TRUCHOT"],
+                                    fragment: {
+                                        start: 258.9,
+                                        end: 314.29,
+                                        context: {
+                                            _id: "546cb4be157a4908003c2e47",
+                                            id_corpus: "52fe3fd811d4fade00007c2c",
+                                            id_medium: "546cb4cc157a4908003c2e4c"
+                                        }
+                                    }
+                                },
+                                {
+                                    id_corpus: "52fb49016ed21ede00000009",
+                                    id_medium: "546cb4cc157a4908003c2e4c",
+                                    _id: "52fe3fd811d4fade00007c2b",
+                                    id_layer: "546cb4be157a4908003c2e47",
+                                    data: ["Olivier_TRUCHOT"],
+                                    fragment: {
+                                        start: 330.21,
+                                        end: 340.27,
+                                        context: {
+                                            _id: "546cb4be157a4908003c2e47",
+                                            id_corpus: "52fe3fd811d4fade00007c2c",
+                                            id_medium: "546cb4cc157a4908003c2e4c"
+                                        }
+                                    }
+                                },
+                                {
+                                    id_corpus: "52fe3fd811d4fade00007c2c",
+                                    id_medium: "546cb4cc157a4908003c2e4c",
+                                    _id: "52fb49016ed21ede00000009",
+                                    id_layer: "546cb4be157a4908003c2e47",
+                                    data: ["Rachid_M_BARKI"],
+                                    fragment: {
+                                        start: 340.27,
+                                        end: 362.18,
+                                        context: {
+                                            _id: "546cb4be157a4908003c2e47",
+                                            id_corpus: "52fe3fd811d4fade00007c2c",
+                                            id_medium: "546cb4cc157a4908003c2e4c"
+                                        }
                                     }
                                 }
-                            },
-                            {
-                                id_corpus: "52fb49016ed21ede00000009",
-                                id_medium: "546cb4cc157a4908003c2e4c",
-                                _id: "52fe3fd811d4fade00007c2b",
-                                id_layer: "546cb4be157a4908003c2e47",
-                                data: ["Olivier_TRUCHOT"],
-                                fragment: {
-                                    start: 330.21,
-                                    end: 340.27,
-                                    context: {
-                                        _id: "546cb4be157a4908003c2e47",
-                                        id_corpus: "52fe3fd811d4fade00007c2c",
-                                        id_medium: "546cb4cc157a4908003c2e4c"
-                                    }
+                            ];
+
+
+                            // update it on server
+                            camomileService.enqueue(queue._id, queue, function(err, data){
+                                if(err)
+                                {
+                                    console.log(err, data);
                                 }
-                            },
-                            {
-                                id_corpus: "52fe3fd811d4fade00007c2c",
-                                id_medium: "546cb4cc157a4908003c2e4c",
-                                _id: "52fb49016ed21ede00000009",
-                                id_layer: "546cb4be157a4908003c2e47",
-                                data: ["Rachid_M_BARKI"],
-                                fragment: {
-                                    start: 340.27,
-                                    end: 362.18,
-                                    context: {
-                                        _id: "546cb4be157a4908003c2e47",
-                                        id_corpus: "52fe3fd811d4fade00007c2c",
-                                        id_medium: "546cb4cc157a4908003c2e4c"
-                                    }
-                                }
-                            }
-                        ];
-
-
-                        // update it on server
-                        camomileService.enqueue(queue._id, queue);
-
-
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
                     });
 
                     // get queue
                     camomileService.getQueue($rootScope.queues.headIn, function (err, data) {
-                        var queue;
-                        queue = data;
-                        queue.list = [
-                            {
-                                id_corpus: "52fe3fd811d4fade00007c2c",
-                                id_medium: "546cb4cc157a4908003c2e4c",
-                                _id: "52fb49016ed21ede00000009",
-                                id_layer: "546cb4be157a4908003c2e47",
-                                data: ["Rachid_M_BARKI"],
-                                fragment: {
-                                    start: 340.27,
-                                    end: 340.27,
-                                    "position": {
-                                        "top": 0.3,
-                                        "left": 0.506,
-                                        "width": 0.1,
-                                        "height": 0.2
+                        if(!err)
+                        {
+                            var queue;
+                            queue = data;
+                            queue.list = [
+                                {
+                                    id_corpus: "52fe3fd811d4fade00007c2c",
+                                    id_medium: "546cb4cc157a4908003c2e4c",
+                                    _id: "52fb49016ed21ede00000009",
+                                    id_layer: "546cb4be157a4908003c2e47",
+                                    data: ["Rachid_M_BARKI"],
+                                    fragment: {
+                                        start: 340.27,
+                                        end: 340.27,
+                                        "position": {
+                                            "top": 0.3,
+                                            "left": 0.506,
+                                            "width": 0.1,
+                                            "height": 0.2
+                                        }
                                     }
-                                }
 
-                            },
+                                },
 
-                            {
-                                id_corpus: "52fb49016ed21ede00000009",
-                                id_medium: "546cb4cc157a4908003c2e4c",
-                                _id: "52fe3fd811d4fade00007c2b",
-                                id_layer: "546cb4be157a4908003c2e47",
-                                data: ["second test"],
-                                fragment: {
-                                    start: 200.27,
-                                    end: 200.27,
-                                    "position": {
-                                        "top": 0.1,
-                                        "left": 0.1,
-                                        "width": 0.1,
-                                        "height": 0.2
+                                {
+                                    id_corpus: "52fb49016ed21ede00000009",
+                                    id_medium: "546cb4cc157a4908003c2e4c",
+                                    _id: "52fe3fd811d4fade00007c2b",
+                                    id_layer: "546cb4be157a4908003c2e47",
+                                    data: ["second test"],
+                                    fragment: {
+                                        start: 200.27,
+                                        end: 200.27,
+                                        "position": {
+                                            "top": 0.1,
+                                            "left": 0.1,
+                                            "width": 0.1,
+                                            "height": 0.2
+                                        }
                                     }
+
                                 }
+                                ,
 
-                            }
-                            ,
-
-                            {
-                                id_corpus: "52fe3fd811d4fade00007c2c",
-                                id_medium: "546cb4cc157a4908003c2e4c",
-                                _id: "52fb49016ed21ede00000009",
-                                id_layer: "546cb4be157a4908003c2e47",
-                                data: ["troisieme test"],
-                                fragment: {
-                                    start: 300.27,
-                                    end: 300.27,
-                                    "position": {
-                                        "top": 0.9,
-                                        "left": 0.9,
-                                        "width": 0.1,
-                                        "height": 0.2
+                                {
+                                    id_corpus: "52fe3fd811d4fade00007c2c",
+                                    id_medium: "546cb4cc157a4908003c2e4c",
+                                    _id: "52fb49016ed21ede00000009",
+                                    id_layer: "546cb4be157a4908003c2e47",
+                                    data: ["troisieme test"],
+                                    fragment: {
+                                        start: 300.27,
+                                        end: 300.27,
+                                        "position": {
+                                            "top": 0.9,
+                                            "left": 0.9,
+                                            "width": 0.1,
+                                            "height": 0.2
+                                        }
                                     }
+
                                 }
-
-                            }
-                        ];
+                            ];
 
 
-                        // update it on server
-                        camomileService.enqueue(queue._id, queue);
-
+                            // update it on server
+                            camomileService.enqueue(queue._id, queue, function(err, data){
+                                if(err)
+                                {
+                                    console.log(err, data);
+                                }
+                            });
+                        }
+                        else
+                        {
+                            alert(data.message);
+                        }
                     });
                 }
             };

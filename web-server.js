@@ -27,7 +27,7 @@ var camomile_api = program.camomile || process.env.CAMOMILE_API;
 var login = program.login || process.env.CAMOMILE_LOGIN;
 var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
-var port = parseInt(program.port || process.env.PORT || '3000', 10);
+var port = parseInt(program.port || process.env.PORT || '8070', 10);
 var shot_in = program.shotIn;
 var shot_out = program.shotOut;
 

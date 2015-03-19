@@ -2,8 +2,8 @@
  * Created by stefas on 09/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('CommonCtrl', ['$scope', '$http','defaults', 'Session', '$rootScope', 'camomileService',
-        function ($scope, $http, defaults, Session, $rootScope, camomileService) {
+    .controller('CommonCtrl', ['$scope', '$http','defaults', 'Session', '$rootScope', 'camomileService', '$resource',
+        function ($scope, $http, defaults, Session, $rootScope, camomileService, $resource) {
 
             'use strict';
 
@@ -13,7 +13,17 @@ angular.module('myApp.controllers')
             $scope.model.message = undefined;
             $scope.model.absUrl = $rootScope.absUrl;
 
-            camomileService.setURL($rootScope.dataroot);
+
+            var config = $resource($rootScope.absUrl + '/config');
+
+            // Use callbacks to store in $rootScope
+            config.get().$promise.then(function (data) {
+                $rootScope.dataroot = data.camomile_api;
+                $rootScope.toolroot = data.pyannote_api;
+                $rootScope.queues = data.queues;
+
+                camomileService.setURL($rootScope.dataroot);
+            });
 
             // test if user is logged or not
             $scope.isLogged = function () {

@@ -179,10 +179,18 @@ angular.module('myApp.directives').
                         // Get the annotation used as context
                         camomileService.getAnnotations(function(err, data)
                             {
-                                scope.$apply(function(){
-                                    contextLayer = data;
-                                    updateContext();
-                                });
+                                if(!err)
+                                {
+                                    scope.$apply(function(){
+                                        contextLayer = data;
+                                        updateContext();
+                                    });
+                                }
+                                else
+                                {
+                                    alert(data.message);
+                                }
+
                             },
                             {
                                 layer: scope.model.queueData.fragment.context._id,

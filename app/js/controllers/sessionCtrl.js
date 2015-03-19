@@ -23,30 +23,31 @@ angular.module('myApp.controllers')
                 // FIXME new login method
 //                camomileService.setURL($rootScope.dataroot);
                 camomileService.login(username, password, function(err, data)
-                {
-                    $scope.$apply(function(){
-                        if(data)
-                        {
-                            console.log('logged in as ' + username);
-                            Session.isLogged = true;
-                            Session.username = username;
-                            $cookieStore.put("current.user", username);
-                            $scope.model.message = "Connected as " + Session.username;
+                    {
+                        $scope.$apply(function(){
+                            if(!err)
+                            {
+                                console.log('logged in as ' + username);
+                                Session.isLogged = true;
+                                Session.username = username;
+                                $cookieStore.put("current.user", username);
+                                $scope.model.message = "Connected as " + Session.username;
 
-                            submit(); // hack to allow autofill and autocomplete support
+                                submit(); // hack to allow autofill and autocomplete support
 
-                        }
-                        else
-                        {
-                            Session.isLogged = false;
-                            Session.username = undefined;
-                            $cookieStore.remove("current.user");
-                            $scope.model.message = "Connection error";
-                            console.log(err);
-                        }
-                    });
+                            }
+                            else
+                            {
+                                Session.isLogged = false;
+                                Session.username = undefined;
+                                $cookieStore.remove("current.user");
+                                $scope.model.message = "Connection error";
+                                console.log(data);
+                                alert(data.message);
+                            }
+                        });
 
-                }
+                    }
                     // Initialize the camomileService URL
 //                    ,$rootScope.dataroot
                 );
@@ -82,7 +83,7 @@ angular.module('myApp.controllers')
                 {
                     $scope.$apply(function()
                     {
-                        if(data)
+                        if(!err)
                         {
                             Session.isLogged = false;
                             $cookieStore.remove("current.user");
@@ -100,6 +101,7 @@ angular.module('myApp.controllers')
                             $cookieStore.remove("current.user");
                             $scope.model.message = "Connection error";
                             console.log(err);
+                            alert(data.message);
                         }
                     });
 
