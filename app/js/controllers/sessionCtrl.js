@@ -3,11 +3,16 @@
  */
 angular.module('myApp.controllers')
 
-    .controller('SessionCtrl', ['$sce', '$scope', '$http', 'Session', '$cookieStore','$rootScope', 'camomileService',
-        function ($sce, $scope, $http, Session, $cookieStore,$rootScope, camomileService) {
+    .controller('SessionCtrl', ['$sce', '$scope', '$controller', '$http', 'defaults', 'Session', '$cookieStore','$rootScope', 'camomileService',
+        function ($sce, $scope, $controller, $http, defaults, Session, $cookieStore,$rootScope, camomileService) {
 
-            $scope.model = {};
-            $scope.model.message = undefined;
+            $controller('CommonCtrl',
+                {
+                    $scope: $scope,
+                    $http: $http,
+                    defaults: defaults,
+                    Session: Session
+                });
 
             $scope.login = function (submit) {
                 var username = $("#login").val();

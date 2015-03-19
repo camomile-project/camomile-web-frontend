@@ -10,7 +10,7 @@ angular.module('myApp.controllers')
             delete $http.defaults.headers.common['X-Requested-With'];
 
             $scope.model = {};
-            $scope.model.lig=true;
+            $scope.model.message = undefined;
             $scope.model.absUrl = $rootScope.absUrl;
 
             camomileService.setURL($rootScope.dataroot);
