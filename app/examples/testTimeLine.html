@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    <script src="../bower_components/jquery/dist/jquery.js"></script>
+    <script src="../bower_components/jquery-ui/jquery-ui.min.js"></script>
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <script src="../bower_components/angular/angular.js"></script>
+    <script src="../bower_components/angular-resource/angular-resource.js"></script>
+    <script src="../bower_components/angular-route/angular-route.min.js"></script>
+    <script src="../bower_components/angular-cookies/angular-cookies.js"></script>
+
+    <script src="../bower_components/d3/d3.js"></script>
+
+    <script src="../bower_components/angular-sanitize/angular-sanitize.min.js"></script>
+    <script src="../bower_components/angular-strap/dist/angular-strap.min.js"></script>
+    <script src="../bower_components/angular-strap/dist/angular-strap.tpl.min.js"></script>
+
+    <!-- Json to Human lib-->
+    <script src="../bower_components/json-human/lib/crel.js"></script>
+    <script src="../bower_components/json-human/src/json.human.js"></script>
+
+    <!-- Modules-->
+    <script src="js/appTest.js"></script>
+
+    <!-- Directives-->
+    <script src="../js/directives/cmTimeLine.js"></script>
+    <script src="../js/services/dateUtils.js"></script>
+
+    <!-- Controllers-->
+    <script src="js/controllers/testTimeLineCtrl.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/test.css"/>
+
+    <title>TimeLine test</title>
+</head>
+<body ng-app="myApp" ng-controller="TestTimeLineCtrl">
+<div id="detailedView" class="container">
+
+    <div>
+        <label>Timeline:</label>
+        <svg cm-timeline cm-context-menu></svg>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -28,7 +28,7 @@
             <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
                 <label>Reference: </label>
                 <select class="form-control" ng-model='model.selected_reference'>
-                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.layer_type}}
+                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}
                     </option>
                 </select>
             </div>
@@ -37,7 +37,7 @@
             <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
                 <label>1st Hypothesis: </label>
                 <select class="form-control" ng-model='model.selected_before'>
-                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.layer_type}}
+                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}
                     </option>
                 </select>
             </div>
@@ -46,7 +46,7 @@
             <div class="col-xs-4 cm-selector" ng-show='model.selected_medium'>
                 <label>2nd Hypothesis: </label>
                 <select class="form-control" ng-model='model.selected_after'>
-                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.layer_type}}
+                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}
                     </option>
                 </select>
             </div>
@@ -153,14 +153,14 @@
             <tbody>
 
             <tr>
-                <td>
+                <td style="vertical-align:top;">
                     <cm-piechart ng-show="model.display_piechart" width="0px" height="0px"></cm-piechart>
                     <cm-barchart ng-show="model.display_barchart" width="0px" height="0px"></cm-barchart>
                     <cm-treemap ng-show="model.display_treemap" width="0px" height="0px"></cm-treemap>
                 </td>
-                <td>
-                    <cm-piechart-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
-                                        width="0px" height="0px"></cm-piechart-legend>
+                <td style="vertical-align:top;">
+                    <cm-legend ng-show="model.display_piechart  || model.display_barchart || model.display_treemap"
+                                        width="0px" height="0px"></cm-legend>
                 </td>
             </tr>
 
