@@ -8,15 +8,13 @@ angular.module('myApp.controllers')
 
             delete $http.defaults.headers.common['X-Requested-With'];
 
-            $controller('ExplorationBaseCtrl',
-                {
-                    $scope: $scope,
-                    $http: $http,
-                    defaults: defaults,
-                    palette: palette,
-                    Session: Session
-                });
-
+            $controller('ExplorationBaseCtrl', {
+                $scope: $scope,
+                $http: $http,
+                defaults: defaults,
+                palette: palette,
+                Session: Session
+            });
 
             // placeholder definitions
             var defaultReferenceLayer = {
@@ -53,8 +51,7 @@ angular.module('myApp.controllers')
 
             $scope.get_reference_annotations = function (corpus_id, medium_id, layer_id, do_update) {
 
-                if(do_update == undefined)
-                {
+                if (do_update == undefined) {
                     do_update = true;
                 }
                 $scope.model.layers[0] = {
@@ -62,43 +59,35 @@ angular.module('myApp.controllers')
                     '_id': layer_id + "_0"
                 };
 
-                camomileService.getAnnotations(function(err, data)
-                    {
-                        if(!err)
-                        {
-                            $scope.$apply(function(){
-                                $scope.model.layers[0].layer = data;
+                camomileService.getAnnotations(function (err, data) {
+                    if (!err) {
+                        $scope.$apply(function () {
+                            $scope.model.layers[0].layer = data;
 
-                                if(do_update)
-                                {
-                                    $scope.model.layersUpdated = true;
-                                    $scope.compute_regression();
-                                }
-                                else if($scope.model.layers[0].layer != undefined
-                                    && $scope.model.layers[1].layer != undefined
-                                    && $scope.model.layers[2].layer != undefined)
-                                {
-                                    $scope.model.layersUpdated = true;
-                                    $scope.compute_regression();
-                                }
-                            });
-                        }
-                        else
-                        {
-                            alert(data.message);
-                        }
+                            if (do_update) {
+                                $scope.model.layersUpdated = true;
+                                $scope.compute_regression();
+                            } else if ($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined && $scope.model.layers[2].layer != undefined) {
+                                $scope.model.layersUpdated = true;
+                                $scope.compute_regression();
+                            }
+                        });
+                    } else {
+                        alert(data.message);
+                    }
 
-                    },
-                    {
-                        layer: layer_id,
-                        media: medium_id
-                    });
+                }, {
+                    filter: {
+                        id_layer: layer_id,
+                        id_medium: medium_id
+
+                    }
+                });
             };
 
             $scope.get_before_annotations = function (corpus_id, medium_id, layer_id, do_update) {
 
-                if(do_update == undefined)
-                {
+                if (do_update == undefined) {
                     do_update = true;
                 }
                 $scope.model.layers[1] = {
@@ -106,43 +95,34 @@ angular.module('myApp.controllers')
                     '_id': layer_id + "_1"
                 };
 
-                camomileService.getAnnotations(function(err, data)
-                    {
-                        if(!err)
-                        {
-                            $scope.$apply(function(){
-                                $scope.model.layers[1].layer = data;
+                camomileService.getAnnotations(function (err, data) {
+                    if (!err) {
+                        $scope.$apply(function () {
+                            $scope.model.layers[1].layer = data;
 
-                                if(do_update)
-                                {
-                                    $scope.model.layersUpdated = true;
-                                    $scope.compute_regression();
-                                }
-                                else if($scope.model.layers[0].layer != undefined
-                                    && $scope.model.layers[1].layer != undefined
-                                    && $scope.model.layers[2].layer != undefined)
-                                {
-                                    $scope.model.layersUpdated = true;
-                                    $scope.compute_regression();
-                                }
-                            });
-                        }
-                        else
-                        {
-                            alert(data.message);
-                        }
+                            if (do_update) {
+                                $scope.model.layersUpdated = true;
+                                $scope.compute_regression();
+                            } else if ($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined && $scope.model.layers[2].layer != undefined) {
+                                $scope.model.layersUpdated = true;
+                                $scope.compute_regression();
+                            }
+                        });
+                    } else {
+                        alert(data.message);
+                    }
 
-                    },
-                    {
-                        layer: layer_id,
-                        media: medium_id
-                    });
+                }, {
+                    filter: {
+                        id_layer: layer_id,
+                        id_medium: medium_id
+                    }
+                });
             };
 
             $scope.get_after_annotations = function (corpus_id, medium_id, layer_id, do_update) {
 
-                if(do_update == undefined)
-                {
+                if (do_update == undefined) {
                     do_update = true;
                 }
 
@@ -151,37 +131,29 @@ angular.module('myApp.controllers')
                     '_id': layer_id + "_2"
                 };
 
-                camomileService.getAnnotations(function(err, data)
-                    {
-                        if(!err)
-                        {
-                            $scope.$apply(function(){
-                                $scope.model.layers[2].layer = data;
+                camomileService.getAnnotations(function (err, data) {
+                    if (!err) {
+                        $scope.$apply(function () {
+                            $scope.model.layers[2].layer = data;
 
-                                if(do_update)
-                                {
-                                    $scope.model.layersUpdated = true;
-                                    $scope.compute_regression();
-                                }
-                                else if($scope.model.layers[0].layer != undefined
-                                    && $scope.model.layers[1].layer != undefined
-                                    && $scope.model.layers[2].layer != undefined)
-                                {
-                                    $scope.model.layersUpdated = true;
-                                    $scope.compute_regression();
-                                }
-                            });
-                        }
-                        else
-                        {
-                            alert(data.message);
-                        }
+                            if (do_update) {
+                                $scope.model.layersUpdated = true;
+                                $scope.compute_regression();
+                            } else if ($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined && $scope.model.layers[2].layer != undefined) {
+                                $scope.model.layersUpdated = true;
+                                $scope.compute_regression();
+                            }
+                        });
+                    } else {
+                        alert(data.message);
+                    }
 
-                    },
-                    {
-                        layer: layer_id,
-                        media: medium_id
-                    });
+                }, {
+                    filter: {
+                        id_layer: layer_id,
+                        id_medium: medium_id
+                    }
+                });
             };
 
             $scope.compute_regression = function () {
@@ -212,7 +184,6 @@ angular.module('myApp.controllers')
                 // Force brushUpdate to be false in order to allow it to launch brushUpdate event later
                 $scope.model.brushUpdate = false;
             };
-
 
             $scope.computeLastLayer = function () {
                 $scope.compute_regression();
@@ -250,7 +221,7 @@ angular.module('myApp.controllers')
                         $scope.get_after_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_after, false);
                     }
 
-//					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
+                    //					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/corpus/" + scope.model.selected_corpus + "/media/" + scope.model.selected_medium + "/video");
                     $scope.resetSummaryView(true);
                 }
             });
@@ -306,4 +277,5 @@ angular.module('myApp.controllers')
                         $scope.model.restrict_toggle = 0;
                     }
                 });
-        }]);
+        }
+    ]);

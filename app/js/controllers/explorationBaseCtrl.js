@@ -3,21 +3,17 @@
  */
 angular.module('myApp.controllers')
     .controller('ExplorationBaseCtrl', ['$scope', '$http',
-        'defaults', 'palette', '$controller','Session', 'camomileService',
+        'defaults', 'palette', '$controller', 'Session', 'camomileService',
         function ($scope, $http, defaults, palette, $controller, Session, camomileService) {
-
 
             'use strict';
 
-            $controller('CommonCtrl',
-                {
-                    $scope: $scope,
-                    $http: $http,
-                    defaults: defaults,
-                    Session: Session
-                });
-
-
+            $controller('CommonCtrl', {
+                $scope: $scope,
+                $http: $http,
+                defaults: defaults,
+                Session: Session
+            });
 
             $scope.model.selectedSummary = "nothing";
             $scope.model.display_piechart = false;
@@ -30,7 +26,7 @@ angular.module('myApp.controllers')
             // as soon as the corpora are loaded - ie sufficiently "late" in the angular init loop.
             $scope.model.layerWatch = [];
 
-            $scope.model.colScale = d3.scale.ordinal();// custom color scale
+            $scope.model.colScale = d3.scale.ordinal(); // custom color scale
 
             $scope.model.selected_slice = -1;
 
@@ -50,7 +46,6 @@ angular.module('myApp.controllers')
                 // - add new modalities
                 // - remove unused
 
-
                 // newVals: modalities not already in the color mapping
                 // oldVals: modalities historically in the mapping, from which we exclude those still needed
                 var vals;
@@ -60,7 +55,6 @@ angular.module('myApp.controllers')
                     keys: [],
                     maps: []
                 };
-
 
                 $scope.model.layers.forEach(function (layer) {
                     if (layer.mapping === undefined) {
@@ -77,7 +71,6 @@ angular.module('myApp.controllers')
                         };
                     }
 
-
                     if (layer.mapping.colors === undefined) {
                         vals = layer.layer.map(layer.mapping.getKey);
                         vals = $.grep(vals, function (v, k) {
@@ -85,8 +78,7 @@ angular.module('myApp.controllers')
                         }); // jQuery hack to get Array of unique values
                         // and then all that are not already in the scale domain
                         newVals = newVals.concat(vals.filter(function (l) {
-                            return (!($scope.model.colScale.domain().indexOf(l) > -1)
-                                && !(newVals.indexOf(l) > -1));
+                            return (!($scope.model.colScale.domain().indexOf(l) > -1) && !(newVals.indexOf(l) > -1));
                         }));
 
                         oldVals = oldVals.filter(function (l) {
@@ -94,8 +86,7 @@ angular.module('myApp.controllers')
                         });
                     } else {
                         vals = Object.keys(layer.mapping.colors).filter(function (l) {
-                            return (!($scope.model.colScale.domain().indexOf(l) > -1)
-                                && !(newMaps.keys.indexOf(l) > -1));
+                            return (!($scope.model.colScale.domain().indexOf(l) > -1) && !(newMaps.keys.indexOf(l) > -1));
                         });
                         // check that explicit mapping is not already defined in the color scale
                         newMaps.keys = newMaps.keys.concat(vals);
@@ -121,7 +112,6 @@ angular.module('myApp.controllers')
                     curColInd = (curColInd + 1) % palette.length;
                 });
 
-
                 newMaps.keys.forEach(function (k, i) {
                     $scope.model.colScale.domain().push(k);
                     $scope.model.colScale.domain($scope.model.colScale.domain());
@@ -138,18 +128,15 @@ angular.module('myApp.controllers')
                     $scope.model.colScale.range($scope.model.colScale.range());
                 });
 
-
             };
 
             // get list of corpora
             $scope.get_corpora = function () {
                 if ($scope.isLogged()) {
 
-                    camomileService.getCorpora(function(err, data)
-                    {
-                        if(!err)
-                        {
-                            $scope.$apply(function(){
+                    camomileService.getCorpora(function (err, data) {
+                        if (!err) {
+                            $scope.$apply(function () {
                                 $scope.model.available_corpora = data;
 
                                 $scope.model.layerWatch = [$scope.model.layers[0]._id,
@@ -158,78 +145,65 @@ angular.module('myApp.controllers')
                                 ];
 
                             });
-                        }
-                        else
-                        {
+                        } else {
                             alert(data.message);
                         }
 
                     });
-//                    $scope.model.available_corpora = Corpus.query(function () {
-//                        // initializing layerWatch after corpora are loaded
-//                        // Adds empty layers as border effect
-//                        $scope.model.layerWatch = [$scope.model.layers[0]._id,
-//                            $scope.model.layers[1]._id,
-//                            $scope.model.layers[2]._id
-//                        ];
-//                    });
                 }
             };
 
             // get list of media for a given corpus
             $scope.get_media = function (corpus_id) {
-//                $scope.model.available_media = Media.query({
-//                    corpusId: corpus_id
-//                }, function () {
-//                });
-//                Camomile.setURL($rootScope.dataroot);
+                //                $scope.model.available_media = Media.query({
+                //                    corpusId: corpus_id
+                //                }, function () {
+                //                });
+                //                Camomile.setURL($rootScope.dataroot);
                 camomileService.getMedia(
-                    function(err, data)
-                    {
-                        if(!err)
-                        {
-                            $scope.$apply(function()
-                            {
+                    function (err, data) {
+                        if (!err) {
+                            $scope.$apply(function () {
                                 $scope.model.available_media = data;
                             });
-                        }
-                        else
-                        {
+                        } else {
                             alert(data.message);
                         }
 
                     },
                     // Filter over corpus_id
-                    {corpus:corpus_id});
+                    {
+                        filter: {
+                            id_corpus: corpus_id
+                        }
+                    });
             };
 
             // get list of layers for a given medium
             $scope.get_layers = function (corpusId) {
-//                $scope.model.available_layers = Layer.query({
-//                    corpusId: corpusId
-//                });
-//                Camomile.setURL($rootScope.dataroot);
+                //                $scope.model.available_layers = Layer.query({
+                //                    corpusId: corpusId
+                //                });
+                //                Camomile.setURL($rootScope.dataroot);
                 camomileService.getLayers(
                     // The callback
-                    function(err, data)
-                    {
-                        if(!err)
-                        {
-                            $scope.$apply(function()
-                            {
+                    function (err, data) {
+                        if (!err) {
+                            $scope.$apply(function () {
                                 $scope.model.available_layers = data;
                             });
-                        }
-                        else
-                        {
+                        } else {
                             alert(data.message);
                         }
 
                     },
                     // Filter over corpus_id
-                    {corpus:corpusId});
+                    {
+                        filter: {
+                            id_corpus: corpusId
+                        }
+                    });
             };
-
 
             // Action on combobox "display piechart"
             $scope.displayPiechart = function () {
@@ -257,11 +231,9 @@ angular.module('myApp.controllers')
                 $scope.displayNothing();
                 if ($scope.model.selectedSummary === "piechart") {
                     $scope.displayPiechart();
-                }
-                else if ($scope.model.selectedSummary === "barchart") {
+                } else if ($scope.model.selectedSummary === "barchart") {
                     $scope.displayBarchart();
-                }
-                else if ($scope.model.selectedSummary === "treemap") {
+                } else if ($scope.model.selectedSummary === "treemap") {
                     $scope.displayTreemap();
                 }
             };
@@ -269,8 +241,7 @@ angular.module('myApp.controllers')
             $scope.clickOnASummaryViewSlice = function (sliceId) {
                 if ($scope.model.selected_slice == sliceId) {
                     $scope.model.selected_slice = -1;
-                }
-                else {
+                } else {
                     $scope.model.selected_slice = sliceId;
                 }
             };
@@ -287,10 +258,7 @@ angular.module('myApp.controllers')
                     data.layer.forEach(function (d) {
 
                         var addElement = true;
-                        if ((d.fragment.end <= $scope.model.xMsScale.domain()[1] && d.fragment.end >= $scope.model.xMsScale.domain()[0])
-                            || (d.fragment.start <= $scope.model.xMsScale.domain()[1] && d.fragment.start >= $scope.model.xMsScale.domain()[0])
-                            || (($scope.model.xMsScale.domain()[1] <= d.fragment.end && $scope.model.xMsScale.domain()[1] >= d.fragment.start)
-                            || ($scope.model.xMsScale.domain()[0] <= d.fragment.end && $scope.model.xMsScale.domain()[0] >= d.fragment.start))) {
+                        if ((d.fragment.end <= $scope.model.xMsScale.domain()[1] && d.fragment.end >= $scope.model.xMsScale.domain()[0]) || (d.fragment.start <= $scope.model.xMsScale.domain()[1] && d.fragment.start >= $scope.model.xMsScale.domain()[0]) || (($scope.model.xMsScale.domain()[1] <= d.fragment.end && $scope.model.xMsScale.domain()[1] >= d.fragment.start) || ($scope.model.xMsScale.domain()[0] <= d.fragment.end && $scope.model.xMsScale.domain()[0] >= d.fragment.start))) {
 
                             for (var i = 0, max = $scope.model.slices.length; i < max; i++) {
                                 if ($scope.model.slices[i].element == data.mapping.getKey(d)) {
@@ -300,7 +268,10 @@ angular.module('myApp.controllers')
                             }
 
                             if (addElement) {
-                                $scope.model.slices.push({"element": data.mapping.getKey(d), "spokenTime": (d.fragment.end - d.fragment.start)});
+                                $scope.model.slices.push({
+                                    "element": data.mapping.getKey(d),
+                                    "spokenTime": (d.fragment.end - d.fragment.start)
+                                });
                             }
                         }
                     });
@@ -324,32 +295,23 @@ angular.module('myApp.controllers')
             $scope.update_annotation = function (corpus_id, medium_id, layer_id, annotation_id, newValue) {
 
                 // qet the annotation to edit
-//                var annotation_edited = AnnotationUpdater.queryForAnUpdate({
-//                    annotationId: annotation_id
-//                });
+                //                var annotation_edited = AnnotationUpdater.queryForAnUpdate({
+                //                    annotationId: annotation_id
+                //                });
 
-//                Camomile.setURL($rootScope.dataroot);
-                camomileService.getAnnotation(annotation_id, function(err, data)
-                {
-                    if(!err)
-                    {
-                        $scope.$apply(function()
-                        {
-                            var annotation_edited;
-
-                            annotation_edited = data;
-
-                            // replace its data by the new one
-                            annotation_edited.data = newValue;
+                //                Camomile.setURL($rootScope.dataroot);
+                camomileService.getAnnotation(annotation_id, function (err, data) {
+                    if (!err) {
+                        $scope.$apply(function () {
+                            var fields = {
+                                data: newValue
+                            };
 
                             // update it on server
-                            camomileService.updateAnnotation(annotation_id, annotation_edited, function(err, data)
-                            {
-                                if(!err)
-                                {
-                                    $scope.$apply(function()
-                                    {
-                                        if(data) {
+                            camomileService.updateAnnotation(annotation_id, fields, function (err, data) {
+                                if (!err) {
+                                    $scope.$apply(function () {
+                                        if (data) {
                                             console.log('Successfully update the annotation');
                                         }
                                         //error handling
@@ -358,43 +320,38 @@ angular.module('myApp.controllers')
                                             console.log(error);
                                         }
                                     });
-                                }
-                                else
-                                {
+                                } else {
                                     alert(data.message);
                                 }
 
                             });
                         });
-                    }
-                    else
-                    {
+                    } else {
                         alert(data.message);
                     }
 
                 });
 
-
-//                // replace its data by the new one
-//                annotation_edited.data = newValue;
-//
-//                // update it on server
-//                AnnotationUpdater.update(
-//                    // update parameters
-//                    {
-//                        annotationId: annotation_id
-//                    },
-//                    // data to post
-//                    annotation_edited,
-//                    // success handling
-//                    function () {
-//                        console.log('Successfully update the annotation');
-//                    },
-//                    //error handling
-//                    function (error) {
-//                        console.log("ERROR: ");
-//                        console.log(error);
-//                    });
+                //                // replace its data by the new one
+                //                annotation_edited.data = newValue;
+                //
+                //                // update it on server
+                //                AnnotationUpdater.update(
+                //                    // update parameters
+                //                    {
+                //                        annotationId: annotation_id
+                //                    },
+                //                    // data to post
+                //                    annotation_edited,
+                //                    // success handling
+                //                    function () {
+                //                        console.log('Successfully update the annotation');
+                //                    },
+                //                    //error handling
+                //                    function (error) {
+                //                        console.log("ERROR: ");
+                //                        console.log(error);
+                //                    });
 
             };
 
@@ -402,35 +359,27 @@ angular.module('myApp.controllers')
             $scope.remove_annotation = function (corpus_id, medium_id, layer_id, annotation_id) {
 
                 // call the native remove method
-//                AnnotationUpdater.remove({
-////						corpusId: corpus_id,
-//                        media: medium_id,
-//                        layerId: layer_id,
-//                        annotationId: annotation_id
-//                    },
-//                    function () {
-//                        console.log('Successfully remove the annotation')
-//                    });
+                //                AnnotationUpdater.remove({
+                ////						corpusId: corpus_id,
+                //                        media: medium_id,
+                //                        layerId: layer_id,
+                //                        annotationId: annotation_id
+                //                    },
+                //                    function () {
+                //                        console.log('Successfully remove the annotation')
+                //                    });
 
-//                Camomile.setURL($rootScope.dataroot);
-                camomileService.deleteAnnotation(annotation_id, function(err, data)
-                {
-                    if(!err)
-                    {
-                        $scope.$apply(function()
-                        {
-                            if(data)
-                            {
+                //                Camomile.setURL($rootScope.dataroot);
+                camomileService.deleteAnnotation(annotation_id, function (err, data) {
+                    if (!err) {
+                        $scope.$apply(function () {
+                            if (data) {
                                 console.log('Successfully remove the annotation');
-                            }
-                            else if(err)
-                            {
+                            } else if (err) {
                                 console.log('Error while trying to remove the annotation')
                             }
                         });
-                    }
-                    else
-                    {
+                    } else {
                         alert(data.message);
                     }
 
@@ -443,10 +392,8 @@ angular.module('myApp.controllers')
                 // Get the correct svg tag to append the chart
                 var vis = d3.select("#piechart").attr("width", 410).attr("height", 410);
 
-
                 // Remove old existing piechart
                 var oldGraph = vis.selectAll("g");
-
 
                 if (oldGraph) {
                     oldGraph.remove();
@@ -455,10 +402,8 @@ angular.module('myApp.controllers')
                 // remove barchart
                 vis = d3.select("#barchart").attr("width", 410).attr("height", 410);
 
-
                 // Remove old existing piechart
                 oldGraph = vis.selectAll("g");
-
 
                 if (oldGraph) {
                     oldGraph.remove();
@@ -467,15 +412,12 @@ angular.module('myApp.controllers')
                 // remove treemap
                 vis = d3.select("#treemap").attr("width", 410).attr("height", 410);
 
-
                 // Remove old existing piechart
                 oldGraph = vis.selectAll("g");
-
 
                 if (oldGraph) {
                     oldGraph.remove();
                 }
-
 
                 // Remove old existing tooltips
                 var detailedView = d3.select("#detailedView").attr("width", 0).attr("height", 0);
@@ -483,7 +425,6 @@ angular.module('myApp.controllers')
                 if (oldTooltip) {
                     oldTooltip.remove();
                 }
-
 
                 var svgContainer = d3.select("#legend");
 
@@ -536,12 +477,12 @@ angular.module('myApp.controllers')
                     $scope.model.layersUpdated = true;
                     $scope.computeLastLayer();
 
-//                    if ($scope.model.update_SummaryView > 3) {
-//                        $scope.model.update_SummaryView = 0;
-//                    }
-//                    else {
-//                        $scope.model.update_SummaryView++;
-//                    }
+                    //                    if ($scope.model.update_SummaryView > 3) {
+                    //                        $scope.model.update_SummaryView = 0;
+                    //                    }
+                    //                    else {
+                    //                        $scope.model.update_SummaryView++;
+                    //                    }
                     $scope.computeSlices();
                 }
             };
@@ -563,8 +504,7 @@ angular.module('myApp.controllers')
                 // Forces summary view's update
                 if ($scope.model.update_SummaryView > 3) {
                     $scope.model.update_SummaryView = 0;
-                }
-                else {
+                } else {
                     $scope.model.update_SummaryView++;
                 }
             };
@@ -585,12 +525,13 @@ angular.module('myApp.controllers')
                 if (newValue != null && newValue != "" && newValue != undefined) {
 
                     var layer = $scope.model.layers[$scope.model.selected_layer];
-                    $scope.model.maximalXDisplayedValue = layer.layer[layer.layer.length-1].fragment.end;
+                    $scope.model.maximalXDisplayedValue = layer.layer[layer.layer.length - 1].fragment.end;
 
                     $scope.model.minimalXDisplayedValue = layer.layer[0].fragment.start;
 
-                   $scope.computeSlices();
+                    $scope.computeSlices();
                 }
             });
 
-        }]);
+        }
+    ]);
