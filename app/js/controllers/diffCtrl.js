@@ -82,8 +82,10 @@ angular.module('myApp.controllers')
 
                     },
                     {
-                        layer: layer_id,
-                        media: medium_id
+											filter: {
+												id_layer: layer_id,
+												id_medium: medium_id
+											}
                     });
             };
 
@@ -127,8 +129,10 @@ angular.module('myApp.controllers')
 
                     },
                     {
-                        layer: layer_id,
-                        media: medium_id
+											filter: {
+												id_layer: layer_id,
+												id_medium: medium_id
+											}
                     });
             };
 
@@ -186,7 +190,7 @@ angular.module('myApp.controllers')
 
                 if (newValue) {
 
-                    scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + scope.model.selected_medium + "/video");
+                    scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + scope.model.selected_medium + "/video");
                     scope.get_layers(scope.model.selected_corpus);
 
                     // re-initialize the reference is needed
