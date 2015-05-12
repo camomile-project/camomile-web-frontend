@@ -21,6 +21,7 @@ program
     .option('--port <int>', 'Local port to listen to (default: 3000)')
     .option('--shot-in <shotIn>', 'id of shotIn queue (optional)')
 	.option('--shot-out <shotOut>', 'id of shotOut queue (optional)')
+	.option('--head-in <headIn>', 'id of headIn queue (optional)')
     .parse(process.argv);
 
 var camomile_api = program.camomile || process.env.CAMOMILE_API;
@@ -29,6 +30,7 @@ var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
 var port = parseInt(program.port || process.env.PORT || '8070', 10);
 var shot_in = program.shotIn;
+var head_in = program.headIn;
 var shot_out = program.shotOut;
 
 // configure express app
@@ -156,7 +158,9 @@ function create_queues(callback) {
 		if(shot_out === undefined) {
 			queuesToCreate.push('shotOut');
 		}
-		queuesToCreate.push('headIn');
+		if(head_in === undefined) {
+			queuesToCreate.push('headIn');
+		}
 		queuesToCreate.push('headOut');
 
     async.map(
@@ -191,7 +195,7 @@ function create_queues(callback) {
 						var it = 0;
 						queues_dict.shotIn = (shot_in !== undefined) ? shot_in : queues[it++];
 						queues_dict.shotOut = (shot_out !== undefined) ? shot_out : queues[it++];
-						queues_dict.headIn = queues[it++];
+						queues_dict.headIn = (head_in !== undefined) ? head_in : queues[it++];
 						queues_dict.headOut = queues[it++];
 
             callback(null, queues_dict);

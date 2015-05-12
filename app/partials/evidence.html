@@ -1,0 +1,117 @@
+<div ng-controller="EvidenceCtrl" ng-show='isLogged()' ng-init="initPopup()">
+<div class="container-fluid">
+
+    <div class="row top-padding">
+
+        <div class="col-lg-2 col-md-pull-0 col-xs-pull-0">
+        </div>
+        <div class="col-lg-8 col-md-12 col-xs-12">
+        <div id="video-container">
+            <!-- TODO: Enlever le ng-show pour afficher le plan transparent partout-->
+            <div id="transparent-plan"></div>
+            <!--<div id="transparent-plan"></div>-->
+            <!-- video player behaviour managed by cm-video-player angular attribute -->
+
+            <video id="player"
+                   cm-video-player
+                   ng-src={{model.video}}
+                   height="360px">
+            </video>
+            <div class="controls">
+                <div id="play-button">
+                    <button type="button" class="video-control" id="play-pause"
+                            ng-click="model.toggle_play()">
+                        {{ model.play_label }}
+                    </button>
+                    <!-- use directive for quite simple way to indicate annotation to perform -->
+                    <!-- + extensible for reference layer and controls for extension to x seconds -->
+                </div>
+                <!--!!! KNOWN PROBLEM WITH INPUT RANGE TYPE-->
+                <!--see https://github.com/angular/angular.js/issues/6726-->
+                <div id="control-bar" title="Drag to reference frame">
+                    <svg id="controlsvg" cm-context-bar></svg>
+                    <div id="controlsoverlay">
+                        <input width="100%" type="range" id="seek-bar"
+                               min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
+                               step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
+                    </div>
+                </div>
+                <div id="time-display">
+                    <label>{{ model.current_time_display }}</label>
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+     <span style="float: right" ng-show="model.isDisplayedVideo">
+        <div id="evidence_button_id" style="margin-top: 30px;margin-left: -180px;" alt="qqqqqqqqh">
+            <input class="image-button" type="image" src="../img/validate.png"  value="Evidence" ng-click="model.saveQueueElement(true)" >
+        </div>
+
+        <div id="not_evidence_button_id" style="margin-top: 60px;;margin-left: -180px;">
+            <input class="image-button" type="image" src="../img/un validate.png" value="Not Evidence" ng-click="model.saveQueueElement(false)">
+        </div>
+
+         <div id="button-tooltip"></div>
+    </span>
+
+</div>
+
+
+</div>
+
+    <div class="container-fluid" ng-show="model.isDisplayedVideo" style="margin-top: 30px;margin-left: 85px;">
+        <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
+        </div>
+        <div class="col-lg-8 col-md-12 col-xs-12">
+            <div class="input-group">
+                <span class="input-group-addon" data-title="Enter your own annotation here"><b>Element:</b></span>
+
+                <form ng-submit="model.addEntry()" class="ng-pristine ng-valid">
+                    <input id="entry_input" type="text" class="form-control ui-autocomplete-input ng-pristine ng-valid" ng-model="model.corrected_data" >
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!--<div class="container-fluid" ng-show="model.isDisplayedVideo">-->
+        <!--<div class="col-lg-1 col-md-pull-0 col-xs-pull-0">-->
+        <!--</div>-->
+        <!--<div class="col-lg-8 col-md-12 col-xs-12">-->
+            <!--<div data-title="This is an evidence">-->
+                <!--<input class="image-button" type="image" src="../img/validate.png"  value="Evidence" ng-click="model.saveQueueElement(true)" >-->
+            <!--</div>-->
+
+            <!--<div data-title="This isn't an evidence" >-->
+                <!--<input class="image-button" type="image" src="../img/un validate.png" value="Not Evidence" ng-click="model.saveQueueElement(false)">-->
+            <!--</div>-->
+
+
+
+        <!--</div>-->
+    <!--</div>-->
+
+    <div id="myModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Confirmation</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Ici tu mets ton tuto</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="model.popQueueElement()">Start</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

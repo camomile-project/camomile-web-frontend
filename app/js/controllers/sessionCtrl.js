@@ -43,7 +43,7 @@ angular.module('myApp.controllers')
                                 $cookieStore.remove("current.user");
                                 $scope.model.message = "Connection error";
                                 console.log(data);
-                                alert(data.message);
+                                alert(data.error);
                             }
                         });
 
@@ -101,7 +101,7 @@ angular.module('myApp.controllers')
                             $cookieStore.remove("current.user");
                             $scope.model.message = "Connection error";
                             console.log(err);
-                            alert(data.message);
+                            alert(data.error);
                         }
                     });
 

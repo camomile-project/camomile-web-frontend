@@ -22,6 +22,7 @@ angular.module(
         $routeProvider.when('/fusion', {templateUrl: 'partials/fusion.html'});
         $routeProvider.when('/queue', {templateUrl: 'partials/queue.html'});
         $routeProvider.when('/diff', {templateUrl:'partials/diff.html'});
+        $routeProvider.when('/evidence', {templateUrl:'partials/evidence.html'});
         $routeProvider.otherwise({redirectTo: '/'});
     }])
 

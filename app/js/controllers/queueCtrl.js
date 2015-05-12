@@ -270,7 +270,7 @@ angular.module('myApp.controllers')
 
                                 });
 
-                                $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/media/" + $scope.model.queueData.id_medium + "/video");
+                                $scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + $scope.model.queueData.id_medium + "/video");
                                 $scope.model.videoThumbnail = $scope.model.video;
                                 if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
                                     $scope.model.restrict_toggle = 2;
@@ -381,7 +381,7 @@ angular.module('myApp.controllers')
                         newOutcomingQueue.list = [$scope.model.queueData];
 
                         // Update the queue by adding list element to the end of it
-                        camomileService.enqueue(newOutcomingQueue._id, newOutcomingQueue, function(err, data){
+                        camomileService.enqueue(newOutcomingQueue._id, newOutcomingQueue.list, function(err, data){
                             if(err)
                             {
                                 console.log(err, data);
@@ -447,7 +447,7 @@ angular.module('myApp.controllers')
                             updatedQueue.list = [$scope.model.queueData];
 
                             // Update the queue by adding list element to the end of it
-                            camomileService.enqueue(updatedQueue._id, updatedQueue, function(err, data){
+                            camomileService.enqueue(updatedQueue._id, updatedQueue.list, function(err, data){
                                 if(err)
                                 {
                                     console.log(err, data);
