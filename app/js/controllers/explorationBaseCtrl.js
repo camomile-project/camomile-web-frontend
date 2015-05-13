@@ -161,7 +161,7 @@ angular.module('myApp.controllers')
                         }
                         else
                         {
-                            alert(data.message);
+                            alert(data.error);
                         }
 
                     });
@@ -195,12 +195,12 @@ angular.module('myApp.controllers')
                         }
                         else
                         {
-                            alert(data.message);
+                            alert(data.error);
                         }
 
                     },
                     // Filter over corpus_id
-                    {corpus:corpus_id});
+                    {filter:{id_corpus:corpus_id}});
             };
 
             // get list of layers for a given medium
@@ -222,12 +222,12 @@ angular.module('myApp.controllers')
                         }
                         else
                         {
-                            alert(data.message);
+                            alert(data.error);
                         }
 
                     },
                     // Filter over corpus_id
-                    {corpus:corpusId});
+                    {filter:{id_corpus:corpusId}});
             };
 
 
@@ -361,7 +361,7 @@ angular.module('myApp.controllers')
                                 }
                                 else
                                 {
-                                    alert(data.message);
+                                    alert(data.error);
                                 }
 
                             });
@@ -369,7 +369,7 @@ angular.module('myApp.controllers')
                     }
                     else
                     {
-                        alert(data.message);
+                        alert(data.error);
                     }
 
                 });
@@ -431,7 +431,7 @@ angular.module('myApp.controllers')
                     }
                     else
                     {
-                        alert(data.message);
+                        alert(data.error);
                     }
 
                 });
