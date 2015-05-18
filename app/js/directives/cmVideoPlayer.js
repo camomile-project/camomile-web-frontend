@@ -58,8 +58,10 @@ angular.module('myApp.directives')
                     scope.model.reinit_video_size = true;
 
                     // Remove previous brush and update it with new layers
-                    scope.model.brushUpdate = true;
-                    scope.model.brushRemove = true;
+										// update and remove should be triggered when handling reinit_video_size change
+										// player is agnostic of any brush or whatsoever
+                    //scope.model.brushUpdate = true;
+                    //scope.model.brushRemove = true;
                 });
             });
 

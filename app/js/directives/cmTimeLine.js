@@ -469,7 +469,7 @@ angular.module('myApp.directives')
 
                     annotSel.enter()
                         .append("rect")
-                        .attr("opacity", 0.4)
+                        .attr("opacity", 1.0)
                         .attr("y", 0)
                         .attr("height", laneHeight)
                         .attr("x", function (d) {
@@ -598,7 +598,7 @@ angular.module('myApp.directives')
 //						// Restore initial color and opacity
                         scope.model.layers.forEach(function (l) {
                             // use of jQuery selector as d3 selector has limitations
-                            d3.select($("#" + l._id)[0]).selectAll("rect").attr("opacity", 0.4)
+                            d3.select($("#" + l._id)[0]).selectAll("rect").attr("opacity", 1.0)
                                 .attr("fill", function (d) {
                                     return scope.model.colScale(d3.select(this.parentNode).data()[0].mapping.getKey(d));
                                 });
@@ -693,21 +693,22 @@ angular.module('myApp.directives')
 
                 var bushRects;
                 scope.$watch('model.brushUpdate', function (newValue) {
-                    if (newValue == true) {
+                    if (newValue === true) {
 
                         // Be sure to remove stuff only when meta data are loaded and only once
-                        if (bushRects != undefined && scope.model.brushRemove) {
+                        if (bushRects !== undefined && scope.model.brushRemove) {
                             var layerToRemove = document.getElementById('brush-rects-div');
-
                             layerToRemove.parentNode.removeChild(layerToRemove);
-                            bushRects = undefined
+                            bushRects = undefined;
                         }
-                        if (bushRects == undefined) {
+                        if (bushRects === undefined) {
                             bushRects = context.insert("g", ".brush").attr("id", "brush-rects-div");
                         }
 
                         // Be sure to do it only when a layer has changed, not when meta data are loaded
-                        if (!scope.model.brushRemove) {
+												// originally condition on brushRemove
+												// but not triggered in case of medium change then
+                        if (scope.model.selected_reference !== undefined || scope.model.selected_hypothesis !== undefined) {
                             scope.model.layers.forEach(function (d) {
                                 d.layer.forEach(function (layer) {
                                     if (layer._id != undefined && layer._id.indexOf("Computed") === -1) {
@@ -759,12 +760,22 @@ angular.module('myApp.directives')
                         x2MsScale.domain([0, scope.model.duration]);
                         x2TimeScale.domain([DateUtils.parseDate(0),
                             DateUtils.parseDate(scope.model.duration)]);
-                        x2MsScale.domain([0, scope.model.duration]);
-                        x2TimeScale.domain([DateUtils.parseDate(0),
-                            DateUtils.parseDate(scope.model.duration)]);
                         scope.model.infbndsec = 0;
                         scope.model.supbndsec = scope.model.duration;
                         scope.model.reinit_video_size = false;
+												scope.model.xMsScale.domain(x2MsScale.domain());
+												xTimeScale.domain(x2TimeScale.domain());
+
+												// reset axes and brush
+												brush.clear();
+												focus.select(".x.axis").call(xAxis);
+												context.select(".x.axis").call(xAxis2);
+
+												// force brushed so that focus is correctly set
+												brushed();
+												scope.model.brushUpdate = true;
+												scope.model.brushRemove = true;
+
                     }
 
                 });
