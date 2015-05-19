@@ -249,3 +249,4 @@ angular.module('myApp.controllers')
             });
 
         }]);
+

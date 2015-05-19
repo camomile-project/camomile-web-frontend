@@ -696,7 +696,8 @@ angular.module('myApp.directives')
                     if (newValue === true) {
 
                         // Be sure to remove stuff only when meta data are loaded and only once
-                        if (bushRects !== undefined && scope.model.brushRemove) {
+                        //if (bushRects !== undefined && scope.model.brushRemove) {
+						if (bushRects !== undefined) {
                             var layerToRemove = document.getElementById('brush-rects-div');
                             layerToRemove.parentNode.removeChild(layerToRemove);
                             bushRects = undefined;
@@ -708,7 +709,7 @@ angular.module('myApp.directives')
                         // Be sure to do it only when a layer has changed, not when meta data are loaded
 												// originally condition on brushRemove
 												// but not triggered in case of medium change then
-                        if (scope.model.selected_reference !== undefined || scope.model.selected_hypothesis !== undefined) {
+                        //if (scope.model.selected_reference !== undefined || scope.model.selected_hypothesis !== undefined) {
                             scope.model.layers.forEach(function (d) {
                                 d.layer.forEach(function (layer) {
                                     if (layer._id != undefined && layer._id.indexOf("Computed") === -1) {
@@ -732,9 +733,9 @@ angular.module('myApp.directives')
                                     }
                                 });
                             });
-                        }
+                        //}
                         scope.model.brushUpdate = false;
-                        scope.model.brushRemove = false;
+                        //scope.model.brushRemove = false;
                     }
 
 
@@ -763,18 +764,18 @@ angular.module('myApp.directives')
                         scope.model.infbndsec = 0;
                         scope.model.supbndsec = scope.model.duration;
                         scope.model.reinit_video_size = false;
-												scope.model.xMsScale.domain(x2MsScale.domain());
-												xTimeScale.domain(x2TimeScale.domain());
+						scope.model.xMsScale.domain(x2MsScale.domain());
+						xTimeScale.domain(x2TimeScale.domain());
 
-												// reset axes and brush
-												brush.clear();
-												focus.select(".x.axis").call(xAxis);
-												context.select(".x.axis").call(xAxis2);
+						// reset axes and brush
+						brush.clear();
+						focus.select(".x.axis").call(xAxis);
+						context.select(".x.axis").call(xAxis2);
 
-												// force brushed so that focus is correctly set
-												brushed();
-												scope.model.brushUpdate = true;
-												scope.model.brushRemove = true;
+						// force brushed so that focus is correctly set
+						brushed();
+						scope.model.brushUpdate = true;
+						//scope.model.brushRemove = true;
 
                     }
 
