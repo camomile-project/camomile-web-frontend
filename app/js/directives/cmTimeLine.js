@@ -383,7 +383,6 @@ angular.module('myApp.directives')
 					// updateColorScale now refreshed independently of a specific layer
 					scope.updateColorScale();
 
-					// TODO
 					// adapt time scales
 					adaptTimeScales();
 
@@ -586,8 +585,8 @@ angular.module('myApp.directives')
 							return "scale(" + margin.left / maxTickLength + "," + margin.left / maxTickLength + ")";
 						});
 
-					scope.model.xMsScale.domain(x2MsScale.domain());
-					xTimeScale.domain(x2TimeScale.domain());
+					scope.model.xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
+					xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brush.extent().map(x2MsScale).map(x2TimeScale.invert));
 				};
 
 				var updateLayerSelectedItem = function (selectedSliceValue) {
@@ -634,7 +633,6 @@ angular.module('myApp.directives')
 					}
 				};
 
-				//TODO moved this block to allow it to be called multiple times
 				var adaptTimeScales = function () {
 					// Reinitialises infannot and supannot
 					infannot = undefined;
@@ -692,6 +690,8 @@ angular.module('myApp.directives')
 				}, true);
 
 				var bushRects;
+				// TODO: this is not how context is supposed to be updated - see in updateLayers how
+				// TODO: scope.model.layers is processed. This causes several problems, eg if with want to restrict_toggle.
 				scope.$watch('model.brushUpdate', function (newValue) {
 					if (newValue === true) {
 
@@ -702,9 +702,11 @@ angular.module('myApp.directives')
 							layerToRemove.parentNode.removeChild(layerToRemove);
 							bushRects = undefined;
 						}
+
 						if (bushRects === undefined) {
 							bushRects = context.insert("g", ".brush").attr("id", "brush-rects-div");
 						}
+
 
 						// Be sure to do it only when a layer has changed, not when meta data are loaded
 						// originally condition on brushRemove
@@ -713,8 +715,9 @@ angular.module('myApp.directives')
 						scope.model.layers.forEach(function (d) {
 							d.layer.forEach(function (layer) {
 								if (layer._id != undefined && layer._id.indexOf("Computed") === -1) {
-									bushRects.append("g")
-										.attr("class", "layer")
+									bushRects
+										//.append("g")
+										//.attr("class", "layer")
 										.append("rect")
 										.attr("fill", "#999999")
 										.attr("opacity", 0.2)
@@ -768,13 +771,13 @@ angular.module('myApp.directives')
 						xTimeScale.domain(x2TimeScale.domain());
 
 						// reset axes and brush
-						brush.clear();
+						d3.selectAll(".brush").call(brush.clear());
 						focus.select(".x.axis").call(xAxis);
 						context.select(".x.axis").call(xAxis2);
 
-						// force brushed so that focus is correctly set
-						brushed();
-						scope.model.brushUpdate = true;
+						// refresh layers, and brush update is commanded by this refresh
+						scope.model.layersUpdated = true;
+						//scope.model.brushUpdate = true;
 						//scope.model.brushRemove = true;
 
 					}
@@ -800,6 +803,7 @@ angular.module('myApp.directives')
 							if (scope.model.current_time > scope.model.supbndsec) {
 								scope.model.current_time = scope.model.supbndsec;
 							}
+
 						}
 					} else if (newValue === 0 || newValue === 1) {
 						x2MsScale.domain([0, scope.model.duration]);
@@ -824,13 +828,14 @@ angular.module('myApp.directives')
 							return scope.model.xMsScale(d.fragment.end) - scope.model.xMsScale(d.fragment.start);
 						});
 
-					context.selectAll(".annot")
-						.attr("x", function (d) {
-							return x2MsScale(d.fragment.start);
-						})
-						.attr("width", function (d) {
-							return x2MsScale(d.fragment.end) - x2MsScale(d.fragment.start);
-						});
+					//context.selectAll(".annot-brushed")
+//					bushRects.selectAll(".annot-brushed")
+//						.attr("x", function (d) {
+//							return x2MsScale(d.fragment.start);
+//						})
+//						.attr("width", function (d) {
+//							return x2MsScale(d.fragment.end) - x2MsScale(d.fragment.start);
+//						});
 
 
 				});

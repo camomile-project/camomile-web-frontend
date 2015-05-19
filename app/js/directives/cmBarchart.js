@@ -12,6 +12,7 @@
  * explorationBaseCtrl.js. All elements listed on top are in explorationBaseCtrl.js and have to be modified the way you want.
  *
  */
+// TODO: now default opacity is 1.0 with mix-blend-mode set to multiply - adjust summary views consistently
 angular.module('myApp.directives')
     .directive('cmBarchart', [function () {
         return {
