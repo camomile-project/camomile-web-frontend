@@ -241,7 +241,20 @@ angular.module('myApp.controllers')
 
                 if (newValue) {
 
-                    scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + scope.model.selected_medium + "/video");
+//                    scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + scope.model.selected_medium + "/video");
+
+                    if(scope.model.useDefaultVideoPath)
+                    {
+                        scope.model.video = $sce.trustAsResourceUrl(camomileService.getMediumURL(scope.model.selected_medium, 'webm'));
+                    }
+                    else
+                    {
+                        camomileService.getMedium(scope.model.selected_medium, function(err, data)
+                        {
+                            $scope.model.video = $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url +'.webm');
+
+                        });
+                    }
 
                     scope.get_layers(scope.model.selected_corpus);
 

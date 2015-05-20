@@ -110,12 +110,7 @@ angular.module('myApp.directives')
                             }) //set the color for each slice to be chosen from the color function defined above
                             .attr("d", arc)                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
                             .attr("opacity", function (d, i) {
-                                if (i == scope.model.selected_slice) {
-                                    return 1;
-                                }
-                                else {
-                                    return 0.4;
-                                }
+                                return 1;
                             });
                     }
                 };

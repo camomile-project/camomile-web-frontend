@@ -82,12 +82,13 @@ angular.module('myApp.directives')
                                 }
                             })
                             .style("opacity", function (d, i) {
-                                if (i == scope.model.selected_slice) {
-                                    return 1;
-                                }
-                                else {
-                                    return 0.4;
-                                }
+//                                if (i == scope.model.selected_slice) {
+//                                    return 1;
+//                                }
+//                                else {
+//                                    return 0.4;
+//                                }
+                                return 1;
                             })
                             .style("stroke", "black");   //allow us to style things in the slices (like text);
 

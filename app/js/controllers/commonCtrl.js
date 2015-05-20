@@ -2,8 +2,8 @@
  * Created by stefas on 09/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('CommonCtrl', ['$scope', '$http','defaults', 'Session', '$rootScope', 'camomileService', '$resource',
-        function ($scope, $http, defaults, Session, $rootScope, camomileService, $resource) {
+    .controller('CommonCtrl', ['$scope', '$http','defaults', 'Session', '$rootScope', 'camomileService', '$resource', '$cookieStore',
+        function ($scope, $http, defaults, Session, $rootScope, camomileService, $resource, $cookieStore) {
 
             'use strict';
 
@@ -13,6 +13,20 @@ angular.module('myApp.controllers')
             $scope.model.message = undefined;
             $scope.model.absUrl = $rootScope.absUrl;
 
+//            if($scope.model.useDefaultVideoPath == undefined)
+//            {
+//                $scope.model.useDefaultVideoPath = true;
+//            }
+//            if($scope.model.videoPath == undefined)
+//            {
+//                $scope.model.videoPath = "";
+//            }
+
+            var useDefaultVideoPath = $cookieStore.get("use.default.video.path");
+            var videoPath = $cookieStore.get("video.path");
+
+            $scope.model.useDefaultVideoPath = useDefaultVideoPath;
+            $scope.model.videoPath = videoPath;
 
             var config = $resource($rootScope.absUrl + '/config');
 

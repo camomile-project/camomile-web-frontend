@@ -97,12 +97,13 @@ angular.module('myApp.directives')
                                 }
                             })
                             .style("opacity", function (d, i) {
-                                if (i - 1 == scope.model.selected_slice) {
-                                    return 1;
-                                }
-                                else {
-                                    return 0.4;
-                                }
+//                                if (i - 1 == scope.model.selected_slice) {
+//                                    return 1;
+//                                }
+//                                else {
+//                                    return 0.4;
+//                                }
+                                return 1;
                             })
                             .on("mouseover", function (d, i) {
                                 if (!d.children) {

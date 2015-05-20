@@ -614,12 +614,13 @@ angular.module('myApp.directives')
 								if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.model.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d)) {
 									return 1.0;
 								}
-								else if (selectedSliceValue != undefined && selectedSliceValue != -1) {
+								else
+                                if (selectedSliceValue != undefined && selectedSliceValue != -1) {
 									return 0.1;
 								}
-								else {
-									return 0.4;
-								}
+//								else {
+//									return 0.4;
+//								}
 							})
 							.attr("fill", function (d) {
 								if (selectedSliceValue != undefined && selectedSliceValue != -1 && scope.model.slices[selectedSliceValue].element === addedLayer.mapping.getKey(d)) {

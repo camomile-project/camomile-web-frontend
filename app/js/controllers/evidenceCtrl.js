@@ -128,8 +128,20 @@ angular.module('myApp.controllers')
 
 								});
 
-								$scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + $scope.model.queueData.fragment.id_medium + "/video");
+//								$scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + $scope.model.queueData.fragment.id_medium + "/video");
 
+                                if($scope.model.useDefaultVideoPath)
+                                {
+                                    $scope.model.video = $sce.trustAsResourceUrl(camomileService.getMediumURL($scope.model.queueData.fragment.id_medium, 'webm'));
+                                }
+                                else
+                                {
+                                    camomileService.getMedium($scope.model.queueData.fragment.id_medium, function(err, data)
+                                    {
+                                        $scope.model.video = $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url +'.webm');
+
+                                    });
+                                }
 								if ($scope.model.queueData !== undefined && $scope.model.queueData.fragment !== undefined && $scope.model.queueData.fragment.start !== undefined && $scope.model.queueData.fragment.end !== undefined) {
 									$scope.model.restrict_toggle = 2;
 

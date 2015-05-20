@@ -85,12 +85,13 @@ angular.module('myApp.directives')
                             })
                             .attr("height", "15px")
                             .style("opacity", function (d, i) {
-                                if (i == scope.model.selected_slice) {
-                                    return 1;
-                                }
-                                else {
-                                    return 0.4;
-                                }
+//                                if (i == scope.model.selected_slice) {
+//                                    return 1;
+//                                }
+//                                else {
+//                                    return 0.4;
+//                                }
+                                return 1;
                             })
                             .style("stroke", "black")
                             .on("mouseover", function (d, i) {

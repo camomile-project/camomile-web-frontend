@@ -70,17 +70,66 @@
         <div class="col-lg-1 col-md-pull-0 col-xs-pull-0">
         </div>
         <div class="col-lg-8 col-md-12 col-xs-12">
-            <div class="input-group">
-                <span class="input-group-addon" data-title="Enter your own annotation here"><b>Element:</b></span>
+            <!--<div class="input-group">-->
+                <!--<span class="input-group-addon" data-title="Enter your own annotation here"><b>Element:</b></span>-->
 
-                <form ng-submit="model.addEntry()" class="ng-pristine ng-valid">
-                    <input id="entry_input" type="text" class="form-control ui-autocomplete-input ng-pristine ng-valid" ng-model="model.corrected_data" >
-                </form>
-            </div>
+                <!--<form ng-submit="model.addEntry()" class="ng-pristine ng-valid">-->
+                    <!--<input id="entry_input" type="text" class="form-control ui-autocomplete-input ng-pristine ng-valid" ng-model="model.corrected_data" >-->
+                <!--</form>-->
+            <!--</div>-->
+            <table class="table table-bordered table-hover" id="clickable-table">
+                <thead>
+                <tr class="active">
+                    <td style="text-align: center">
+                        <b>
+                            Not visible
+                        </b>
+                    </td>
+                    <td style="text-align: center">
+                        <b>
+                            Is visible
+                        </b>
+                    </td>
+                    <td style="text-align: center">
+                        <b>
+                            Is visible and speaking
+                        </b>
+                    </td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="queueData in model.queueTableData track by $index">
+                    <td id={{"not_visible_"+$index}} style="text-align: center" ng-click="clickOnNotVisible($index)">
+                        <img class="disclosure" src={{model.queueTableData[$index].image}}>
+                    </td>
+                    <td id={{"is_visible_"+$index}} style="text-align: center" ng-click="clickOnVisible($index)">
+                    </td>
+                    <td id={{"is_visible_and_speaking_"+$index}} style="text-align: center" ng-click="clickOnVisibleAndSpeaking($index)">
+                    </td>
+                </tr>
+                <tr>
+                    <td id="add_person_button" style="text-align: center">
+                        <input  class="image-button" type="image" src="../img/plus.png"  value="Add a person" ng-click="openAddPersonModal()" height="80px" width="100px">
+                    </td>
+                    <td style="text-align: center">
+                    </td>
+                    <td style="text-align: center">
+                    </td>
+
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <div id="label_button_id" style="margin-top: 30px;margin-left: -180px;" alt="" >
+            <input class="image-button" type="image" src="../img/validate.png"  value="label" ng-click="model.saveQueueElement(true)" width="90px" height="90px">
         </div>
     </div>
 
-    <div id="myModal" class="modal fade">
+    <!--<div id="button-tooltip"></div>-->
+
+    <div id="label_tuto_modal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -93,6 +142,34 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="model.popQueueElement()">Start</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="label_add_person_modal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Add element(s)</h4>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom: 20px;">Double click on the element(s) you want to add</div>
+                    <div class="tab-pane active"   style="width:inherit; height: 300px;overflow-y: auto;overflow-x: auto;">
+                        <!--ligne n -->
+                        <div ng-repeat="line in model.lines track by $index" style="height:110px;">
+                            <span ng-repeat="col in model.lines[$index] track by $index" style="vertical-align: middle;margin-left: 20px;">
+                                <input id={{"person_id_"+model.lines.indexOf(line)+"_"+$index}} class="image-button" type="image" src={{col.image}} ng-click="clickPerson($event)">
+                            </span>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="addAPerson()">Add</button>
                 </div>
             </div>
         </div>
