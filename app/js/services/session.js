@@ -7,21 +7,7 @@ angular.module('myApp.services')
             return {
 
                 isLogged: false,
-                username: undefined,
-
-                login: function (credentials) {
-                    var url = $rootScope.dataroot + '/login';
-                    return $http.post(url, credentials, {
-                        withCredentials: true
-                    });
-                },
-
-                logout: function (credentials) {
-                    var url = $rootScope.dataroot + '/logout';
-                    return $http.post(url, credentials, {
-                        withCredentials: true
-                    });
-                }
+                username: undefined
             }
         }
     ]);

@@ -55,12 +55,14 @@
 
     <!-- Controllers-->
     <script src="js/controllers/commonCtrl.js"></script>
+    <script src="js/controllers/parameterButtonCtrl.js"></script>
     <script src="js/controllers/explorationBaseCtrl.js"></script>
     <script src="js/controllers/sessionCtrl.js"></script>
     <script src="js/controllers/regressionCtrl.js"></script>
     <script src="js/controllers/fusionCtrl.js"></script>
     <script src="js/controllers/diffCtrl.js"></script>
     <script src="js/controllers/evidenceCtrl.js"></script>
+    <script src="js/controllers/labelCtrl.js"></script>
 
     <!-- Filters-->
     <script src="js/filters.js"></script>
@@ -107,11 +109,14 @@
                     <li><a href="#/diff">Diff</a></li>
                     <li><a href="#/regression">Regression</a></li>
                     <li><a href="#/evidence">Evidence</a></li>
-                    <!--li><a href="#/label">Label</a></li-->
+                    <li><a href="#/label">Label</a></li>
                     <!--<li><a href="#/fusion">Fusion</a></li>-->
                 </ul>
 
-                <div ng-controller="SessionCtrl" data-ng-init="checkLoggin()">
+                <div id="parameterButtons_button_id" ng-controller="ParameterButtonCtrl">
+                    <input class="image-button navbar-right" type="image" src="./img/params.png"  value="Evidence" ng-click="openParameters()" width="28px" height="27px" style="margin-top: 10px;margin-left: 15px;">
+                </div>
+                <div ng-controller="SessionCtrl">
 
                     <div ng-if="isLogged()">
                         <form ng-submit="logout()" class="navbar-form navbar-right">
@@ -149,7 +154,9 @@
 
                     </div>
 
+
                 </div>
+
 
             </div>
             <!--/.navbar-collapse -->
@@ -172,6 +179,37 @@
     </div>
 </div>
 
+<div id="parameterModal" class="modal fade" ng-controller="ParameterButtonCtrl" ng-init="initializeParameters()">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Change the video path</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <span>
+                        Use default video path
+                        <input type="checkbox" ng-model="model.useDefaultVideoPath">
+                    </span>
+                </div>
+                <div class="input-group" style="margin-top: 20px;">
+                    <span class="input-group-addon" data-title="Specify your path here"><b>Video path:</b></span>
+
+                    <form ng-submit="model.modifyVideoPath" class="ng-pristine ng-valid">
+                        <input id="videoPathInput" type="text" class="form-control ng-pristine ng-valid" ng-model="model.videoPath" ng-disabled="model.useDefaultVideoPath">
+                    </form>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="modifyVideoPath()">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="button-tooltip"></div>
 
 </body>
 </html>

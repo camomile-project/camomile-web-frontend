@@ -55,13 +55,8 @@ angular.module('myApp.controllers')
 
 
 			// PBR : get queue data from config
-			if ($scope.model.queueType === "head") {
-				$scope.model.incomingQueue = $rootScope.queues.headIn;
-				$scope.model.outcomingQueue = $rootScope.queues.headOut;
-			} else {
-				$scope.model.incomingQueue = $rootScope.queues.shotIn;
-				$scope.model.outcomingQueue = $rootScope.queues.shotOut;
-			}
+            $scope.model.incomingQueue = $rootScope.queues.evidenceIn;
+            $scope.model.outcomingQueue = $rootScope.queues.evidenceOut;
 
 			// initialize page state
 			$scope.model.updateIsDisplayedVideo(false);
@@ -122,7 +117,6 @@ angular.module('myApp.controllers')
 									else
 									{
 										console.log(data);
-										console.log(err);
 										alert(data.error);
 									}
 
@@ -158,16 +152,14 @@ angular.module('myApp.controllers')
 
 									$scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
 
+                                    // FIXME : c'est un callback ===> $apply peut être nécessaire
 									//FIXME: C'est ici que c'est fait au "mauvais moment"
-									$scope.model.current_time = $scope.model.queueData.fragment.start;
+									$scope.$apply(function()
+                                    {
+                                        $scope.model.current_time = $scope.model.queueData.fragment.start;
+                                    });
 
 //                                console.log("nouveau current:",$scope.model.current_time)
-
-									//TODO: Commenter le test pour mettre le plan transparent partout
-									if ($scope.model.queueType === 'head') {
-										// at the end of video loading, draw a rectangle on head as described in "position"
-										$scope.model.updateTransparentPlan = true;
-									}
 
 								}
 							}
@@ -180,7 +172,6 @@ angular.module('myApp.controllers')
 						{
 							$scope.$apply(function(){
 								console.log(data);
-								console.log(err);
 								alert(data.error);
 								$scope.model.video = undefined;
 								$scope.model.isDisplayedVideo = false;
@@ -239,12 +230,14 @@ angular.module('myApp.controllers')
 							camomileService.enqueue(newOutcomingQueue._id, newOutcomingQueue.list, function(err, data){
 								if(err)
 								{
-									console.log(err, data);
+                                    alert(data.error);
+									console.log(data);
 								}
 							});
 						}
 						else
 						{
+                            console.log(data);
 							alert(data.error);
 						}
 
@@ -255,73 +248,6 @@ angular.module('myApp.controllers')
 					$scope.model.popQueueElement();
 				}
 			};
-
-			// TODO. SKIP CASE
-			// Event launched when click on the next button
-//			$scope.model.nextQueueElement = function () {
-//
-//				//var buttonNext = document.getElementById("buttonNext");
-//
-//				//buttonNext['data-title'] = "Skip this element and load the next one";
-//
-//				// Push queue ONLY if a "Skip" as been done. NOT when "Start" has been pressed.
-//				//if (buttonNext.innerHTML === "Skip")
-//				{
-//					// Get the queue
-//					camomileService.getQueue($scope.model.outcomingQueue,function (err, data) {
-//
-//						if(!err)
-//						{
-//							var updatedQueue;
-//							updatedQueue = data;
-//
-//							var dataToPush = {};
-//							dataToPush["inData"] = {};
-//							dataToPush["inData"]["data"] = $scope.model.corrected_data;
-//							dataToPush["inData"]["date"] = $scope.model.initialDate;
-//							dataToPush["outData"] = {};
-//
-//							var date = new Date(); // already UTC ddate in JSON Format...
-//
-//							var user = $cookieStore.get("current.user");
-//							var newData = [];
-////                        for (var i in $scope.model.queueTableData) {
-//							for (var i = 0, maxI = $scope.model.queueTableData.length; i< maxI; i++) {
-//								newData[i] = $scope.model.queueTableData[i];
-//							}
-//							dataToPush["outData"]["date"] = date;
-//							dataToPush["outData"]["duration"] = date - $scope.model.initialDate;
-//							dataToPush["outData"]["user"] = user;
-//							dataToPush["outData"]["data"] = newData;
-//
-//							//status
-//							dataToPush["status"] = "SKIP";
-//
-//							$scope.model.queueData.data = dataToPush;
-//
-//							updatedQueue.list = [$scope.model.queueData];
-//
-//							// Update the queue by adding list element to the end of it
-//							camomileService.enqueue(updatedQueue._id, updatedQueue.list, function(err, data){
-//								if(err)
-//								{
-//									console.log(err, data);
-//								}
-//							});
-//						}
-//						else
-//						{
-//							alert(data.message);
-//						}
-//
-//					});
-//
-//
-//					console.log("skip");
-//				}
-//
-//				$scope.model.popQueueElement();
-//			};
 
 			var player = $("#player");
 			var transparentPlan = d3.select("#transparent-plan").style("width", "100%")
@@ -370,7 +296,10 @@ angular.module('myApp.controllers')
 			transparentPlan.call(drag);
 
 			$scope.initPopup = function(){
-				$("#myModal").modal('show');
+                if($scope.isLogged())
+                {
+                    $("#myModal").modal('show');
+                }
 			};
 
 			var tooltip = d3.select("#button-tooltip");

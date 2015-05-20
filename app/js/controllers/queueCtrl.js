@@ -265,7 +265,7 @@ angular.module('myApp.controllers')
 									}
 									else
 									{
-										alert(data.error);
+										alert(data.message);
 									}
 
 								});
@@ -407,7 +407,7 @@ angular.module('myApp.controllers')
 					}
 					else
 					{
-						alert(data.error);
+						alert(data.message);
 					}
 
 				});
@@ -473,7 +473,7 @@ angular.module('myApp.controllers')
 						}
 						else
 						{
-							alert(data.error);
+							alert(data.message);
 						}
 
 					});

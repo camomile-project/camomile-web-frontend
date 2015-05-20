@@ -14,6 +14,7 @@ angular.module('myApp.controllers')
                     Session: Session
                 });
 
+            console.log("sessionCtrl");
             $scope.login = function (submit) {
                 var username = $("#login").val();
                 var password = $("#password").val();
@@ -34,6 +35,8 @@ angular.module('myApp.controllers')
                                 $scope.model.message = "Connected as " + Session.username;
 
                                 submit(); // hack to allow autofill and autocomplete support
+
+                                window.location.reload();
 
                             }
                             else
@@ -126,25 +129,43 @@ angular.module('myApp.controllers')
 //                    });
             };
 
-            $scope.isLogged = function () {
-                return Session.isLogged;
-            };
+//            $scope.isLogged = function () {
+//                return Session.isLogged;
+//            };
 
             $scope.getUserName = function () {
                 return Session.username;
             };
 
-            // Allow to check in the coockie if the user is already set
-            $scope.checkLoggin = function () {
-                var currentUser = $cookieStore.get("current.user");
-                if (currentUser && currentUser != "") {
-                    Session.isLogged = true;
-                    Session.username = currentUser;
-                    $cookieStore.put("current.user", currentUser);
-                    $scope.model.message = "Connected as " + Session.username;
-//                    camomileService.setURL($rootScope.dataroot);
-                }
-
-            }
-
+//            // Allow to check in the coockie if the user is already set
+//            $scope.checkLoggin = function () {
+////                camomileService.setURL($rootScope.dataroot);
+////                camomileService.me(function(err, data)
+////                {
+////                    console.log(data)
+////                    if(data.error)
+////                    {
+////                        Session.isLogged = false;
+////                        Session.username = undefined;
+////                        $scope.model.message = undefined;
+////                        return false;
+////                    }
+////                    else
+////                    {
+////                        Session.isLogged = true;
+////                        Session.username = data.username;
+////                        $scope.model.message = "Connected as " + Session.username;
+////                        return true;
+////                    }
+////                });
+//
+////                var currentUser = $cookieStore.get("current.user");
+////                if (currentUser && currentUser != "") {
+////                    Session.isLogged = true;
+////                    Session.username = currentUser;
+////                    $cookieStore.put("current.user", currentUser);
+////                    $scope.model.message = "Connected as " + Session.username;
+//
+////                }
+//            }
         }]);

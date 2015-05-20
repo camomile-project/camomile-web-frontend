@@ -10,9 +10,7 @@ angular.module('myApp.controllers')
             delete $http.defaults.headers.common['X-Requested-With'];
 
             $scope.model = {};
-            $scope.model.message = undefined;
             $scope.model.absUrl = $rootScope.absUrl;
-
 //            if($scope.model.useDefaultVideoPath == undefined)
 //            {
 //                $scope.model.useDefaultVideoPath = true;
@@ -37,7 +35,26 @@ angular.module('myApp.controllers')
                 $rootScope.queues = data.queues;
 
                 camomileService.setURL($rootScope.dataroot);
+
+                camomileService.me(function(err, data)
+                {
+                    $scope.$apply(function(){
+                        if(data.error)
+                        {
+                            Session.isLogged = false;
+                            Session.username = undefined;
+                            $scope.model.message = undefined;
+                        }
+                        else
+                        {
+                            Session.isLogged = true;
+                            Session.username = data.username;
+                            $scope.model.message = "Connected as " + Session.username;
+                        }
+                    });
+                });
             });
+
 
             // test if user is logged or not
             $scope.isLogged = function () {

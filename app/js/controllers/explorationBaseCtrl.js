@@ -17,7 +17,7 @@ angular.module('myApp.controllers')
                     Session: Session
                 });
 
-
+            console.log("ExplorationBaseCtrl");
 
             $scope.model.selectedSummary = "nothing";
             $scope.model.display_piechart = false;
@@ -143,8 +143,6 @@ angular.module('myApp.controllers')
 
             // get list of corpora
             $scope.get_corpora = function () {
-                if ($scope.isLogged()) {
-
                     camomileService.getCorpora(function(err, data)
                     {
                         if(!err)
@@ -173,7 +171,7 @@ angular.module('myApp.controllers')
 //                            $scope.model.layers[2]._id
 //                        ];
 //                    });
-                }
+
             };
 
             // get list of media for a given corpus
