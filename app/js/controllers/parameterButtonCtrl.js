@@ -14,17 +14,6 @@ angular.module('myApp.controllers')
                     Session: Session
                 });
 
-            // Load parameters stored in the cookies
-            $scope.initializeParameters = function()
-            {
-                var useDefaultVideoPath = $cookieStore.get("use.default.video.path");
-                var videoPath = $cookieStore.get("video.path");
-
-                $scope.model.useDefaultVideoPath = useDefaultVideoPath;
-                $scope.model.videoPath = videoPath;
-
-            };
-
             var tooltip = d3.select("#button-tooltip");
             d3.select("#parameterButtons_button_id").on("mouseover", function(d) {
                 tooltip.transition()

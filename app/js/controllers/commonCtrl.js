@@ -11,17 +11,9 @@ angular.module('myApp.controllers')
 
             $scope.model = {};
             $scope.model.absUrl = $rootScope.absUrl;
-//            if($scope.model.useDefaultVideoPath == undefined)
-//            {
-//                $scope.model.useDefaultVideoPath = true;
-//            }
-//            if($scope.model.videoPath == undefined)
-//            {
-//                $scope.model.videoPath = "";
-//            }
 
-            var useDefaultVideoPath = $cookieStore.get("use.default.video.path");
-            var videoPath = $cookieStore.get("video.path");
+            var useDefaultVideoPath = $cookieStore.get("use.default.video.path") || true;
+            var videoPath = $cookieStore.get("video.path")||"";
 
             $scope.model.useDefaultVideoPath = useDefaultVideoPath;
             $scope.model.videoPath = videoPath;
