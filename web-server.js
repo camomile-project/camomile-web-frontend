@@ -1,5 +1,5 @@
 var express = require("express"),
-	app     = express(),
+    app     = express(),
     program = require('commander'),
     fs = require('fs'),
     request = require('request'),
@@ -20,8 +20,14 @@ program
     .option('--pyannote <url>', 'URL of PyAnnote server (e.g. https://camomile.fr/tool)')
     .option('--port <int>', 'Local port to listen to (default: 3000)')
     .option('--shot-in <shotIn>', 'id of shotIn queue (optional)')
-	.option('--shot-out <shotOut>', 'id of shotOut queue (optional)')
-	.option('--head-in <headIn>', 'id of headIn queue (optional)')
+    .option('--shot-out <shotOut>', 'id of shotOut queue (optional)')
+    .option('--head-in <headIn>', 'id of headIn queue (optional)')
+    .option('--head-in <headIn>', 'id of headIn queue (optional)')
+    .option('--head-in <headOut>', 'id of headOut queue (optional)')
+    .option('--head-in <evidenceIn>', 'id of evidenceIn queue (optional)')
+    .option('--head-in <evidenceOut>', 'id of evidenceOut queue (optional)')
+    .option('--head-in <labelIn>', 'id of labelIn queue (optional)')
+    .option('--head-in <labelOut>', 'id of labelOut queue (optional)')
     .parse(process.argv);
 
 var camomile_api = program.camomile || process.env.CAMOMILE_API;
@@ -30,21 +36,27 @@ var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
 var port = parseInt(program.port || process.env.PORT || '8070', 10);
 var shot_in = program.shotIn;
-var head_in = program.headIn;
 var shot_out = program.shotOut;
+var head_in = program.headIn;
+var head_out = program.headOut;
+var evidence_in = program.evidenceIn;
+var evidence_out = program.evidenceOut;
+var label_in = program.labelIn;
+var label_out = program.labelOut;
+
 
 // configure express app
 app.configure(function(){
-	app.use(express.methodOverride());
-	app.use(express.bodyParser());
-	app.use(express.static(__dirname + '/app'));
-	app.use(app.router);
+    app.use(express.methodOverride());
+    app.use(express.bodyParser());
+    app.use(express.static(__dirname + '/app'));
+    app.use(app.router);
 });
 
 // handle the hidden form submit
 app.post('/', function(req, res){
     console.log("là");
-    res.redirect('/'); 
+    res.redirect('/');
 });
 
 app.get('/lig', function(req, res){
@@ -66,11 +78,11 @@ function log_in(callback) {
     };
 
     request(
-        options, 
-        function (error, response, body) { 
+        options,
+        function (error, response, body) {
             // TODO: error handling
             callback(null);
-        }); 
+        });
 };
 
 // log out from Camomile API and callback
@@ -82,11 +94,11 @@ function log_out(callback) {
     };
 
     request(
-        options, 
-        function (error, response, body) { 
+        options,
+        function (error, response, body) {
             // TODO: error handling
-            callback(null); 
-        }); 
+            callback(null);
+        });
 };
 
 // delete one specific queue (based on its id) and callback
@@ -98,7 +110,7 @@ function delete_one_queue(queue, callback) {
     };
 
     request(
-        options, 
+        options,
         function (error, response, body) {
             // TODO: error handling
             console.log('   * deleted /queue/' + queue);
@@ -113,11 +125,11 @@ function delete_queues(queues, callback) {
     console.log('Deleting queues');
 
     async.each(
-        queues, 
+        queues,
         delete_one_queue,
-        function (error) { 
+        function (error) {
             // TODO: error handling
-            callback(error); 
+            callback(error);
         }
     );
 
@@ -135,7 +147,7 @@ function create_one_queue(item, callback) {
     };
 
     request(
-        options, 
+        options,
         function (error, response, body) {
             // TODO: error handling
             console.log(body);
@@ -150,53 +162,72 @@ function create_queues(callback) {
 
     console.log('Creating queues as user ' + login);
 
-		// PBR patch : support parametrized shotIn and shotOut
-		var queuesToCreate = [];
-		if(shot_in === undefined) {
-			queuesToCreate.push('shotIn');
-		}
-		if(shot_out === undefined) {
-			queuesToCreate.push('shotOut');
-		}
-		if(head_in === undefined) {
-			queuesToCreate.push('headIn');
-		}
-		queuesToCreate.push('headOut');
+    // PBR patch : support parametrized shotIn and shotOut
+    var queuesToCreate = [];
+    if(shot_in === undefined) {
+        queuesToCreate.push('shotIn');
+    }
+    if(shot_out === undefined) {
+        queuesToCreate.push('shotOut');
+    }
+    if(head_in === undefined) {
+        queuesToCreate.push('headIn');
+    }
+    if(head_out === undefined) {
+        queuesToCreate.push('headOut');
+    }
+    if(evidence_in=== undefined) {
+        queuesToCreate.push('evidenceIn');
+    }
+    if(evidence_out === undefined) {
+        queuesToCreate.push('evidenceOut');
+    }
+    if(label_in === undefined) {
+        queuesToCreate.push('labelIn');
+    }
+    if(label_out === undefined) {
+        queuesToCreate.push('labelOut');
+    }
+
 
     async.map(
         queuesToCreate,
-        create_one_queue, 
+        create_one_queue,
         function(err, queues) {
 
             // TODO: error handling
 
             // remember to remove queues when process is sent SIGINT (Ctrl+C)
-						// hack to account for Win32 platforms, where SIGINT does not exist
-						if (process.platform === "win32") {
-							require("readline").createInterface({
-								input: process.stdin,
-								output: process.stdout
-							}).on("SIGINT", function () {
-									process.emit("SIGINT");
-								});
-						}
+            // hack to account for Win32 platforms, where SIGINT does not exist
+            if (process.platform === "win32") {
+                require("readline").createInterface({
+                    input: process.stdin,
+                    output: process.stdout
+                }).on("SIGINT", function () {
+                        process.emit("SIGINT");
+                    });
+            }
 
             process.on('SIGINT', function() {
                 async.waterfall(
                     [log_in, function(callback) { delete_queues(queues, callback); }, log_out],
-                    function (error) { 
+                    function (error) {
                         // TODO: error handling
-                        process.exit(); 
+                        process.exit();
                     }
                 );
             });
 
             var queues_dict = {};
-						var it = 0;
-						queues_dict.shotIn = (shot_in !== undefined) ? shot_in : queues[it++];
-						queues_dict.shotOut = (shot_out !== undefined) ? shot_out : queues[it++];
-						queues_dict.headIn = (head_in !== undefined) ? head_in : queues[it++];
-						queues_dict.headOut = queues[it++];
+            var it = 0;
+            queues_dict.shotIn = (shot_in !== undefined) ? shot_in : queues[it++];
+            queues_dict.shotOut = (shot_out !== undefined) ? shot_out : queues[it++];
+            queues_dict.headIn = (head_in !== undefined) ? head_in : queues[it++];
+            queues_dict.headOut = (head_out !== undefined) ? head_out : queues[it++];
+            queues_dict.evidenceIn = (evidence_in !== undefined) ? evidence_in : queues[it++];
+            queues_dict.evidenceOut = (evidence_out !== undefined) ? evidence_out : queues[it++];
+            queues_dict.labelIn = (label_in !== undefined) ? label_in : queues[it++];
+            queues_dict.labelOut = (label_out !== undefined) ? label_out : queues[it++];
 
             callback(null, queues_dict);
         }
@@ -228,7 +259,11 @@ function create_config_route(queues, callback) {
                 'shotIn': queues.shotIn,
                 'shotOut': queues.shotOut,
                 'headIn': queues.headIn,
-                'headOut': queues.headOut
+                'headOut': queues.headOut,
+                'evidenceIn': queues.evidenceIn,
+                'evidenceOut': queues.evidenceOut,
+                'labelIn': queues.labelIn,
+                'labelOut': queues.labelOut
             }
         });
     };
@@ -239,6 +274,10 @@ function create_config_route(queues, callback) {
     console.log('   * shotOut --> /queue/' + queues.shotOut);
     console.log('   * headIn  --> /queue/' + queues.headIn);
     console.log('   * headOut --> /queue/' + queues.headOut);
+    console.log('   * evidenceIn  --> /queue/' + queues.evidenceIn);
+    console.log('   * evidenceOut --> /queue/' + queues.evidenceOut);
+    console.log('   * labelIn  --> /queue/' + queues.labelIn);
+    console.log('   * labelOut --> /queue/' + queues.labelOut);
 
     callback(null);
 
@@ -256,14 +295,14 @@ function create_config_file(callback) {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     config_js = sprintf(
-        "angular.module('myApp.config', [])" + "\n" + 
-        "   .value('DataRoot', '%s')" + "\n" +
-        "   .value('ToolRoot', '%s');",
+        "angular.module('myApp.config', [])" + "\n" +
+            "   .value('DataRoot', '%s')" + "\n" +
+            "   .value('ToolRoot', '%s');",
         camomile_api, pyannote_api
     );
 
     fs.writeFile(
-        __dirname + '/app/config.js', config_js, 
+        __dirname + '/app/config.js', config_js,
         function(err) {
             if(err) {
                 console.log(err);
