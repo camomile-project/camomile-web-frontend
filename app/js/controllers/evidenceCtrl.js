@@ -167,58 +167,32 @@ angular.module('myApp.controllers')
 			// Event launched when click on the save button.
 			$scope.model.saveQueueElement = function (isEvidence) {
 
-				var proceedPopQueue = true;
-				// Test if the entry has been added
-				if ($scope.model.boundingBox.w == undefined || $scope.model.boundingBox.w == 0) {
-
-					alert("You must place a bounding box around the speaker");
-					proceedPopQueue = false;
+				if (isEvidence && ($scope.model.boundingBox.w === undefined || $scope.model.boundingBox.w === 0)) {
+					alert("Please draw a bounding box around the face.");
+					return;
 				}
 
-				if (proceedPopQueue) {
-					// Get the queue
-					camomileService.getQueue($scope.model.outcomingQueue, function (err, data) {
-
-						if (!err) {
-							var newOutcomingQueue;
-							newOutcomingQueue = data;
-
-							var dataToPush = {};
-
-							var date = new Date(); // already UTC ddate in JSON Format...
-
-							var user = $cookieStore.get("current.user");
-
-							dataToPush["id_evidence"] = $scope.model.queueData.id_evidence
-							dataToPush["is_evidence"] = isEvidence;
-							dataToPush["person_name"] = $scope.model.initialData;
-							dataToPush["corrected_person_name"] = $scope.model.corrected_data;
-							dataToPush["source"] = $scope.model.queueData.data.source;
-							dataToPush["display"] = {};
-							dataToPush["display"]["time"] = $scope.model.current_time;
-							dataToPush["display"]["bounding_box"] = $scope.model.boundingBox;
-
-							//$scope.model.queueData.data = dataToPush;
-
-							newOutcomingQueue.list = [dataToPush];
-
-							// Update the queue by adding list element to the end of it
-							camomileService.enqueue(newOutcomingQueue._id, newOutcomingQueue.list, function (err, data) {
-								if (err) {
-									alert(data.error);
-									console.log(data);
-								}
-							});
-						} else {
-							console.log(data);
-							alert(data.error);
-						}
-
-					});
-
-					console.log("save");
-					$scope.model.popQueueElement();
+				var dataToPush = {};
+				dataToPush["id_evidence"] = $scope.model.queueData.id_evidence
+				dataToPush["is_evidence"] = isEvidence;
+				dataToPush["source"] = $scope.model.queueData.data.source;
+				dataToPush["person_name"] = $scope.model.initialData;
+				if (isEvidence) {
+					dataToPush["corrected_person_name"] = $scope.model.corrected_data;
+					dataToPush["display"] = {};
+					dataToPush["display"]["time"] = $scope.model.current_time;
+					dataToPush["display"]["bounding_box"] = $scope.model.boundingBox;
 				}
+
+				camomileService.enqueue($scope.model.outcomingQueue, dataToPush, function (err, data) {
+
+					if (err) {
+						console.log("Something went wrong");
+					} else {
+						$scope.model.popQueueElement();
+					}
+
+				});
 			};
 
 			var player = $("#player");
