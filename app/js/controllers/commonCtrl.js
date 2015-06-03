@@ -2,7 +2,7 @@
  * Created by stefas on 09/03/15.
  */
 angular.module('myApp.controllers')
-    .controller('CommonCtrl', ['$scope', '$http','defaults', 'Session', '$rootScope', 'camomileService', '$resource', '$cookieStore',
+    .controller('CommonCtrl', ['$scope', '$http', 'defaults', 'Session', '$rootScope', 'camomileService', '$resource', '$cookieStore',
         function ($scope, $http, defaults, Session, $rootScope, camomileService, $resource, $cookieStore) {
 
             'use strict';
@@ -29,17 +29,13 @@ angular.module('myApp.controllers')
 
                 camomileService.setURL($rootScope.dataroot);
 
-                camomileService.me(function(err, data)
-                {
-                    $scope.$apply(function(){
-                        if(data.error)
-                        {
+                camomileService.me(function (err, data) {
+                    $scope.$apply(function () {
+                        if (data.error) {
                             Session.isLogged = false;
                             Session.username = undefined;
                             $scope.model.message = undefined;
-                        }
-                        else
-                        {
+                        } else {
                             Session.isLogged = true;
                             Session.username = data.username;
                             $scope.model.message = "Connected as " + Session.username;
@@ -47,7 +43,6 @@ angular.module('myApp.controllers')
                     });
                 });
             });
-
 
             // test if user is logged or not
             $scope.isLogged = function () {
@@ -97,4 +92,5 @@ angular.module('myApp.controllers')
                 });
             });
 
-        }]);
+        }
+    ]);

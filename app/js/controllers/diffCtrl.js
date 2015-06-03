@@ -6,15 +6,13 @@ angular.module('myApp.controllers')
 		'CMError', 'defaults', 'palette', '$controller', 'Session', 'camomile2pyannoteFilter', 'pyannote2camomileFilter', '$rootScope', 'camomileService',
 		function ($sce, $scope, $http, CMError, defaults, palette, $controller, Session, camomile2pyannoteFilter, pyannote2camomileFilter, $rootScope, camomileService) {
 
-			$controller('ExplorationBaseCtrl',
-				{
-					$scope: $scope,
-					$http: $http,
-					defaults: defaults,
-					palette: palette,
-					Session: Session
-				});
-
+			$controller('ExplorationBaseCtrl', {
+				$scope: $scope,
+				$http: $http,
+				defaults: defaults,
+				palette: palette,
+				Session: Session
+			});
 
 			// placeholder definitions
 			var defaultReferenceLayer = {
@@ -47,8 +45,7 @@ angular.module('myApp.controllers')
 			// and update difference with hypothesis when it's done
 			$scope.get_reference_annotations = function (corpus_id, medium_id, layer_id, do_update) {
 
-				if(do_update == undefined)
-				{
+				if (do_update == undefined) {
 					do_update = true;
 				}
 				$scope.model.layers[0] = {
@@ -56,37 +53,29 @@ angular.module('myApp.controllers')
 					'_id': layer_id + "_0"
 				};
 
-				camomileService.getAnnotations(function(err, data)
-					{
-						if(!err)
-						{
-							$scope.$apply(function(){
-								$scope.model.layers[0].layer = data;
+				camomileService.getAnnotations(function (err, data) {
+					if (!err) {
+						$scope.$apply(function () {
+							$scope.model.layers[0].layer = data;
 
-								if(do_update)
-								{
-									$scope.model.layersUpdated = true;
-									$scope.compute_diff();
-								}
-								else if($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined)
-								{
-									$scope.model.layersUpdated = true;
-									$scope.compute_diff();
-								}
-							});
-						}
-						else
-						{
-							alert(data.message);
-						}
+							if (do_update) {
+								$scope.model.layersUpdated = true;
+								$scope.compute_diff();
+							} else if ($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined) {
+								$scope.model.layersUpdated = true;
+								$scope.compute_diff();
+							}
+						});
+					} else {
+						alert(data.message);
+					}
 
-					},
-					{
-						filter: {
-							id_layer: layer_id,
-							id_medium: medium_id
-						}
-					});
+				}, {
+					filter: {
+						id_layer: layer_id,
+						id_medium: medium_id
+					}
+				});
 			};
 
 			// get list of hypothesis annotations from a given layer,
@@ -94,8 +83,7 @@ angular.module('myApp.controllers')
 			// and update difference with reference when it's done
 			$scope.get_hypothesis_annotations = function (corpus_id, medium_id, layer_id, do_update) {
 
-				if(do_update == undefined)
-				{
+				if (do_update == undefined) {
 					do_update = true;
 				}
 				$scope.model.layers[1] = {
@@ -103,48 +91,36 @@ angular.module('myApp.controllers')
 					'_id': layer_id + "_1"
 				};
 
-				camomileService.getAnnotations(function(err, data)
-					{
-						if(!err)
-						{
-							$scope.$apply(function(){
-								$scope.model.layers[1].layer = data;
-								if(do_update)
-								{
-									$scope.model.layersUpdated = true;
-									$scope.compute_diff();
-								}
-								else if($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined)
-								{
-									$scope.model.layersUpdated = true;
-									$scope.compute_diff();
-								}
+				camomileService.getAnnotations(function (err, data) {
+					if (!err) {
+						$scope.$apply(function () {
+							$scope.model.layers[1].layer = data;
+							if (do_update) {
+								$scope.model.layersUpdated = true;
+								$scope.compute_diff();
+							} else if ($scope.model.layers[0].layer != undefined && $scope.model.layers[1].layer != undefined) {
+								$scope.model.layersUpdated = true;
+								$scope.compute_diff();
+							}
 
-							});
-						}
-						else
-						{
-							alert(data.message);
-						}
+						});
+					} else {
+						alert(data.message);
+					}
 
-					},
-					{
-						filter: {
-							id_layer: layer_id,
-							id_medium: medium_id
-						}
-					});
+				}, {
+					filter: {
+						id_layer: layer_id,
+						id_medium: medium_id
+					}
+				});
 			};
 
 			// recompute difference between reference and hypothesis,
 			// and replace diff layer.
 			$scope.compute_diff = function () {
 
-				if ($scope.model.selected_medium != undefined
-					&& $scope.model.layers[1].layer != undefined
-					&& $scope.model.layers[1].layer.length > 0
-					&& $scope.model.layers[0].layer != undefined
-					&& $scope.model.layers[0].layer.length > 0) {
+				if ($scope.model.selected_medium != undefined && $scope.model.layers[1].layer != undefined && $scope.model.layers[1].layer.length > 0 && $scope.model.layers[0].layer != undefined && $scope.model.layers[0].layer.length > 0) {
 					var reference_and_hypothesis = {
 						'hypothesis': camomile2pyannoteFilter($scope.model.layers[1].layer),
 						'reference': camomile2pyannoteFilter($scope.model.layers[0].layer)
@@ -165,11 +141,9 @@ angular.module('myApp.controllers')
 
 			};
 
-
 			$scope.computeLastLayer = function () {
 				$scope.compute_diff();
 			};
-
 
 			// the selected corpus has changed
 			$scope.$watch('model.selected_corpus', function (newValue, oldValue, scope) {
@@ -180,7 +154,6 @@ angular.module('myApp.controllers')
 					$scope.resetSummaryView(true);
 				}
 			});
-
 
 			$scope.$watch('model.selected_medium', function (newValue, oldValue, scope) {
 				// when the medium changes, the viz is reinit, and the select box gets the new layers
@@ -219,7 +192,6 @@ angular.module('myApp.controllers')
 
 					$scope.resetSummaryView(true);
 
-
 				}
 			});
 
@@ -247,7 +219,6 @@ angular.module('myApp.controllers')
 					}
 				});
 
-
 			$scope.$watch('model.selected_hypothesis', function (newValue, oldValue, scope) {
 				// handle the reinit case
 				if (newValue === undefined) {
@@ -262,5 +233,5 @@ angular.module('myApp.controllers')
 				}
 			});
 
-		}]);
-
+		}
+	]);
