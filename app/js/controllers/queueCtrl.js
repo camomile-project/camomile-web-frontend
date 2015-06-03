@@ -249,10 +249,11 @@ angular.module('myApp.controllers')
 							$scope.model.updateNextStatus();
 
 							// Update the add entry button's status
-							$scope.model.updateIsDisplayedVideo($scope.model.inData.length != 0);
+							// we pass here only if err is not null - medium can be assumed
+							$scope.model.updateIsDisplayedVideo(true);
 
 							// Get the video
-							if ($scope.model.queueData.id_medium != undefined) {
+							if ($scope.model.queueData.id_medium !== undefined) {
 
 								// Get queue element medium
 								camomileService.getMedium($scope.model.queueData.id_medium, function(err, data)
