@@ -20,7 +20,7 @@ program
     .option('--login <login>', 'Login for Camomile server (for queues creation)')
     .option('--password <password>', 'Password for Camomile server')
     .option('--pyannote <url>', 'URL of PyAnnote server (e.g. https://camomile.fr/tool)')
-    .option('--port <int>', 'Local port to listen to (default: 3000)')
+    .option('--port <int>', 'Local port to listen to (default: 8070)')
     .parse(process.argv);
 
 var camomile_api = program.camomile || process.env.CAMOMILE_API;
@@ -97,7 +97,6 @@ function log_out(callback) {
 };
 
 function getQueueByName(name, callback) {
-
 
     var options = {
         url: camomile_api + '/queue',
