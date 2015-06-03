@@ -1,5 +1,5 @@
 var express = require("express"),
-    app     = express(),
+    app = express(),
     program = require('commander'),
     fs = require('fs'),
     request = require('request'),
@@ -7,7 +7,9 @@ var express = require("express"),
     sprintf = require('sprintf').sprintf;
 
 // remember cookie
-var request = request.defaults({jar: true});
+var request = request.defaults({
+    jar: true
+});
 
 // read parameters from command line or from environment variables 
 // (CAMOMILE_API, CAMOMILE_LOGIN, CAMOMILE_PASSWORD, PYANNOTE_API)
@@ -15,7 +17,7 @@ var request = request.defaults({jar: true});
 // PBR patch : support parametrized shotIn and shotOut
 program
     .option('--camomile <url>', 'URL of Camomile server (e.g. https://camomile.fr/api)')
-    .option('--login <login>',  'Login for Camomile server (for queues creation)')
+    .option('--login <login>', 'Login for Camomile server (for queues creation)')
     .option('--password <password>', 'Password for Camomile server')
     .option('--pyannote <url>', 'URL of PyAnnote server (e.g. https://camomile.fr/tool)')
     .option('--port <int>', 'Local port to listen to (default: 3000)')
@@ -44,9 +46,8 @@ var evidence_out = program.evidenceOut;
 var label_in = program.labelIn;
 var label_out = program.labelOut;
 
-
 // configure express app
-app.configure(function(){
+app.configure(function () {
     app.use(express.methodOverride());
     app.use(express.bodyParser());
     app.use(express.static(__dirname + '/app'));
@@ -54,16 +55,16 @@ app.configure(function(){
 });
 
 // handle the hidden form submit
-app.post('/', function(req, res){
+app.post('/', function (req, res) {
     console.log("là");
     res.redirect('/');
 });
 
-app.get('/lig', function(req, res){
+app.get('/lig', function (req, res) {
     res.sendfile(__dirname + '/app/indexLIG.html');
 });
 
-app.get('/limsi', function(req, res){
+app.get('/limsi', function (req, res) {
     res.sendfile(__dirname + '/app/indexLimsi.html');
 });
 
@@ -73,7 +74,10 @@ function log_in(callback) {
     var options = {
         url: camomile_api + '/login',
         method: 'POST',
-        body: {'username': login, 'password': password},
+        body: {
+            'username': login,
+            'password': password
+        },
         json: true
     };
 
@@ -234,7 +238,6 @@ function create_queues(callback) {
     );
 };
 
-
 // create NodeJS route "GET /config" returning front-end configuration as JSON
 // and callback (passing no results whatsoever)
 function create_config_route(queues, callback) {
@@ -251,7 +254,7 @@ function create_config_route(queues, callback) {
     // }
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    var get_config = function(req, res) {
+    var get_config = function (req, res) {
         res.json({
             'camomile_api': camomile_api,
             'pyannote_api': pyannote_api,
@@ -296,15 +299,15 @@ function create_config_file(callback) {
 
     config_js = sprintf(
         "angular.module('myApp.config', [])" + "\n" +
-            "   .value('DataRoot', '%s')" + "\n" +
-            "   .value('ToolRoot', '%s');",
+        "   .value('DataRoot', '%s')" + "\n" +
+        "   .value('ToolRoot', '%s');",
         camomile_api, pyannote_api
     );
 
     fs.writeFile(
         __dirname + '/app/config.js', config_js,
-        function(err) {
-            if(err) {
+        function (err) {
+            if (err) {
                 console.log(err);
             } else {
                 callback(null);
