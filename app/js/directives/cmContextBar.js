@@ -193,8 +193,10 @@ angular.module('myApp.directives').
 
                             },
                             {
-                                layer: scope.model.queueData.fragment.context._id,
-                                media: scope.model.queueData.fragment.context.id_medium
+															filter: {
+																id_layer: scope.model.queueData.fragment.context._id,
+																id_medium: scope.model.queueData.fragment.context.id_medium
+															}
                             });
                     } else {
                         contextLayer = undefined;
