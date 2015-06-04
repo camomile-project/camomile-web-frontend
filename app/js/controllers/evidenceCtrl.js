@@ -232,9 +232,9 @@ angular.module('myApp.controllers')
 
 					// Store bounding box;
 					$scope.model.boundingBox.x = originPosition[0] / player.width();
-					$scope.model.boundingBox.z = originPosition[1] / player.height();
-					$scope.model.boundingBox.h = size / player.width();
-					$scope.model.boundingBox.w = size / player.height();
+					$scope.model.boundingBox.y = originPosition[1] / player.height();
+					$scope.model.boundingBox.w = size / player.width();
+					$scope.model.boundingBox.h = size / player.height();
 
 				});
 
