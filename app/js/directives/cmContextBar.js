@@ -12,7 +12,8 @@ angular.module('myApp.directives').
 			  var marker = d3elmt.append('g').append('rect')
 				.attr('width', 0);
 			  var contextMarks = d3elmt.append('g');
-			  var timescale = d3.time.scale().range([0, width]).clamp(true);
+			  //var timescale = d3.time.scale().range([0, width]).clamp(true);
+			  var timescale = d3.scale.linear().range([0, width]).clamp(true);
 			  var targetBounds;
 			  var contextLayer;
 
@@ -212,7 +213,6 @@ angular.module('myApp.directives').
 					  if (contextLayer !== undefined) {
 						  updateContext();
 					  }
-					  scope.model.current_time = scope.model.current_time_temp;
 				  }
 			  }, true);
 
