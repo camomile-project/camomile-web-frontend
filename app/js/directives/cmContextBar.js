@@ -188,7 +188,8 @@ angular.module('myApp.directives').
                                 }
                                 else
                                 {
-                                    alert(data.message);
+                                    console.log(err, data);
+                                    alert(data.error);
                                 }
 
                             },
