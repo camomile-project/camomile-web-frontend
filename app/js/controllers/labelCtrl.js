@@ -60,7 +60,7 @@ angular.module('myApp.controllers')
             $scope.model.displayDescription = function () {
                 $scope.model.description_flag = true;
             };
-
+            
             // Initializes the data from the queue
             // rename from "initQueueData" to "popQueueElement"
             $scope.model.popQueueElement = function () {
