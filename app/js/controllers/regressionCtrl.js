@@ -85,7 +85,8 @@ angular.module('myApp.controllers')
                         }
                         else
                         {
-                            alert(data.message);
+                            console.log(err, data);
+                            alert(data.error);
                         }
 
                     },
@@ -131,7 +132,8 @@ angular.module('myApp.controllers')
                         }
                         else
                         {
-                            alert(data.message);
+                            console.log(err, data);
+                            alert(data.error);
                         }
 
                     },
@@ -178,7 +180,8 @@ angular.module('myApp.controllers')
                         }
                         else
                         {
-                            alert(data.message);
+                            console.log(err, data);
+                            alert(data.error);
                         }
 
                     },

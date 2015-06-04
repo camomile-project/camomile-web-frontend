@@ -162,7 +162,6 @@ angular.module('myApp.directives').
 
 				  curSelect.exit().remove();
 //                });
-
 			  };
 
 
@@ -219,3 +218,4 @@ angular.module('myApp.directives').
 		  }
 	  }
   }]);
+
