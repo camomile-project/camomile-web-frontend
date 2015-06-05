@@ -167,6 +167,7 @@ angular.module('myApp.controllers')
 
 				dataToPush.input = {};
 				dataToPush.input.id_evidence = $scope.model.queueData.id_evidence;
+				dataToPush.input.id_layer_evidence = $scope.model.queueData.id_layer_evidence;
 				dataToPush.input.source = $scope.model.queueData.data.source;
 				dataToPush.input.person_name = $scope.model.initialData;
 
