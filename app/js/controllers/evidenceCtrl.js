@@ -80,74 +80,74 @@ angular.module('myApp.controllers')
 			// rename from "initQueueData" to "popQueueElement"
 			$scope.model.popQueueElement = function () {
 
-					// Get queue first element and pop it from the queue
-					camomileService.dequeue($scope.model.incomingQueue, function (err, data) {
+				// Get queue first element and pop it from the queue
+				camomileService.dequeue($scope.model.incomingQueue, function (err, data) {
 
-						if (err) {
-							$scope.$apply(function () {
-								alert(data.error);
-								$scope.model.video = undefined;
-								$scope.model.isDisplayedVideo = false;
-								$scope.model.queueTableData = [];
-								$scope.model.queueData.data = [];
-								$scope.model.updateIsDisplayedVideo(false);
-							});
+					if (err) {
+						alert(data.error);
+						$scope.$apply(function () {
+							$scope.model.video = undefined;
+							$scope.model.isDisplayedVideo = false;
+							$scope.model.queueTableData = [];
+							$scope.model.queueData.data = [];
+							$scope.model.updateIsDisplayedVideo(false);
+						});
 
-							return;
-						}
+						return;
+					}
 
-						$scope.model.resetTransparentPlan();
+					$scope.model.resetTransparentPlan();
 
-						// Update the next button's status
-						$scope.model.updateIsDisplayedVideo(true);
+					// Update the next button's status
+					$scope.model.updateIsDisplayedVideo(true);
 
-						$scope.model.queueData = data;
-						$scope.model.corrected_data = "";
-						$scope.model.queueTableData = [];
+					$scope.model.queueData = data;
+					$scope.model.corrected_data = "";
+					$scope.model.queueTableData = [];
 
-						$scope.model.initialDate = new Date();
+					$scope.model.initialDate = new Date();
 
-						$scope.model.corrected_data = $scope.model.queueData.data.person_name;
-						$scope.model.initialData = $scope.model.queueData.data.person_name;
+					$scope.model.corrected_data = $scope.model.queueData.data.person_name;
+					$scope.model.initialData = $scope.model.queueData.data.person_name;
 
-						// Update the add entry button's status
-						$scope.model.updateIsDisplayedVideo($scope.model.corrected_data != "");
+					// Update the add entry button's status
+					$scope.model.updateIsDisplayedVideo($scope.model.corrected_data != "");
 
-						// Get the video
+					// Get the video
 
-						async.parallel({
-								video: function (callback) {
-									_getVideo($scope.model.queueData.fragment.id_medium, callback);
-								},
-								serverDate: function (callback) {
-									camomileService.getDate(function (err, data) {
-										callback(null, data.date);
-									});
-								}
+					async.parallel({
+							video: function (callback) {
+								_getVideo($scope.model.queueData.fragment.id_medium, callback);
 							},
-							function (err, results) {
-								$scope.model.video = results.video;
-								$scope.model.serverDate = results.serverDate;
-								$scope.model.clientDate = Date.now();
-
-								$scope.model.restrict_toggle = 2;
-								$scope.model.current_time_temp = $scope.model.queueData.fragment.start;
-								$scope.model.infbndsec = parseFloat($scope.model.queueData.fragment.start || 0);
-								if ($scope.model.infbndsec < 0) {
-									$scope.model.infbndsec = 0;
-								}
-								$scope.model.supbndsec = parseFloat($scope.model.queueData.fragment.end || 0);
-								if ($scope.model.supbndsec > $scope.model.fullDuration) {
-									$scope.model.supbndsec = $scope.model.fullDuration;
-								}
-								$scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
-
-								$scope.$apply(function () {
-									$scope.model.current_time = $scope.model.queueData.fragment.start;
+							serverDate: function (callback) {
+								camomileService.getDate(function (err, data) {
+									callback(null, data.date);
 								});
+							}
+						},
+						function (err, results) {
+							$scope.model.video = results.video;
+							$scope.model.serverDate = results.serverDate;
+							$scope.model.clientDate = Date.now();
 
+							$scope.model.restrict_toggle = 2;
+							$scope.model.current_time_temp = $scope.model.queueData.fragment.start;
+							$scope.model.infbndsec = parseFloat($scope.model.queueData.fragment.start || 0);
+							if ($scope.model.infbndsec < 0) {
+								$scope.model.infbndsec = 0;
+							}
+							$scope.model.supbndsec = parseFloat($scope.model.queueData.fragment.end || 0);
+							if ($scope.model.supbndsec > $scope.model.fullDuration) {
+								$scope.model.supbndsec = $scope.model.fullDuration;
+							}
+							$scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
+
+							$scope.$apply(function () {
+								$scope.model.current_time = $scope.model.queueData.fragment.start;
 							});
-					});
+
+						});
+				});
 			};
 
 			// Event launched when click on the save button.
