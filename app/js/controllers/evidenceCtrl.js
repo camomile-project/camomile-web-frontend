@@ -79,7 +79,6 @@ angular.module('myApp.controllers')
 			// Initializes the data from the queue
 			// rename from "initQueueData" to "popQueueElement"
 			$scope.model.popQueueElement = function () {
-				{
 
 					// Get queue first element and pop it from the queue
 					camomileService.dequeue($scope.model.incomingQueue, function (err, data) {
@@ -149,7 +148,6 @@ angular.module('myApp.controllers')
 
 							});
 					});
-				}
 			};
 
 			// Event launched when click on the save button.

@@ -281,7 +281,7 @@ angular.module('myApp.controllers')
 								{
 									camomileService.getMedium($scope.model.queueData.id_medium, function(err, data)
 									{
-										$scope.model.video = $scope.model.videoThumbnail = $sce.trustAsResourceUrl('http://' + $scope.model.videoPath+ '/' + data.url +'.webm');
+										$scope.model.video = $scope.model.videoThumbnail = $sce.trustAsResourceUrl($scope.model.videoPath+ '/' + data.url +'.webm');
 
 									});
 								}
