@@ -236,11 +236,5 @@ angular.module('myApp.controllers')
 
 			transparentPlan.call(drag);
 
-			$scope.initPopup = function () {
-				if ($scope.isLogged()) {
-					$("#myModal").modal('show');
-				}
-			};
-
 		}
 	]);
