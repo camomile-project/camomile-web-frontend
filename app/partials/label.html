@@ -1,106 +1,101 @@
 <div ng-controller="labelCtrl" ng-show='isLogged()' ng-init="initPopup()">
     
     <div class="container-fluid">
-        <div class="col-lg-12 ">
-            <div class = "row">
-                <div class = "col-lg-6">
-                     <div id="video-container">
-                    <!-- TODO: Enlever le ng-show pour afficher le plan transparent partout-->
-                    <div id="transparent-plan"></div>
-                    <!--<div id="transparent-plan"></div>-->
-                    <!-- video player behaviour managed by cm-video-player angular attribute -->
-
-                    <video id="player"
-                           class = "col-lg-10"
-                           cm-video-player
-                           ng-src={{model.video}}
-                           height="360px">
-                    </video>
-                    <div class="controls">
-                        <div id="play-button">
-                            <button type="button" class="video-control" id="play-pause"
-                                    ng-click="model.toggle_play()">
-                                {{ model.play_label }}
-                            </button>
-                            <!-- use directive for quite simple way to indicate annotation to perform -->
-                            <!-- + extensible for reference layer and controls for extension to x seconds -->
-                        </div>
-                        <!--!!! KNOWN PROBLEM WITH INPUT RANGE TYPE-->
-                        <!--see https://github.com/angular/angular.js/issues/6726-->
-                        <div id="control-bar" title="Drag to reference frame">
-                            <svg id="controlsvg" cm-context-bar></svg>
-                            <div id="controlsoverlay">
-                                <input width="100%" type="range" id="seek-bar"
-                                       min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
-                                       step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
-                            </div>
-                        </div>
-                        <div id="time-display"  style="float: left">
-                            <label>{{ model.current_time_display }}</label>
-                        </div>
-                        <div id = "loop">
-                            <button type ="radio" ng-click = "model.loop_display()">LOOP</button>
+        <div class = "row">
+            <div id="video-container" class="col-lg-7" style="margin:10px">
+            <!-- TODO: Enlever le ng-show pour afficher le plan transparent partout-->
+                <div id="transparent-plan"></div>
+            <!--<div id="transparent-plan"></div>-->
+            <!-- video player behaviour managed by cm-video-player angular attribute -->
+                <video id="player"
+                       cm-video-player
+                       ng-src={{model.video}}
+                       height="360px">
+                </video>
+                <div class="controls">
+                    <div id="play-button">
+                        <button type="button" class="video-control" id="play-pause"
+                                ng-click="model.toggle_play()">
+                            {{ model.play_label }}
+                        </button>
+                        <!-- use directive for quite simple way to indicate annotation to perform -->
+                        <!-- + extensible for reference layer and controls for extension to x seconds -->
+                    </div>
+                    <!--!!! KNOWN PROBLEM WITH INPUT RANGE TYPE-->
+                    <!--see https://github.com/angular/angular.js/issues/6726-->
+                    <div id="control-bar" title="Drag to reference frame">
+                        <svg id="controlsvg" cm-context-bar></svg>
+                        <div id="controlsoverlay">
+                            <input width="100%" type="range" id="seek-bar"
+                                   min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
+                                   step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
                         </div>
                     </div>
-                </div>
-                </div>
-                <div class = "col-lg-4">
-                    <table class="table table-bordered table-hover" id="clickable-table">
-                        <thead>
-                        <tr class="active">
-                            <td style="text-align: center ; min-width = 150px">
-                                <b>
-                                    Not visible
-                                <img src = "../img/video_judge_option/invisible_light.png" style = "width:20px">
-
-                                </b>
-                            </td>
-                            <td style="text-align: center min-width = 150px">
-                                <b>
-                                    Is visible
-                                    <img src = "../img/video_judge_option/73-Eye-Visible-128.png" style = "width:20px" >
-                                </b>
-                            </td>
-                            <td style="text-align: center min-width = 150px">
-                                <b>
-                                    Is visible and speaking
-                                    <img src = "../img/video_judge_option/visible_speak.png" style = "width:20px"  >
-
-                                </b>
-                            </td>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="queueData in model.queueTableData track by $index">
-                            <td id={{"not_visible_"+$index}} style="text-align: center" ng-click="clickOnNotVisible($index)">
-                                <img class="disclosure" src={{model.queueTableData[$index].image}}>
-                            </td>
-                            <td id={{"is_visible_"+$index}} style="text-align: center" ng-click="clickOnVisible($index)">
-                            </td>
-                            <td id={{"is_visible_and_speaking_"+$index}} style="text-align: center" ng-click="clickOnVisibleAndSpeaking($index)">
-                            </td>
-                        </tr>
-                        <tr>
-                            <td id="add_person_button" style="text-align: center">
-                                <input  class="image-button" type="image" src="../img/plus.png"  value="Add a person" ng-click="openAddPersonModal()" height="80px" width="100px">
-                            </td>
-                            <td style="text-align: center">
-                            </td>
-                            <td style="text-align: center">
-                            </td>
-
-                        </tr>
-
-                        </tbody>
-                    </table>
+                    <div id="time-display"  style="float: left">
+                        <label>{{ model.current_time_display }}</label>
+                    </div>
+                    <div id = "loop">
+                        <button type ="radio" ng-click = "model.loop_display()">LOOP</button>
+                    </div>
                 </div>
             </div>
-            <div class = "row" id="label_button_id" style="margin-top: 30px;margin-left: -180px; float:right;" alt="">
-                    <input class="image-button" type="image" src="../img/validate.png"  value="label" ng-click="model.saveQueueElement(true)" width="90px" height="90px">
-            </div>
+            <div id="table-container" class="col-lg-4" style="margin-top:10px">
+                <table class="table table-bordered table-hover" id="clickable-table">
+                    <thead>
+                    <tr class="active">
+                        <td style="text-align: center ; min-width = 150px">
+                            <b>
+                                Not visible
+                            <img src = "../img/video_judge_option/invisible_light.png" style = "width:20px">
+
+                            </b>
+                        </td>
+                        <td style="text-align: center min-width = 150px">
+                            <b>
+                                Is visible
+                                <img src = "../img/video_judge_option/73-Eye-Visible-128.png" style = "width:20px" >
+                            </b>
+                        </td>
+                        <td style="text-align: center min-width = 150px">
+                            <b>
+                                Is visible and speaking
+                                <img src = "../img/video_judge_option/visible_speak.png" style = "width:20px"  >
+
+                            </b>
+                        </td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="queueData in model.queueTableData track by $index">
+                        <td id={{"not_visible_"+$index}} style="text-align: center" ng-click="clickOnNotVisible($index)">
+                            <img class="disclosure" src={{model.queueTableData[$index].image}}>
+                        </td>
+                        <td id={{"is_visible_"+$index}} style="text-align: center" ng-click="clickOnVisible($index)">
+                        </td>
+                        <td id={{"is_visible_and_speaking_"+$index}} style="text-align: center" ng-click="clickOnVisibleAndSpeaking($index)">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td id="add_person_button" style="text-align: center">
+                            <input  class="image-button" type="image" src="../img/plus.png"  value="Add a person" ng-click="openAddPersonModal()" height="80px" width="100px">
+                        </td>
+                        <td style="text-align: center">
+                        </td>
+                        <td style="text-align: center">
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+                </table>
+                <div class = "row" id="label_button_id" style="margin-top: 30px;margin-left: -180px; float:right;" alt="">
+                <input class="image-button" type="image" src="../img/validate.png"  value="label" ng-click="model.saveQueueElement(true)" width="90px" height="90px">
+        </div>
+
         </div>
 
     </div>
+
 
 
     <!--<div id="button-tooltip"></div>-->
