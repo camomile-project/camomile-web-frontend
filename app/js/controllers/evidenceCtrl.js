@@ -249,6 +249,9 @@ angular.module('myApp.controllers')
 				}
 			};
 
+          
+            
+            
 			var player = $("#player");
 			var transparentPlan = d3.select("#transparent-plan").style("width", "100%")
 				.style("height", (player.height())+"px");
@@ -258,6 +261,14 @@ angular.module('myApp.controllers')
 			{
 				originPosition=undefined;
 			});
+            
+//             Add keyboard event
+            $scope.keydown = function ($event) {
+                if ($event.keyCode === 32 ){
+                    console.log("hi");
+                    $scope.model.toggle_play();      
+                }
+            }
 
 			var drag =d3.behavior.drag()
 				.origin(Object)

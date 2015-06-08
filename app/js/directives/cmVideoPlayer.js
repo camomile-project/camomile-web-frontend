@@ -74,7 +74,6 @@ angular.module('myApp.directives')
 
 				element[0].addEventListener("timeupdate", function () {
 					scope.$apply(function () {
-                        console.log("timeupdate!!");
 						// if player paused, currentTime has been changed for exogenous reasons
 						if (!element[0].paused) {
 							if (element[0].currentTime > scope.model.supbndsec) {
