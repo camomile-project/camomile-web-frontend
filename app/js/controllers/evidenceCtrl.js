@@ -3,9 +3,9 @@
  */
 angular.module('myApp.controllers')
 	.controller('EvidenceCtrl', ['$sce', '$scope', '$http',
-		'defaults', '$controller', '$cookieStore', 'Session', '$rootScope', '$routeParams', 'camomileService',
+		'defaults', '$controller', 'Session', '$rootScope', 'camomileService',
 
-		function ($sce, $scope, $http, defaults, $controller, $cookieStore, Session, $rootScope, $routeParams, camomileService) {
+		function ($sce, $scope, $http, defaults, $controller, Session, $rootScope, camomileService) {
 
 			$controller('CommonCtrl', {
 				$scope: $scope,
@@ -14,56 +14,27 @@ angular.module('myApp.controllers')
 				Session: Session
 			});
 
-			$scope.queues = [];
-			$scope.model.queueTableData = [];
-			$scope.model.incomingQueue = {};
-			$scope.model.outcomingQueue = {};
-			$scope.model.queueData = {};
-			$scope.model.availableEntry = [];
-			$scope.model.videoMetaData = "";
+			$scope.model.incomingQueue = $rootScope.queues.evidenceIn;
+			$scope.model.outgoingQueue = $rootScope.queues.evidenceOut;
 
-			$scope.model.boundingBox = {};
+			$scope.model.q = {};
 
-			$scope.model.queueType = $routeParams.type;
-
-			$(function () {
-				$("#entry_input").autocomplete({
-					source: $scope.model.availableEntry
-				});
-			});
-
-			// store the entry typed in the textbox
-			$scope.model.entryTyped = "";
-
-			// Store the selected table's line
-			$scope.model.selectedQueueLineIndex = "";
+			$scope.model.user_input = {};
+			$scope.model.user_input.boundingBox = {};
 
 			$scope.model.resetTransparentPlan = function () {
 				var transparentPlan = d3.select("#transparent-plan");
-				// Remove old element
 				transparentPlan.selectAll("svg").remove();
-
-				$scope.model.boundingBox = {};
+				$scope.model.user_input.boundingBox = {};
 			};
 
 			$scope.model.updateIsDisplayedVideo = function (activate) {
 				$scope.model.isDisplayedVideo = activate;
 			};
 
-			// PBR : get queue data from config
-			$scope.model.incomingQueue = $rootScope.queues.evidenceIn;
-			$scope.model.outcomingQueue = $rootScope.queues.evidenceOut;
-
 			// initialize page state
 			$scope.model.updateIsDisplayedVideo(false);
-
 			$scope.model.updateTransparentPlan = false;
-
-			$scope.model.description_flag = false;
-
-			$scope.model.displayDescription = function () {
-				$scope.model.description_flag = true;
-			};
 
 			var _getVideo = function (id_medium, callback) {
 
@@ -81,15 +52,13 @@ angular.module('myApp.controllers')
 			$scope.model.popQueueElement = function () {
 
 				// Get queue first element and pop it from the queue
-				camomileService.dequeue($scope.model.incomingQueue, function (err, data) {
+				camomileService.dequeue($scope.model.incomingQueue, function (err, item) {
 
 					if (err) {
-						alert(data.error);
+						alert(item.error);
 						$scope.$apply(function () {
 							$scope.model.video = undefined;
 							$scope.model.isDisplayedVideo = false;
-							$scope.model.queueTableData = [];
-							$scope.model.queueData.data = [];
 							$scope.model.updateIsDisplayedVideo(false);
 						});
 
@@ -97,27 +66,18 @@ angular.module('myApp.controllers')
 					}
 
 					$scope.model.resetTransparentPlan();
-
-					// Update the next button's status
 					$scope.model.updateIsDisplayedVideo(true);
 
-					$scope.model.queueData = data;
-					$scope.model.corrected_data = "";
-					$scope.model.queueTableData = [];
-
-					$scope.model.initialDate = new Date();
-
-					$scope.model.corrected_data = $scope.model.queueData.data.person_name;
-					$scope.model.initialData = $scope.model.queueData.data.person_name;
+					$scope.model.q = item;
+					$scope.model.user_input.person_name = $scope.model.q.person_name;
+					$scope.model.initialData = $scope.model.q.person_name;
 
 					// Update the add entry button's status
-					$scope.model.updateIsDisplayedVideo($scope.model.corrected_data != "");
-
-					// Get the video
+					$scope.model.updateIsDisplayedVideo($scope.model.user_input.person_name != "");
 
 					async.parallel({
 							video: function (callback) {
-								_getVideo($scope.model.queueData.fragment.id_medium, callback);
+								_getVideo($scope.model.q.id_medium, callback);
 							},
 							serverDate: function (callback) {
 								camomileService.getDate(function (err, data) {
@@ -131,19 +91,19 @@ angular.module('myApp.controllers')
 							$scope.model.clientDate = Date.now();
 
 							$scope.model.restrict_toggle = 2;
-							$scope.model.current_time_temp = $scope.model.queueData.fragment.start;
-							$scope.model.infbndsec = parseFloat($scope.model.queueData.fragment.start || 0);
+							$scope.model.current_time_temp = $scope.model.q.start;
+							$scope.model.infbndsec = parseFloat($scope.model.q.start || 0);
 							if ($scope.model.infbndsec < 0) {
 								$scope.model.infbndsec = 0;
 							}
-							$scope.model.supbndsec = parseFloat($scope.model.queueData.fragment.end || 0);
+							$scope.model.supbndsec = parseFloat($scope.model.q.end || 0);
 							if ($scope.model.supbndsec > $scope.model.fullDuration) {
 								$scope.model.supbndsec = $scope.model.fullDuration;
 							}
 							$scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
 
 							$scope.$apply(function () {
-								$scope.model.current_time = $scope.model.queueData.fragment.start;
+								$scope.model.current_time = $scope.model.q.start;
 							});
 
 						});
@@ -153,34 +113,36 @@ angular.module('myApp.controllers')
 			// Event launched when click on the save button.
 			$scope.model.saveQueueElement = function (isEvidence, itWasMyLastAnnotationForToday) {
 
-				if (isEvidence && ($scope.model.boundingBox.w === undefined || $scope.model.boundingBox.w === 0)) {
+				if (isEvidence && ($scope.model.user_input.boundingBox.w === undefined || $scope.model.user_input.boundingBox.w === 0)) {
 					alert("Please draw a bounding box around the face.");
 					return;
 				}
 
-				var dataToPush = {};
+				var item = {};
 
-				dataToPush.log = {};
-				dataToPush.log.user = Session.username;
-				dataToPush.log.date = $scope.model.serverDate;
-				dataToPush.log.duration = Date.now() - $scope.model.clientDate;
+				item.log = {};
+				item.log.user = Session.username;
+				item.log.date = $scope.model.serverDate;
+				item.log.duration = Date.now() - $scope.model.clientDate;
 
-				dataToPush.input = {};
-				dataToPush.input.id_evidence = $scope.model.queueData.id_evidence;
-				dataToPush.input.id_layer_evidence = $scope.model.queueData.id_layer_evidence;
-				dataToPush.input.source = $scope.model.queueData.data.source;
-				dataToPush.input.person_name = $scope.model.initialData;
+				item.input = {};
+				item.input.id_submission = $scope.model.q.id_submission;
+				item.input.person_name = $scope.model.initialData;
+				item.input.source = $scope.model.q.source;
+				item.input.id_medium = $scope.model.q.id_medium;
+				item.input.id_shot = $scope.model.q.id_shot;
+				item.input.start = $scope.model.q.start;
+				item.input.end = $scope.model.q.end;
 
-				dataToPush.output = {};
-				dataToPush.output.is_evidence = isEvidence;
-
+				item.output = {};
+				item.output.is_evidence = isEvidence;
 				if (isEvidence) {
-					dataToPush.output.person_name = $scope.model.corrected_data;
-					dataToPush.output.time = $scope.model.current_time;
-					dataToPush.output.bounding_box = $scope.model.boundingBox;
+					item.output.person_name = $scope.model.user_input.person_name;
+					item.output.time = $scope.model.current_time;
+					item.output.bounding_box = $scope.model.user_input.boundingBox;
 				}
 
-				camomileService.enqueue($scope.model.outcomingQueue, dataToPush, function (err, data) {
+				camomileService.enqueue($scope.model.outgoingQueue, item, function (err, data) {
 
 					if (err) {
 						console.log("Something went wrong");
@@ -191,8 +153,6 @@ angular.module('myApp.controllers')
 							$scope.$apply(function () {
 								$scope.model.video = undefined;
 								$scope.model.isDisplayedVideo = false;
-								$scope.model.queueTableData = [];
-								$scope.model.queueData.data = [];
 								$scope.model.updateIsDisplayedVideo(false);
 							});
 						}
@@ -237,10 +197,10 @@ angular.module('myApp.controllers')
 						.style("stroke-width", 5);
 
 					// Store bounding box;
-					$scope.model.boundingBox.x = originPosition[0] / player.width();
-					$scope.model.boundingBox.y = originPosition[1] / player.height();
-					$scope.model.boundingBox.w = size / player.width();
-					$scope.model.boundingBox.h = size / player.height();
+					$scope.model.user_input.boundingBox.x = originPosition[0] / player.width();
+					$scope.model.user_input.boundingBox.y = originPosition[1] / player.height();
+					$scope.model.user_input.boundingBox.w = size / player.width();
+					$scope.model.user_input.boundingBox.h = size / player.height();
 
 				});
 
