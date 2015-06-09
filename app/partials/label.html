@@ -34,9 +34,11 @@
                     <div id="time-display"  style="float: left">
                         <label>{{ model.current_time_display }}</label>
                     </div>
+<!--
                     <div id = "loop">
                         <button type ="radio" ng-click = "model.loop_display()">LOOP</button>
                     </div>
+-->
                 </div>
             </div>
             <div id="table-container" class="col-lg-4" style="margin-top:10px">
@@ -85,21 +87,17 @@
                         </td>
 
                     </tr>
-
-                    </tbody>
-                </table>
-                <div class = "row" id="label_button_id" style="margin-top: 30px;margin-left: -180px; float:right;" alt="">
-                <input class="image-button" type="image" src="../img/validate.png"  value="label" ng-click="model.saveQueueElement(true)" width="90px" height="90px">
-        </div>
-
+                </tbody>
+            </table>
+            <div class = "row" id="label_button_id" style="margin-top: 30px;margin-left: -180px; float:right;" alt="">
+            <input class="image-button" type="image" src="../img/validate.png"  value="label" ng-click="model.saveQueueElement(true)" width="90px" height="90px">
+            </div>
         </div>
 
     </div>
 
 
-
     <!--<div id="button-tooltip"></div>-->
-
     <div id="label_tuto_modal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
