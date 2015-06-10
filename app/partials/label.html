@@ -1,8 +1,8 @@
+<link rel="stylesheet" href="../css/label.css"/>
 <div ng-controller="labelCtrl" ng-show='isLogged()' ng-init="initPopup()">
-    
     <div class="container-fluid">
         <div class = "row">
-            <div id="video-container" class="col-lg-7" style="margin:10px">
+            <div id="video-container" class="col-lg-7" style="margin-top: 200px; margin-right:60px">
             <!-- TODO: Enlever le ng-show pour afficher le plan transparent partout-->
                 <div id="transparent-plan"></div>
             <!--<div id="transparent-plan"></div>-->
@@ -41,34 +41,74 @@
 -->
                 </div>
             </div>
+            <div> <button  ng-click = "model.popQueueElement()">click me</button></div>
             <div id="table-container" class="col-lg-4" style="margin-top:10px">
-                <table class="table table-bordered table-hover" id="clickable-table">
+                <table class="table table-borded table-hover" id="clickable-table">
+                    <thead>
+                        <th></th>
+                        <th><img src = "../img/video_judge_option/speakingface.png" style = "width:100px;"></th>
+                        <th><img src = "../img/video_judge_option/face.png" style = "width:100px;" ></th>
+                        <th><img src = "../img/video_judge_option/speaking.png" style = "width:100px;"  ></th>
+                        <th><img src = "../img/video_judge_option/question_mark.png" style = "width:100px;"  ></th>
+                    </thead>
+                    <tbody ng-form name="myJudge">
+                        <tr ng-repeat="person_visibility in model.person_visibility track by $index">
+                            <td>
+                                <img class="disclosure" src={{model.queueTableData[$index].image}}>
+                                    {{model.queueTableData[$index].person_name}}
+                            </td>
+                            <td>
+<!--                                style="vertical-align: middle; margin: 0px;"-->
+                                    <label><input style="vertical-align: middle; margin: 0px;" ng-model="person_visibility" type="radio" name={{"judge"+$index}} value="speakingface"></label>
+                            </td>
+                            <td>
+                                <label><input style="vertical-align: middle; margin: 0px;" ng-model="person_visibility" type="radio" name={{"judge"+$index}} value="face" >
+                                </label>
+                            </td>
+                            <td>
+                                <label><input style="vertical-align: middle; margin: 0px;" ng-model="person_visibility" type="radio" name={{"judge"+$index}} value="none" ></label>
+                            </td>
+                            <td>
+                                <label><input style="vertical-align: middle; margin: 0px;" ng-model="person_visibility" type="radio" name={{"judge"+$index}} value="notSure"></label>
+                            </td>
+                            <td>{{person_visibility}}</td>
+                        </tr>
+                        <tr>
+                            <td id="add_person_button" style="text-align: center; ">
+                                <input  class="image-button" type="image" src="../img/plus.png"  value="Add a person" ng-click="openAddPersonModal()"  width = "40px">
+                            </td>
+                            <td style="text-align: center">
+                            </td>
+                            <td style="text-align: center">
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <input  class="image-button" type="image" src="../img/validate.png"  value="Validate" ng-click="model.saveQueueElement(true)"  width = "40px">
+                            </td>
+
+                        </tr>
+                            
+                    </tbody>
+                </table>
+<!--
+                <table class="table table-bordered table-condensed" id="clickable-table">
                     <thead>
                     <tr class="active">
                         <td style="text-align: center ; min-width = 150px">
-                            <b>
-                                Not visible
-                            <img src = "../img/video_judge_option/invisible_light.png" style = "width:20px">
-
-                            </b>
+                            <img src = "../img/video_judge_option/invisible_light.png" style = "width:40px;">
                         </td>
                         <td style="text-align: center min-width = 150px">
-                            <b>
-                                Is visible
-                                <img src = "../img/video_judge_option/73-Eye-Visible-128.png" style = "width:20px" >
-                            </b>
+                            <img src = "../img/video_judge_option/73-Eye-Visible-128.png" style = "width:40px;" >
                         </td>
                         <td style="text-align: center min-width = 150px">
-                            <b>
-                                Is visible and speaking
-                                <img src = "../img/video_judge_option/visible_speak.png" style = "width:20px"  >
-
-                            </b>
+                            <img src = "../img/video_judge_option/visible_speak.png" style = "width:40px;"  >
                         </td>
                     </tr>
                     </thead>
                     <tbody>
                     <tr ng-repeat="queueData in model.queueTableData track by $index">
+                         TODO: change the style                       
                         <td id={{"not_visible_"+$index}} style="text-align: center" ng-click="clickOnNotVisible($index)">
                             <img class="disclosure" src={{model.queueTableData[$index].image}}>
                         </td>
@@ -78,8 +118,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td id="add_person_button" style="text-align: center">
-                            <input  class="image-button" type="image" src="../img/plus.png"  value="Add a person" ng-click="openAddPersonModal()" height="80px" width="100px">
+                        <td id="add_person_button" style="text-align: center; ">
+                            <input  class="image-button" type="image" src="../img/plus.png"  value="Add a person" ng-click="openAddPersonModal()"  width = "40px">
                         </td>
                         <td style="text-align: center">
                         </td>
@@ -92,12 +132,14 @@
             <div class = "row" id="label_button_id" style="margin-top: 30px;margin-left: -180px; float:right;" alt="">
             <input class="image-button" type="image" src="../img/validate.png"  value="label" ng-click="model.saveQueueElement(true)" width="90px" height="90px">
             </div>
+-->
         </div>
 
     </div>
 
 
     <!--<div id="button-tooltip"></div>-->
+<!--
     <div id="label_tuto_modal" class="modal fade">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -115,6 +157,7 @@
             </div>
         </div>
     </div>
+-->
 
     <div id="label_add_person_modal" class="modal fade">
         <div class="modal-dialog">

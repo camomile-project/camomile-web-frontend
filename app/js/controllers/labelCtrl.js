@@ -1,6 +1,7 @@
 /**
  * Created by isc on 12/05/15.
  */
+
 angular.module('myApp.controllers')
     .controller('labelCtrl', ['$sce', '$scope', '$http',
         'defaults', '$controller', '$cookieStore', 'Session', '$rootScope', '$routeParams', 'camomileService',
@@ -126,7 +127,7 @@ angular.module('myApp.controllers')
                                 // Add the person
                                 $scope.model.person_visibility.push("none");
 
-                                $scope.clickOnNotVisible(i);
+//                                $scope.clickOnNotVisible(i);
                             }
 
                             $scope.clickPerson = function(person)
@@ -182,6 +183,10 @@ angular.module('myApp.controllers')
                         else {
                             $scope.model.video = undefined;
                         }
+                        console.log("queueTableData:");
+                        console.log($scope.model.queueTableData);
+                        console.log("queueData:");
+                        console.log($scope.model.queueData);
 
                     }
                     else
@@ -299,46 +304,47 @@ angular.module('myApp.controllers')
 
             };
 
-            $scope.clickOnVisible = function(index)
-            {
-                // Remove the picture
-                d3.select("#not_visible_"+index).selectAll("*").remove();
-                d3.select("#is_visible_"+index).selectAll("*").remove();
-                d3.select("#is_visible_and_speaking_"+index).selectAll("*").remove();
-
-                // Add the image in the right column
-                d3.select("#is_visible_"+index).append("img").attr("src", $scope.model.queueTableData[index].image);
-
-
-                $scope.model.person_visibility[index]= "face";
-            };
-
-            $scope.clickOnVisibleAndSpeaking = function(index)
-            {
-                // Remove the picture
-                d3.select("#not_visible_"+index).selectAll("*").remove();
-                d3.select("#is_visible_"+index).selectAll("*").remove();
-                d3.select("#is_visible_and_speaking_"+index).selectAll("*").remove();
-
-                // Add the image in the right column
-                d3.select("#is_visible_and_speaking_"+index).append("img").attr("src", $scope.model.queueTableData[index].image);
-
-                $scope.model.person_visibility[index]= "speakingFace";
-            };
-
-            $scope.clickOnNotVisible = function(index)
-            {
-                // Remove the picture
-                d3.select("#not_visible_"+index).selectAll("*").remove();
-                d3.select("#is_visible_"+index).selectAll("*").remove();
-                d3.select("#is_visible_and_speaking_"+index).selectAll("*").remove();
-
-                // Add the image in the right column
-                d3.select("#not_visible_"+index).append("img").attr("src", $scope.model.queueTableData[index].image);
-
-                $scope.model.person_visibility[index]= "none";
-            };
-
+//            $scope.clickOnVisible = function(index)
+//            {
+//                // Remove the picture
+//                d3.select("#not_visible_"+index).selectAll("*").remove();
+//                d3.select("#is_visible_"+index).selectAll("*").remove();
+//                d3.select("#is_visible_and_speaking_"+index).selectAll("*").remove();
+//
+//                // Add the image in the right column
+//                d3.select("#is_visible_"+index).append("img").attr("src", $scope.model.queueTableData[index].image);
+//
+//
+//                $scope.model.person_visibility[index]= "face";
+//            };
+//
+//            $scope.clickOnVisibleAndSpeaking = function(index)
+//            {
+//                // Remove the picture
+//                d3.select("#not_visible_"+index).selectAll("*").remove();
+//                d3.select("#is_visible_"+index).selectAll("*").remove();
+//                d3.select("#is_visible_and_speaking_"+index).selectAll("*").remove();
+//
+//                // Add the image in the right column
+//                d3.select("#is_visible_and_speaking_"+index).append("img").attr("src", $scope.model.queueTableData[index].image);
+//
+//                $scope.model.person_visibility[index]= "speakingFace";
+//            };
+//
+//            $scope.clickOnNotVisible = function(index)
+//            {
+//                // Remove the picture
+//                d3.select("#not_visible_"+index).selectAll("*").remove();
+//                d3.select("#is_visible_"+index).selectAll("*").remove();
+//                d3.select("#is_visible_and_speaking_"+index).selectAll("*").remove();
+//
+//                // Add the image in the right column
+//                d3.select("#not_visible_"+index).append("img").attr("src", $scope.model.queueTableData[index].image);
+//
+//                $scope.model.person_visibility[index]= "none";
+//            };
+//
+            
 
 
             var tooltip = d3.select("#button-tooltip");
@@ -354,5 +360,17 @@ angular.module('myApp.controllers')
                         .duration(500)
                         .style("opacity", 0);
                 });
+            
+//$('#table-container input:radio').addClass('input_hidden');
+//$('#table-container label').click(function() {
+//
+//console.log("haha");    $(this).addClass('selected').siblings().removeClass('selected');
+//});
+            $scope.radioAnimation = function(){
+                console.log("haha");
+
+                console.log(this);
+            };
+
 
         }]);
