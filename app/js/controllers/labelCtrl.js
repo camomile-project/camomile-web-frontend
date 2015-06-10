@@ -3,8 +3,8 @@
  */
 angular.module('myApp.controllers')
     .controller('labelCtrl', ['$sce', '$scope', '$http',
-        'defaults', '$controller', '$cookieStore', 'Session', '$rootScope', '$routeParams', 'camomileService',
-        function ($sce, $scope, $http, defaults, $controller, $cookieStore, Session, $rootScope, $routeParams, camomileService) {
+        'defaults', '$controller', 'Session', '$rootScope', '$routeParams', 'camomileService',
+        function ($sce, $scope, $http, defaults, $controller, Session, $rootScope, $routeParams, camomileService) {
 
             $controller('CommonCtrl',
                 {

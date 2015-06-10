@@ -3,8 +3,8 @@
  */
 angular.module('myApp.controllers')
     .controller('ParameterButtonCtrl', ['$sce', '$scope', '$http',
-        'defaults', '$controller', '$cookieStore', 'Session',
-        function ($sce, $scope, $http, defaults, $controller, $cookieStore, Session) {
+        'defaults', '$controller', 'Session',
+        function ($sce, $scope, $http, defaults, $controller,Session) {
 
             $controller('CommonCtrl', {
                 $scope: $scope,
@@ -35,8 +35,16 @@ angular.module('myApp.controllers')
 
             // Store parameters in the cookies
             $scope.modifyVideoPath = function () {
-                $cookieStore.put("use.default.video.path", $scope.model.useDefaultVideoPath);
-                $cookieStore.put("video.path", $scope.model.videoPath);
+                var now = new Date(),
+                // this will set the expiration to 1 month
+                    exp = new Date(now.getFullYear(), now.getMonth()+1, now.getDate());
+
+                Cookies.set("use.default.video.path", $scope.model.useDefaultVideoPath,{
+                    expires: exp
+                });
+                Cookies.set("video.path", $scope.model.videoPath, {
+                    expires: exp
+                });
 
                 // reload page
                 window.location.reload();

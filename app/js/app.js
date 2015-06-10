@@ -11,7 +11,6 @@ angular.module(
             'myApp.directives',
             'myApp.controllers',
             'ngRoute',
-            'ngCookies',
             'ngSanitize',
             'mgcrea.ngStrap'
         ])

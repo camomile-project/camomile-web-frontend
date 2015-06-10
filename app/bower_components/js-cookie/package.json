@@ -1,0 +1,58 @@
+{
+  "name": "js-cookie",
+  "version": "2.0.0-pre",
+  "description": "A simple, lightweight JavaScript API for handling cookies",
+  "main": "src/js.cookie.js",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "jquery-plugin",
+    "cookie",
+    "cookies",
+    "browser",
+    "amd",
+    "commonjs",
+    "client",
+    "js-cookie",
+    "browserify"
+  ],
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/js-cookie/js-cookie.git"
+  },
+  "author": {
+    "name": "Klaus Hartl"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "grunt": "0.4.5",
+    "grunt-compare-size": "0.4.0",
+    "grunt-contrib-connect": "0.10.1",
+    "grunt-contrib-jshint": "0.11.1",
+    "grunt-contrib-nodeunit": "0.4.1",
+    "grunt-contrib-qunit": "0.7.0",
+    "grunt-contrib-uglify": "0.9.1",
+    "grunt-contrib-watch": "0.6.1",
+    "grunt-jscs": "1.6.0",
+    "grunt-saucelabs": "8.6.0",
+    "gzip-js": "0.3.2",
+    "qunitjs": "1.18.0",
+    "requirejs": "2.1.17"
+  },
+  "readme": "# JavaScript Cookie [![Build Status](https://travis-ci.org/js-cookie/js-cookie.svg?branch=master)](https://travis-ci.org/js-cookie/js-cookie) [![Code Climate](https://codeclimate.com/github/js-cookie/js-cookie.svg)](https://codeclimate.com/github/js-cookie/js-cookie)\r\n\r\nA simple, lightweight JavaScript API for handling cookies\r\n\r\n* Works in [all](https://saucelabs.com/u/js-cookie) browsers\r\n* [Heavily](test) tested\r\n* No dependency\r\n* [Unobstrusive](#json) JSON support\r\n* Supports AMD/CommonJS\r\n* [RFC 6265](http://www.rfc-editor.org/rfc/rfc6265.txt) compliant\r\n* Enable [custom decoding](#converter)\r\n* **~800 bytes** gzipped!\r\n\r\n**If you're viewing this at https://github.com/js-cookie/js-cookie, you're reading the documentation for the master branch.\r\n[View documentation for the latest release (1.5.1).](https://github.com/js-cookie/js-cookie/tree/v1.5.1)**\r\n\r\n## Build Status Matrix (master branch)\r\n\r\n[![Selenium Test Status](https://saucelabs.com/browser-matrix/js-cookie.svg)](https://saucelabs.com/u/js-cookie)\r\n\r\n## Installation\r\n\r\nInclude the script (unless you are packaging scripts somehow else):\r\n\r\n```html\r\n<script src=\"/path/to/js.cookie.js\"></script>\r\n```\r\n\r\n**Do not include the script directly from GitHub (http://raw.github.com/...).** The file is being served as text/plain and as such being blocked\r\nin Internet Explorer on Windows 7 for instance (because of the wrong MIME type). Bottom line: GitHub is not a CDN.\r\n\r\njs-cookie supports [npm](https://www.npmjs.com/package/js-cookie) and [Bower](http://bower.io/search/?q=js-cookie) under the name `js-cookie`\r\n\r\nIt can also be loaded as an AMD or CommonJS module.\r\n\r\n## Basic Usage\r\n\r\nCreate a cookie, valid across the entire site:\r\n\r\n```javascript\r\nCookies.set('name', 'value');\r\n```\r\n\r\nCreate a cookie that expires 7 days from now, valid across the entire site:\r\n\r\n```javascript\r\nCookies.set('name', 'value', { expires: 7 });\r\n```\r\n\r\nCreate an expiring cookie, valid to the path of the current page:\r\n\r\n```javascript\r\nCookies.set('name', 'value', { expires: 7, path: '' });\r\n```\r\n\r\nRead cookie:\r\n\r\n```javascript\r\nCookies.get('name'); // => 'value'\r\nCookies.get('nothing'); // => undefined\r\n```\r\n\r\nRead all available cookies:\r\n\r\n```javascript\r\nCookies.get(); // => { name: 'value' }\r\n```\r\n\r\nDelete cookie:\r\n\r\n```javascript\r\nCookies.remove('name');\r\n```\r\n\r\nDelete a cookie valid to the path of the current page:\r\n\r\n```javascript\r\nCookies.set('name', 'value', { path: '' });\r\nCookies.remove('name'); // fail!\r\nCookies.remove('name', { path: '' }); // removed!\r\n```\r\n\r\n*IMPORTANT! when deleting a cookie, you must pass the exact same path, domain and secure attributes that were used to set the cookie, unless you're relying on the [default attributes](#cookie-attributes).*\r\n\r\n## Namespace conflicts\r\n\r\nIf there is any danger of a conflict with the namespace `Cookies`, the `noConflict` method will allow you to define a new namespace and preserve the original one. This is especially useful when running the script on third party sites e.g. as part of a widget or SDK.\r\n\r\n```javascript\r\n// Assign the js-cookie api to a different variable and restore the original \"window.Cookies\"\r\nvar Cookies2 = Cookies.noConflict();\r\nCookies2.set('name', 'value');\r\n```\r\n\r\n*Note: The `.noConflict` method is not necessary when using AMD or CommonJS, thus it is not exposed in those environments.*\r\n\r\n## JSON\r\n\r\njs-cookie provides unobstrusive JSON storage for cookies.\r\n\r\nWhen creating a cookie you can pass an Array or Object Literal instead of a string in the value. If you do so, js-cookie will store the string representation of the object according to `JSON.stringify`:\r\n\r\n```javascript\r\nCookies.set('name', { foo: 'bar' });\r\n```\r\n\r\nWhen reading a cookie with the default `Cookies.get` api, you receive the string representation stored in the cookie:\r\n\r\n```javascript\r\nCookies.get('name'); // => '{\"foo\":\"bar\"}'\r\n```\r\n\r\n```javascript\r\nCookies.get(); // => { name: '{\"foo\":\"bar\"}' }\r\n```\r\n\r\nWhen reading a cookie with the `Cookies.getJSON` api, you receive the parsed representation of the string stored in the cookie according to `JSON.parse`:\r\n\r\n```javascript\r\nCookies.getJSON('name'); // => { foo: 'bar' }\r\n```\r\n\r\n```javascript\r\nCookies.getJSON(); // => { name: { foo: 'bar' } }\r\n```\r\n\r\n*Note: To support IE6-8 you need to include the JSON-js polyfill: https://github.com/douglascrockford/JSON-js*\r\n\r\n## Encoding\r\n\r\nThis project is [RFC 6265](http://tools.ietf.org/html/rfc6265#section-4.1.1) compliant. All special characters that are not allowed in the cookie-name or cookie-value are encoded with each one's UTF-8 Hex equivalent using [percent-encoding](http://en.wikipedia.org/wiki/Percent-encoding).  \r\nThe only character in cookie-name or cookie-value that is allowed and still encoded is the percent `%` character, it is escaped in order to interpret percent input as literal.  \r\nTo override the default cookie decoding you need to use a [converter](#converter).\r\n\r\n## Cookie Attributes\r\n\r\nCookie attributes defaults can be set globally by setting properties of the `Cookies.defaults` object or individually for each call to `Cookies.set(...)` by passing a plain object in the last argument. Per-call attributes override the default attributes.\r\n\r\n### expires\r\n\r\nDefine when the cookie will be removed. Value can be a `Number` which will be interpreted as days from time of creation or a `Date` instance. If omitted, the cookie becomes a session cookie.\r\n\r\n**Default:** Cookie is removed when the user closes the browser.\r\n\r\n**Examples:**\r\n\r\n```javascript\r\nCookies.set('name', 'value', { expires: 365 });\r\nCookies.get('name'); // => 'value'\r\nCookies.remove('name');\r\n```\r\n\r\n### path\r\n\r\nDefine the path where the cookie is available.\r\n\r\n**Default:** `/`\r\n\r\n**Examples:**\r\n\r\n```javascript\r\nCookies.set('name', 'value', { path: '' });\r\nCookies.get('name'); // => 'value'\r\nCookies.remove('name', { path: '' });\r\n```\r\n\r\n**Note regarding Internet Explorer:**\r\n\r\n> Due to an obscure bug in the underlying WinINET InternetGetCookie implementation, IE’s document.cookie will not return a cookie if it was set with a path attribute containing a filename.\r\n\r\n(From [Internet Explorer Cookie Internals (FAQ)](http://blogs.msdn.com/b/ieinternals/archive/2009/08/20/wininet-ie-cookie-internals-faq.aspx))\r\n\r\nThis means one cannot set a path using `path: window.location.pathname` in case such pathname contains a filename like so: `/check.html` (or at least, such cookie cannot be read correctly).\r\n\r\n### domain\r\n\r\nDefine the domain where the cookie is available\r\n\r\n**Default:** Domain of the page where the cookie was created\r\n\r\n**Examples:**\r\n\r\n```javascript\r\nCookies.set('name', 'value', { domain: 'sub.domain.com' });\r\nCookies.get('name'); // => undefined (need to read at 'sub.domain.com')\r\n```\r\n\r\n### secure\r\n\r\nA `Boolean` indicating if the cookie transmission requires a secure protocol (https)\r\n\r\n**Default:** No secure protocol requirement\r\n\r\n**Examples:**\r\n\r\n```javascript\r\nCookies.set('name', 'value', { secure: true });\r\nCookies.get('name'); // => 'value'\r\nCookies.remove('name', { secure: true });\r\n```\r\n\r\n## Converter\r\n\r\nCreate a new instance of the api that overrides the default decoding implementation.  \r\nAll methods that rely in a proper decoding to work, such as `Cookies.remove()` and `Cookies.get()`, will run the converter first for each cookie.  \r\nThe returning String will be used as the cookie value.\r\n\r\nExample from reading one of the cookies that can only be decoded using the `escape` function:\r\n\r\n```javascript\r\ndocument.cookie = 'escaped=%u5317';\r\ndocument.cookie = 'default=%E5%8C%97';\r\nvar cookies = Cookies.withConverter(function (value, name) {\r\n    if ( name === 'escaped' ) {\r\n        return unescape(value);\r\n    }\r\n});\r\ncookies.get('escaped'); // 北\r\ncookies.get('default'); // 北\r\ncookies.get(); // { escaped: '北', default: '北' }\r\n```\r\n\r\nExample for parsing the value from a cookie generated with PHP's `setcookie()` method:\r\n\r\n```javascript\r\n// 'cookie+with+space' => 'cookie with space'\r\nCookies.withConverter(function (value) {\r\n    return value.replace(/\\+/g, ' ');\r\n}).get('foo');\r\n```\r\n\r\n## Contributing\r\n\r\nCheck out the [Contributing Guidelines](CONTRIBUTING.md)\r\n\r\n## Manual release steps\r\n\r\n* Remove the \"-pre\" suffix of the \"version\" attribute of `package.json`\r\n* Remove the \"-pre\" suffix of the version number in the `src/js.cookie.js` file\r\n* Commit with the message \"Release version x.x.x\"\r\n* Create version tag in git\r\n* Create a github release and upload the minified file\r\n* Release on npm\r\n* Increment and add the \"-pre\" suffix to the \"version\" attribute of `package.json`\r\n* Increment and add the \"-pre\" suffix to the version number in the `src/js.cookie.js` file\r\n* Link the documentation of the latest release tag in the `README.md`\r\n* Commit with the message \"Prepare for the next development iteration\"\r\n\r\n## Authors\r\n\r\n* [Klaus Hartl](https://github.com/carhartl)\r\n* [Fagner Brack](https://github.com/FagnerMartinsBrack)\r\n* And awesome [contributors](https://github.com/js-cookie/js-cookie/graphs/contributors)\r\n",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/js-cookie/js-cookie/issues"
+  },
+  "homepage": "https://github.com/js-cookie/js-cookie",
+  "_id": "js-cookie@2.0.0-pre",
+  "dist": {
+    "shasum": "640aee434bf1867b92d124a518615cf3dad51aa9"
+  },
+  "_from": "js-cookie@x",
+  "_resolved": "https://registry.npmjs.org/js-cookie/-/js-cookie-2.0.0-pre.tgz"
+}
