@@ -1,7 +1,7 @@
 angular.module('myApp.controllers')
     .controller('QueueCtrl', ['$sce', '$scope', '$http',
-        'defaults', '$controller', '$cookieStore', 'Session', '$rootScope', '$routeParams', 'camomileService',
-        function ($sce, $scope, $http, defaults, $controller, $cookieStore, Session, $rootScope, $routeParams, camomileService) {
+        'defaults', '$controller', 'Session', '$rootScope', '$routeParams', 'camomileService',
+        function ($sce, $scope, $http, defaults, $controller, Session, $rootScope, $routeParams, camomileService) {
 
             $controller('CommonCtrl',
                 {
@@ -355,7 +355,7 @@ angular.module('myApp.controllers')
 
                 var date = new Date(); // already UTC ddate in JSON Format...
 
-                var user = $cookieStore.get("current.user");
+                var user = Cookies.get("current.user");
                 var newData = [];
                 var modified = false;
 
@@ -427,7 +427,7 @@ angular.module('myApp.controllers')
 
                     var date = new Date(); // already UTC ddate in JSON Format...
 
-                    var user = $cookieStore.get("current.user");
+                    var user = Cookies.get("current.user");
                     var newData = [];
 //                        for (var i in $scope.model.queueTableData) {
                     for (var i = 0, maxI = $scope.model.queueTableData.length; i< maxI; i++) {

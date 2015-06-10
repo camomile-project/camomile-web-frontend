@@ -3,8 +3,8 @@
  */
 angular.module('myApp.controllers')
 
-    .controller('SessionCtrl', ['$sce', '$scope', '$controller', '$http', 'defaults', 'Session', '$cookieStore','$rootScope', 'camomileService',
-        function ($sce, $scope, $controller, $http, defaults, Session, $cookieStore,$rootScope, camomileService) {
+    .controller('SessionCtrl', ['$sce', '$scope', '$controller', '$http', 'defaults', 'Session', '$rootScope', 'camomileService',
+        function ($sce, $scope, $controller, $http, defaults, Session, $rootScope, camomileService) {
 
             $controller('CommonCtrl',
                 {
@@ -21,8 +21,7 @@ angular.module('myApp.controllers')
                 // get actual values in the form, as angular scope not
                 // updated from autocomplete (see index.html for info)
 
-                // FIXME new login method
-//                camomileService.setURL($rootScope.dataroot);
+                // New login method
                 camomileService.login(username, password, function(err, data)
                     {
                         $scope.$apply(function(){
@@ -31,7 +30,6 @@ angular.module('myApp.controllers')
                                 console.log('logged in as ' + username);
                                 Session.isLogged = true;
                                 Session.username = username;
-                                $cookieStore.put("current.user", username);
                                 $scope.model.message = "Connected as " + Session.username;
 
                                 submit(); // hack to allow autofill and autocomplete support
@@ -43,7 +41,6 @@ angular.module('myApp.controllers')
                             {
                                 Session.isLogged = false;
                                 Session.username = undefined;
-                                $cookieStore.remove("current.user");
                                 $scope.model.message = "Connection error";
                                 console.log(data);
                                 alert(data.error);
@@ -51,30 +48,7 @@ angular.module('myApp.controllers')
                         });
 
                     }
-                    // Initialize the camomileService URL
-//                    ,$rootScope.dataroot
                 );
-
-
-//                Session.login({
-//                    username: username,
-//                    password: password
-//                })
-//                    .success(function () {
-//                        console.log('logged in as ' + username);
-//                        Session.isLogged = true;
-//                        Session.username = username;
-//                        $cookieStore.put("current.user", username);
-//                        $scope.model.message = "Connected as " + Session.username;
-//                        submit(); // hack to allow autofill and autocomplete support
-//
-//                    })
-//                    .error(function () {
-//                        Session.isLogged = false;
-//                        Session.username = undefined;
-//                        $cookieStore.remove("current.user");
-//                        $scope.model.message = "Connection error";
-//                    });
             };
 
 
@@ -89,7 +63,6 @@ angular.module('myApp.controllers')
                         if(!err)
                         {
                             Session.isLogged = false;
-                            $cookieStore.remove("current.user");
                             Session.username = undefined;
                             $scope.model.message = undefined;
 
@@ -101,7 +74,7 @@ angular.module('myApp.controllers')
                         {
                             Session.isLogged = false;
                             Session.username = undefined;
-                            $cookieStore.remove("current.user");
+//                            Cookies.remove("current.user");
                             $scope.model.message = "Connection error";
                             console.log(err);
                             alert(data.error);
@@ -109,63 +82,9 @@ angular.module('myApp.controllers')
                     });
 
                 });
-
-//                Session.logout()
-//                    .success(function () {
-//                        Session.isLogged = false;
-//                        $cookieStore.remove("current.user");
-//                        Session.username = undefined;
-//                        $scope.model.message = undefined;
-//
-//                        // reload page
-//                        window.location.reload();
-//                    })
-//                    .error(function (err) {
-//                        Session.isLogged = false;
-//                        Session.username = undefined;
-//                        $cookieStore.remove("current.user");
-//                        $scope.model.message = "Connection error";
-//                        console.log(err);
-//                    });
             };
-
-//            $scope.isLogged = function () {
-//                return Session.isLogged;
-//            };
 
             $scope.getUserName = function () {
                 return Session.username;
             };
-
-//            // Allow to check in the coockie if the user is already set
-//            $scope.checkLoggin = function () {
-////                camomileService.setURL($rootScope.dataroot);
-////                camomileService.me(function(err, data)
-////                {
-////                    console.log(data)
-////                    if(data.error)
-////                    {
-////                        Session.isLogged = false;
-////                        Session.username = undefined;
-////                        $scope.model.message = undefined;
-////                        return false;
-////                    }
-////                    else
-////                    {
-////                        Session.isLogged = true;
-////                        Session.username = data.username;
-////                        $scope.model.message = "Connected as " + Session.username;
-////                        return true;
-////                    }
-////                });
-//
-////                var currentUser = $cookieStore.get("current.user");
-////                if (currentUser && currentUser != "") {
-////                    Session.isLogged = true;
-////                    Session.username = currentUser;
-////                    $cookieStore.put("current.user", currentUser);
-////                    $scope.model.message = "Connected as " + Session.username;
-//
-////                }
-//            }
         }]);

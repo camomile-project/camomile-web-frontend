@@ -3,9 +3,9 @@
  */
 angular.module('myApp.controllers')
 	.controller('EvidenceCtrl', ['$sce', '$scope', '$http',
-		'defaults', '$controller', '$cookieStore', 'Session', '$rootScope', '$routeParams', 'camomileService',
+		'defaults', '$controller', 'Session', '$rootScope', '$routeParams', 'camomileService',
 
-		function ($sce, $scope, $http, defaults, $controller, $cookieStore, Session, $rootScope, $routeParams, camomileService) {
+		function ($sce, $scope, $http, defaults, $controller, Session, $rootScope, $routeParams, camomileService) {
 
 			$controller('CommonCtrl', {
 				$scope: $scope,
