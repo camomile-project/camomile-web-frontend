@@ -12,8 +12,10 @@ angular.module('myApp.controllers')
             $scope.model = {};
             $scope.model.absUrl = $rootScope.absUrl;
 
-            var useDefaultVideoPath = $cookieStore.get("use.default.video.path") || true;
-            var videoPath = $cookieStore.get("video.path")||"";
+            var useDefaultVideoPath = $cookieStore.get("use.default.video.path");
+            if (useDefaultVideoPath === undefined) useDefaultVideoPath = true;
+            var videoPath = $cookieStore.get("video.path") || "";
+
 
             $scope.model.useDefaultVideoPath = useDefaultVideoPath;
             $scope.model.videoPath = videoPath;
@@ -28,17 +30,13 @@ angular.module('myApp.controllers')
 
                 camomileService.setURL($rootScope.dataroot);
 
-                camomileService.me(function(err, data)
-                {
-                    $scope.$apply(function(){
-                        if(data.error)
-                        {
+                camomileService.me(function (err, data) {
+-                    $scope.$apply(function () {
+-                        if (data.error) {
                             Session.isLogged = false;
                             Session.username = undefined;
                             $scope.model.message = undefined;
-                        }
-                        else
-                        {
+                        }else{
                             Session.isLogged = true;
                             Session.username = data.username;
                             $scope.model.message = "Connected as " + Session.username;
@@ -46,7 +44,6 @@ angular.module('myApp.controllers')
                     });
                 });
             });
-
 
             // test if user is logged or not
             $scope.isLogged = function () {
@@ -95,5 +92,5 @@ angular.module('myApp.controllers')
                     "pointer-events": "auto"
                 });
             });
-
-        }]);
+        }
+    ]);
