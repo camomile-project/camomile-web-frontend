@@ -123,33 +123,12 @@ function getAllQueues(callback) {
 
     async.parallel({
 
-            // Active learning "Shot" use case
-            shotIn: function (callback) {
-                getQueueByName('activelearning.shot.in', callback);
-            },
-            shotOut: function (callback) {
-                getQueueByName('activelearning.shot.out', callback);
-            },
-            // Active learning "Head" use case
-            headIn: function (callback) {
-                getQueueByName('activelearning.head.in', callback);
-            },
-            headOut: function (callback) {
-                getQueueByName('activelearning.head.out', callback);
-            },
             // MediaEval "Evidence" use case
             evidenceIn: function (callback) {
                 getQueueByName('mediaeval.evidence.in', callback);
             },
             evidenceOut: function (callback) {
                 getQueueByName('mediaeval.evidence.out', callback);
-            },
-            // MediaEval "Label" use case
-            labelIn: function (callback) {
-                getQueueByName('mediaeval.label.in', callback);
-            },
-            labelOut: function (callback) {
-                getQueueByName('mediaeval.label.out', callback);
             },
         },
         function (err, queues) {
@@ -178,28 +157,16 @@ function create_config_route(queues, callback) {
             'camomile_api': camomile_api,
             'pyannote_api': pyannote_api,
             'queues': {
-                'shotIn': queues.shotIn,
-                'shotOut': queues.shotOut,
-                'headIn': queues.headIn,
-                'headOut': queues.headOut,
                 'evidenceIn': queues.evidenceIn,
                 'evidenceOut': queues.evidenceOut,
-                'labelIn': queues.labelIn,
-                'labelOut': queues.labelOut
             }
         });
     };
 
     app.get('/config', get_config);
 
-    console.log('   * shotIn  --> /queue/' + queues.shotIn);
-    console.log('   * shotOut --> /queue/' + queues.shotOut);
-    console.log('   * headIn  --> /queue/' + queues.headIn);
-    console.log('   * headOut --> /queue/' + queues.headOut);
     console.log('   * evidenceIn  --> /queue/' + queues.evidenceIn);
     console.log('   * evidenceOut --> /queue/' + queues.evidenceOut);
-    console.log('   * labelIn  --> /queue/' + queues.labelIn);
-    console.log('   * labelOut --> /queue/' + queues.labelOut);
 
     callback(null);
 
@@ -237,7 +204,6 @@ function create_config_file(callback) {
 
 // run app when everything is set up
 function run_app(err, results) {
-    // TODO: error handling
     app.listen(port);
     console.log('App is running at http://localhost:' + port + ' with');
     console.log('   * Camomile API --> ' + camomile_api);
