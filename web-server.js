@@ -28,14 +28,6 @@ var login = program.login || process.env.CAMOMILE_LOGIN;
 var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
 var port = parseInt(program.port || process.env.PORT || '8070', 10);
-var shot_in = program.shotIn;
-var shot_out = program.shotOut;
-var head_in = program.headIn;
-var head_out = program.headOut;
-var evidence_in = program.evidenceIn;
-var evidence_out = program.evidenceOut;
-var label_in = program.labelIn;
-var label_out = program.labelOut;
 
 // configure express app
 app.configure(function () {
@@ -47,16 +39,7 @@ app.configure(function () {
 
 // handle the hidden form submit
 app.post('/', function (req, res) {
-    console.log("là");
     res.redirect('/');
-});
-
-app.get('/lig', function (req, res) {
-    res.sendfile(__dirname + '/app/indexLIG.html');
-});
-
-app.get('/limsi', function (req, res) {
-    res.sendfile(__dirname + '/app/indexLimsi.html');
 });
 
 // log in Camomile API and callback
