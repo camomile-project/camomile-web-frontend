@@ -30,9 +30,11 @@ angular.module('myApp.controllers')
 
                 camomileService.setURL($rootScope.dataroot);
 
-                camomileService.me(function (err, data) {
--                    $scope.$apply(function () {
--                        if (data.error) {
+                 camomileService.me(function(err, data)
+                {
+                    $scope.$apply(function(){
+                        if(data.error)
+                        {
                             Session.isLogged = false;
                             Session.username = undefined;
                             $scope.model.message = undefined;
