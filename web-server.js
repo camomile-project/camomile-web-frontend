@@ -28,12 +28,6 @@ var login = program.login || process.env.CAMOMILE_LOGIN;
 var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
 var port = parseInt(program.port || process.env.PORT || '8070', 10);
-var shot_in = program.shotIn;
-var shot_out = program.shotOut;
-var head_in = program.headIn;
-var head_out = program.headOut;
-var evidence_in = program.evidenceIn;
-var evidence_out = program.evidenceOut;
 var label_in = program.labelIn;
 var label_out = program.labelOut;
 
@@ -47,16 +41,7 @@ app.configure(function () {
 
 // handle the hidden form submit
 app.post('/', function (req, res) {
-    console.log("là");
     res.redirect('/');
-});
-
-app.get('/lig', function (req, res) {
-    res.sendfile(__dirname + '/app/indexLIG.html');
-});
-
-app.get('/limsi', function (req, res) {
-    res.sendfile(__dirname + '/app/indexLimsi.html');
 });
 
 // log in Camomile API and callback
@@ -123,27 +108,6 @@ function getAllQueues(callback) {
 
     async.parallel({
 
-            // Active learning "Shot" use case
-            shotIn: function (callback) {
-                getQueueByName('activelearning.shot.in', callback);
-            },
-            shotOut: function (callback) {
-                getQueueByName('activelearning.shot.out', callback);
-            },
-            // Active learning "Head" use case
-            headIn: function (callback) {
-                getQueueByName('activelearning.head.in', callback);
-            },
-            headOut: function (callback) {
-                getQueueByName('activelearning.head.out', callback);
-            },
-            // MediaEval "Evidence" use case
-            evidenceIn: function (callback) {
-                getQueueByName('mediaeval.evidence.in', callback);
-            },
-            evidenceOut: function (callback) {
-                getQueueByName('mediaeval.evidence.out', callback);
-            },
             // MediaEval "Label" use case
             labelIn: function (callback) {
                 getQueueByName('mediaeval.label.in', callback);
@@ -178,12 +142,6 @@ function create_config_route(queues, callback) {
             'camomile_api': camomile_api,
             'pyannote_api': pyannote_api,
             'queues': {
-                'shotIn': queues.shotIn,
-                'shotOut': queues.shotOut,
-                'headIn': queues.headIn,
-                'headOut': queues.headOut,
-                'evidenceIn': queues.evidenceIn,
-                'evidenceOut': queues.evidenceOut,
                 'labelIn': queues.labelIn,
                 'labelOut': queues.labelOut
             }
@@ -192,12 +150,6 @@ function create_config_route(queues, callback) {
 
     app.get('/config', get_config);
 
-    console.log('   * shotIn  --> /queue/' + queues.shotIn);
-    console.log('   * shotOut --> /queue/' + queues.shotOut);
-    console.log('   * headIn  --> /queue/' + queues.headIn);
-    console.log('   * headOut --> /queue/' + queues.headOut);
-    console.log('   * evidenceIn  --> /queue/' + queues.evidenceIn);
-    console.log('   * evidenceOut --> /queue/' + queues.evidenceOut);
     console.log('   * labelIn  --> /queue/' + queues.labelIn);
     console.log('   * labelOut --> /queue/' + queues.labelOut);
 

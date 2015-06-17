@@ -11,21 +11,7 @@ angular.module('myApp.controllers')
 
             $scope.model = {};
             $scope.model.absUrl = $rootScope.absUrl;
-
-            var useDefaultVideoPath = Cookies.get("use.default.video.path");
-            // Test the string value also, cause Cookie store a string, not a boolean
-            if (useDefaultVideoPath === undefined || useDefaultVideoPath === 'true' || useDefaultVideoPath == true)
-            {
-                useDefaultVideoPath = true;
-            }
-            else
-            {
-                useDefaultVideoPath = false;
-            }
-            var videoPath = Cookies.get("video.path") || "";
-
-            $scope.model.useDefaultVideoPath = useDefaultVideoPath;
-            $scope.model.videoPath = videoPath;
+            $scope.model.videoPath = Cookies.get("video.path") || "";
 
             var config = $resource($rootScope.absUrl + '/config');
 
