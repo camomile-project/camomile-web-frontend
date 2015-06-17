@@ -152,6 +152,12 @@ angular.module('myApp.controllers')
             // rename from "initQueueData" to "popQueueElement"
             $scope.model.popQueueElement = function () {
 
+                // don't pop if local video server is not set
+                if ($scope.model.videoPath === "") {
+                    alert('Please setup a local video server.');
+                    return;
+                }
+
                 // Get queue first element and pop it from the queue
                 camomileService.dequeue($rootScope.queues.labelIn, function (error, item) {
 
