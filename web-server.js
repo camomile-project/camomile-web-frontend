@@ -139,17 +139,17 @@ function getAllQueues(callback) {
             },
             // MediaEval "Evidence" use case
             evidenceIn: function (callback) {
-                getQueueByName('mediaeval.evidence.in', callback);
+                getQueueByName('xu.mediaeval.evidence.in', callback);
             },
             evidenceOut: function (callback) {
-                getQueueByName('mediaeval.evidence.out', callback);
+                getQueueByName('xu.mediaeval.evidence.out', callback);
             },
             // MediaEval "Label" use case
             labelIn: function (callback) {
-                getQueueByName('mediaeval.label.in', callback);
+                getQueueByName('xu.mediaeval.label.in', callback);
             },
             labelOut: function (callback) {
-                getQueueByName('mediaeval.label.out', callback);
+                getQueueByName('xu.mediaeval.label.out', callback);
             },
         },
         function (err, queues) {

@@ -27,7 +27,15 @@ angular.module('myApp.directives')
 						}
 					}
 				};
-
+                
+                //add a loop button for controlling looping
+                var loop = true;
+                scope.model.loop_display = function() {
+                    console.log(element);
+                    loop = !loop;
+                    console.log("loop_display:" +loop);
+                };
+                
 				var save_state;
 
 				$('#seek-bar').on('mousedown',function () {
@@ -70,11 +78,16 @@ angular.module('myApp.directives')
 						// if player paused, currentTime has been changed for exogenous reasons
 						if (!element[0].paused) {
 							if (element[0].currentTime > scope.model.supbndsec) {
-								scope.model.toggle_play(false);
-								scope.model.current_time = scope.model.supbndsec;
+                                if(loop === false){
+                                    scope.model.toggle_play(false);
+                                    scope.model.current_time = scope.model.supbndsec;
+                                }else{     
+                                    scope.model.toggle_play(true);
+                                    scope.model.current_time = scope.model.infbndsec;
+                                }
 							} else {
 								scope.model.current_time = element[0].currentTime;
-							}
+							}                
 						}
 					});
 				});
@@ -85,7 +98,9 @@ angular.module('myApp.directives')
 						if (element[0].readyState !== 0) {
 							element[0].currentTime = newValue;
 						}
+
 					}
+
 				});
 
 				scope.$watch("model.play_state", function (newValue) {
