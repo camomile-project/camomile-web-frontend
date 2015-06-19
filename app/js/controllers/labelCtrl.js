@@ -229,8 +229,8 @@ angular.module('myApp.controllers')
 
                         $scope.model.restrict_toggle = 2;
 
-                        $scope.model.infbndsec = parseFloat($scope.model.input.start);
-                        $scope.model.supbndsec = parseFloat($scope.model.input.end);
+                        $scope.model.infbndsec = parseFloat($scope.model.input.start) + 0.5;
+                        $scope.model.supbndsec = parseFloat($scope.model.input.end) - 0.5;
                         $scope.model.duration = $scope.model.supbndsec - $scope.model.infbndsec;
 
                         $scope.$apply(function () {
