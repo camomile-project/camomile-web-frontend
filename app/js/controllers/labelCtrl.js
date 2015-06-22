@@ -171,11 +171,33 @@ angular.module('myApp.controllers')
                         return;
                     }
 
-                    // TODO
                     // if current user already annotated this shot
-                    // put it back into the queue
-                    // item.annotated_by
-                    // TODO
+                    if (item.annotated_by.indexOf(Session.username) > -1) {
+                        alert('you already annotated this shot');
+
+                        if (item.skipped_by === undefined) {
+                            item.skipped_by = [];
+                        }
+
+                        if (item.skipped_by.indexOf(Session.username) > -1) {
+                            // increment a "already skippped by you" counter
+                            // and do something based on that number
+                            alert('looks like you are the only one working...');
+                        } else {
+                            item.skipped_by.push(Session.username);
+                        }
+
+                        camomileService.enqueue(
+                            $rootScope.queues.labelIn, item,
+                            function (error, data) {
+                                if (error) {
+                                    alert(data.error);
+                                    return;
+                                }
+                                $scope.model.popQueueElement();
+                            })
+                        return;
+                    }
 
                     $scope.model.input = item;
                     $scope.model.output = {};
