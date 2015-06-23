@@ -68,6 +68,10 @@ angular.module('myApp.controllers')
 					$scope.model.resetTransparentPlan();
 					$scope.model.updateIsDisplayedVideo(true);
 
+					if (item.source === "audio") {
+						alert("Audio evidence");
+					}
+
 					$scope.model.q = item;
 					$scope.model.user_input.person_name = $scope.model.q.person_name;
 					$scope.model.initialData = $scope.model.q.person_name;
