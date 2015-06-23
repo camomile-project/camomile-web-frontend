@@ -115,7 +115,7 @@ angular.module('myApp.controllers')
 			};
 
 			// Event launched when click on the save button.
-			$scope.model.saveQueueElement = function (isEvidence, itWasMyLastAnnotationForToday) {
+			$scope.model.saveQueueElement = function (isEvidence) {
 
 				if (isEvidence && ($scope.model.user_input.boundingBox.w === undefined || $scope.model.user_input.boundingBox.w === 0)) {
 					alert("Please draw a bounding box around the face.");
@@ -151,15 +151,7 @@ angular.module('myApp.controllers')
 					if (err) {
 						console.log("Something went wrong");
 					} else {
-						if (!itWasMyLastAnnotationForToday) {
-							$scope.model.popQueueElement();
-						} else {
-							$scope.$apply(function () {
-								$scope.model.video = undefined;
-								$scope.model.isDisplayedVideo = false;
-								$scope.model.updateIsDisplayedVideo(false);
-							});
-						}
+						$scope.model.popQueueElement();
 					}
 
 				});
