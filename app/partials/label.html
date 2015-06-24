@@ -1,11 +1,14 @@
 <div ng-controller="labelCtrl"
     ng-show='isLogged()'
     ng-init="model.popQueueElement()">
-    <div class="container-fluid">
+    <div ng-show="validating" class="container-fluid">
+        Looking for a new annotation...
+    </div>
+    <div ng-hide="validating" class="container-fluid">
         <div class="row">
             <div class="col-md-6">
                 <div id="video-container">
-                    <video id="player"
+                    <video autoplay id="player"
                         cm-video-player
                         ng-src={{model.video}}
                         height="360px">

@@ -13,6 +13,8 @@ angular.module('myApp.controllers')
                 Session: Session
             });
 
+            $scope.validating = true;
+
             var _getTestCorpus = function (callback) {
 
                 var corpusName = 'mediaeval.test';
@@ -173,7 +175,6 @@ angular.module('myApp.controllers')
 
                     // if current user already annotated this shot
                     if (item.annotated_by.indexOf(Session.username) > -1) {
-                        alert('you already annotated this shot');
 
                         if (item.skipped_by === undefined) {
                             item.skipped_by = [];
@@ -198,6 +199,8 @@ angular.module('myApp.controllers')
                             })
                         return;
                     }
+
+                    $scope.validating = false;
 
                     $scope.model.input = item;
                     $scope.model.output = {};
@@ -305,6 +308,8 @@ angular.module('myApp.controllers')
 
             $scope.model.validate = function () {
 
+                $scope.validating = true;
+
                 var item = {};
                 item.input = $scope.model.input;
                 item.output = $scope.model.output;
@@ -325,6 +330,14 @@ angular.module('myApp.controllers')
             };
 
             $scope.model.skip = function () {
+
+                $scope.validating = true;
+
+                if ($scope.model.input.skipped_by === undefined) {
+                    $scope.model.input.skipped_by = [];
+                }
+                $scope.model.input.skipped_by.push(Session.username);
+
                 camomileService.enqueue(
                     $rootScope.queues.labelIn, $scope.model.input,
                     function (error, data) {
