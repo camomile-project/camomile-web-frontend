@@ -180,7 +180,12 @@ angular.module('myApp.controllers')
                             item.skipped_by = [];
                         }
 
-                        if (item.skipped_by.indexOf(Session.username) > -1) {
+                        var count = 0;
+                        for(var i = 0; i < item.skipped_by.length; ++i){
+                            if(item.skipped_by[i] === Session.username)
+                                count++;
+                        }
+                        if (count > 2){
                             // increment a "already skippped by you" counter
                             // and do something based on that number
                             alert('looks like you are the only one working...');
