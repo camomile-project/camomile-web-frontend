@@ -217,6 +217,7 @@ angular.module('myApp.controllers')
                     if (event.keyCode == 27) {
                         $scope.$apply(function() {
                               //skip
+                              $scope.model.saveQueueElement(false);
                             });
                     }
 
@@ -228,23 +229,45 @@ angular.module('myApp.controllers')
                     //Left
                     if (event.keyCode == 37){
                         $scope.$apply(function() {
-                                $scope.model.current_time = $scope.model.current_time - 0.1;
+	                        	if($scope.model.current_time - 0.04 > $scope.model.infbndsec ){
+	                                $scope.model.current_time = $scope.model.current_time - 0.04;
+	                            }else{
+	                            	$scope.model.current_time = $scope.model.infbndsec;
+	                            }
                             });
                     }
                     //Right
                     if(event.keyCode == 39){
                         $scope.$apply(function() {
-                                $scope.model.current_time = $scope.model.current_time + 0.1;
+	                        	if($scope.model.current_time + 0.04 < $scope.model.supbndsec){
+	                                $scope.model.current_time = $scope.model.current_time + 0.04;
+	                            }else{
+	                            	$scope.model.current_time = $scope.model.supbndsec;
+	                            }
                             });
                     }
                     //Up
                     if(event.keyCode == 38){
                         $scope.$apply(function() {
-                                $scope.model.current_time = $scope.model.current_time + 0.1;
+                        		if($scope.model.current_time - 1 > $scope.model.infbndsec){
+	                                $scope.model.current_time = $scope.model.current_time - 1;
+	                            }else{
+	                            	$scope.model.current_time = $scope.model.infbndsec;
+	                            }
+                                
                             });
                     
 }                    //Down
                     if(event.keyCode == 40){
+                        $scope.$apply(function() {
+                                
+                                if($scope.model.current_time + 1 < $scope.model.supbndsec){
+	                                $scope.model.current_time = $scope.model.current_time + 1;
+	                            }else{
+	                            	$scope.model.current_time = $scope.model.supbndsec;
+	                            }
+
+                            });
 
                     }
 
