@@ -2,10 +2,10 @@
  * Created by isc on 12/05/15.
  */
 angular.module('myApp.controllers')
-	.controller('EvidenceCtrl', ['$sce', '$scope', '$http',
-		'defaults', '$controller', 'Session', '$rootScope', 'camomileService',
+	.controller('EvidenceCtrl', ['$document', '$sce', '$scope', '$http',
+		'defaults', '$controller', 'Session', '$rootScope', 'camomileService', 
 
-		function ($sce, $scope, $http, defaults, $controller, Session, $rootScope, camomileService) {
+		function ($document, $sce, $scope, $http, defaults, $controller, Session, $rootScope, camomileService) {
 
 			$controller('CommonCtrl', {
 				$scope: $scope,
@@ -201,6 +201,79 @@ angular.module('myApp.controllers')
 				});
 
 			transparentPlan.call(drag);
+
+			$document.on(
+                "keydown",
+                function(event) {
+                    var elementId = event.target.id;
+                    console.log(event.target.id);
+                    console.log(event.keyCode);
+                    if (event.keyCode == 13) {
+                        $scope.$apply(function() {
+                               $scope.model.saveQueueElement(true);
+                            });
+                    }
+                    //esc-> skip
+                    if (event.keyCode == 27) {
+                        $scope.$apply(function() {
+                              //skip
+                              $scope.model.saveQueueElement(false);
+                            });
+                    }
+
+                    if (event.keyCode == 32 && elementId != "entry_input") {
+                        $scope.$apply(function() {
+                               $scope.model.toggle_play();
+                            });
+                    }
+                    //Left
+                    if (event.keyCode == 37){
+                        $scope.$apply(function() {
+	                        	if($scope.model.current_time - 0.04 > $scope.model.infbndsec ){
+	                                $scope.model.current_time = $scope.model.current_time - 0.04;
+	                            }else{
+	                            	$scope.model.current_time = $scope.model.infbndsec;
+	                            }
+                            });
+                    }
+                    //Right
+                    if(event.keyCode == 39){
+                        $scope.$apply(function() {
+	                        	if($scope.model.current_time + 0.04 < $scope.model.supbndsec){
+	                                $scope.model.current_time = $scope.model.current_time + 0.04;
+	                            }else{
+	                            	$scope.model.current_time = $scope.model.supbndsec;
+	                            }
+                            });
+                    }
+                    //Up
+                    if(event.keyCode == 38){
+                        $scope.$apply(function() {
+                        		if($scope.model.current_time - 1 > $scope.model.infbndsec){
+	                                $scope.model.current_time = $scope.model.current_time - 1;
+	                            }else{
+	                            	$scope.model.current_time = $scope.model.infbndsec;
+	                            }
+                                
+                            });
+                    
+}                    //Down
+                    if(event.keyCode == 40){
+                        $scope.$apply(function() {
+                                
+                                if($scope.model.current_time + 1 < $scope.model.supbndsec){
+	                                $scope.model.current_time = $scope.model.current_time + 1;
+	                            }else{
+	                            	$scope.model.current_time = $scope.model.supbndsec;
+	                            }
+
+                            });
+
+                    }
+
+
+                }
+            );
 
 		}
 	]);
