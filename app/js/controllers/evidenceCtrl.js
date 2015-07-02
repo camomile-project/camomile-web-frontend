@@ -205,73 +205,79 @@ angular.module('myApp.controllers')
 			$document.on(
                 "keydown",
                 function(event) {
-                    var elementId = event.target.id;
-                    console.log(event.target.id);
-                    console.log(event.keyCode);
+                    var targetID = event.target.id;
+                    var button_checked = false;
+                    if (targetID == 'confirm' || targetID == 'cancel') {
+                        button_checked = true;
+                    }
+                    console.log(event.target);
+                    //enter
                     if (event.keyCode == 13) {
+                        //If the focus is on the check buttons, blur the focus first
+                        if (button_checked) {
+                            event.target.blur();
+                        }
                         $scope.$apply(function() {
-                               $scope.model.saveQueueElement(true);
-                            });
+                            $scope.model.saveQueueElement(true);
+                        });
+                    }
+                    //space
+                    if (event.keyCode == 32 && targetID != "entry_input") {
+                        if (button_checked) {
+                            event.target.blur();
+                        }
+                        $scope.$apply(function() {
+                            $scope.model.toggle_play();
+                        });
                     }
                     //esc-> skip
                     if (event.keyCode == 27) {
                         $scope.$apply(function() {
-                              //skip
-                              $scope.model.saveQueueElement(false);
-                            });
-                    }
-
-                    if (event.keyCode == 32 && elementId != "entry_input") {
-                        $scope.$apply(function() {
-                               $scope.model.toggle_play();
-                            });
+                            //skip
+                            $scope.model.saveQueueElement(false);
+                        });
                     }
                     //Left
-                    if (event.keyCode == 37){
+                    if (event.keyCode == 37) {
                         $scope.$apply(function() {
-	                        	if($scope.model.current_time - 0.04 > $scope.model.infbndsec ){
-	                                $scope.model.current_time = $scope.model.current_time - 0.04;
-	                            }else{
-	                            	$scope.model.current_time = $scope.model.infbndsec;
-	                            }
-                            });
+                            if ($scope.model.current_time - 0.04 > $scope.model.infbndsec) {
+                                $scope.model.current_time = $scope.model.current_time - 0.04;
+                            } else {
+                                $scope.model.current_time = $scope.model.infbndsec;
+                            }
+                        });
                     }
                     //Right
-                    if(event.keyCode == 39){
+                    if (event.keyCode == 39) {
                         $scope.$apply(function() {
-	                        	if($scope.model.current_time + 0.04 < $scope.model.supbndsec){
-	                                $scope.model.current_time = $scope.model.current_time + 0.04;
-	                            }else{
-	                            	$scope.model.current_time = $scope.model.supbndsec;
-	                            }
-                            });
+                            if ($scope.model.current_time + 0.04 < $scope.model.supbndsec) {
+                                $scope.model.current_time = $scope.model.current_time + 0.04;
+                            } else {
+                                $scope.model.current_time = $scope.model.supbndsec;
+                            }
+                        });
                     }
                     //Up
-                    if(event.keyCode == 38){
+                    if (event.keyCode == 38) {
                         $scope.$apply(function() {
-                        		if($scope.model.current_time - 1 > $scope.model.infbndsec){
-	                                $scope.model.current_time = $scope.model.current_time - 1;
-	                            }else{
-	                            	$scope.model.current_time = $scope.model.infbndsec;
-	                            }
-                                
-                            });
-                    
-}                    //Down
-                    if(event.keyCode == 40){
+                            if ($scope.model.current_time - 1 > $scope.model.infbndsec) {
+                                $scope.model.current_time = $scope.model.current_time - 1;
+                            } else {
+                                $scope.model.current_time = $scope.model.infbndsec;
+                            }
+                        });
+
+                    } //Down
+                    if (event.keyCode == 40) {
                         $scope.$apply(function() {
-                                
-                                if($scope.model.current_time + 1 < $scope.model.supbndsec){
-	                                $scope.model.current_time = $scope.model.current_time + 1;
-	                            }else{
-	                            	$scope.model.current_time = $scope.model.supbndsec;
-	                            }
 
-                            });
-
+                            if ($scope.model.current_time + 1 < $scope.model.supbndsec) {
+                                $scope.model.current_time = $scope.model.current_time + 1;
+                            } else {
+                                $scope.model.current_time = $scope.model.supbndsec;
+                            }
+                        });
                     }
-
-
                 }
             );
 
