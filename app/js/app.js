@@ -15,23 +15,8 @@ angular.module(
             'mgcrea.ngStrap'
         ])
     .config(['$routeProvider', function ($routeProvider) {
-        $routeProvider.when('/regression', {
-            templateUrl: 'partials/regression.html'
-        });
-        $routeProvider.when('/fusion', {
-            templateUrl: 'partials/fusion.html'
-        });
-        $routeProvider.when('/queue', {
-            templateUrl: 'partials/queue.html'
-        });
-        $routeProvider.when('/diff', {
-            templateUrl: 'partials/diff.html'
-        });
-        $routeProvider.when('/evidence', {
+        $routeProvider.when('/', {
             templateUrl: 'partials/evidence.html'
-        });
-        $routeProvider.when('/label', {
-            templateUrl: 'partials/label.html'
         });
         $routeProvider.otherwise({
             redirectTo: '/'
