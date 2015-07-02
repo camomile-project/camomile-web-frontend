@@ -117,7 +117,7 @@
                             <form ng-submit="saveVideoPreferences()" class="navbar-form navbar-left">
                                 <input type="checkbox" class="form-control" 
                                        ng-model="model.useDefaultVideoPath">
-                                <input type="text" class="form-control" 
+                                <input id="localServerInput" type="text" class="form-control" 
                                        ng-model="model.videoPath" 
                                        ng-hide="model.useDefaultVideoPath">
                             </form>
