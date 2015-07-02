@@ -21,6 +21,8 @@ program
     .option('--password <password>', 'Password for Camomile server')
     .option('--pyannote <url>', 'URL of PyAnnote server (e.g. https://camomile.fr/tool)')
     .option('--port <int>', 'Local port to listen to (default: 8070)')
+    .option('--label-in <queue>', 'Name of incoming queue (default: mediaeval.label.in)')
+    .option('--label-out <queue>', 'Name of outgoing queue (default: mediaeval.label.out)')
     .parse(process.argv);
 
 var camomile_api = program.camomile || process.env.CAMOMILE_API;
@@ -28,8 +30,8 @@ var login = program.login || process.env.CAMOMILE_LOGIN;
 var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
 var port = parseInt(program.port || process.env.PORT || '8070', 10);
-var label_in = program.labelIn;
-var label_out = program.labelOut;
+var label_in = program.labelIn || process.env.CAMOMILE_QUEUE_IN || 'mediaeval.label.in';
+var label_out = program.labelOut || process.env.CAMOMILE_QUEUE_OUT || 'mediaeval.label.out';
 
 // configure express app
 app.configure(function () {
@@ -110,10 +112,10 @@ function getAllQueues(callback) {
 
             // MediaEval "Label" use case
             labelIn: function (callback) {
-                getQueueByName('mediaeval.label.in', callback);
+                getQueueByName(label_in, callback);
             },
             labelOut: function (callback) {
-                getQueueByName('mediaeval.label.out', callback);
+                getQueueByName(label_out, callback);
             },
         },
         function (err, queues) {
