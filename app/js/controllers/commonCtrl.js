@@ -18,7 +18,6 @@ angular.module('myApp.controllers')
             // Use callbacks to store in $rootScope
             config.get().$promise.then(function (data) {
                 $rootScope.dataroot = data.camomile_api;
-                $rootScope.toolroot = data.pyannote_api;
                 $rootScope.queues = data.queues;
 
                 camomileService.setURL($rootScope.dataroot);
