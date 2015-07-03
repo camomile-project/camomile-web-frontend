@@ -353,82 +353,81 @@ angular.module('myApp.controllers')
                         $scope.model.popQueueElement();
                     })
             };
-				$document.on(
-					"keydown",
-					function (event) {
-						var targetID = event.target.id;
-						var button_checked = false;
-						if (targetID == 'confirm' || targetID == 'cancel') {
-							button_checked = true;
-						}
-						//enter
-						if (event.keyCode == 13 && targetID != 'localServerInput') {
-							//If the focus is on the check buttons, blur the focus first
-							if (button_checked) {
-								event.target.blur();
-							}
-							$scope.$apply(function () {
-								$scope.model.saveQueueElement(true);
-							});
-						}
-						//space
-						if (event.keyCode == 32 && targetID != "entry_input") {
-							if (button_checked) {
-								event.target.blur();
-							}
-							$scope.$apply(function () {
-								$scope.model.toggle_play();
-							});
-						}
-						//esc-> skip
-						if (event.keyCode == 27) {
-							$scope.$apply(function () {
-								//skip
-								$scope.model.saveQueueElement(false);
-							});
-						}
-						//Left
-						if (event.keyCode == 37) {
-							$scope.$apply(function () {
-								if ($scope.model.current_time - 0.04 > $scope.model.infbndsec) {
-									$scope.model.current_time = $scope.model.current_time - 0.04;
-								} else {
-									$scope.model.current_time = $scope.model.infbndsec;
-								}
-							});
-						}
-						//Right
-						if (event.keyCode == 39) {
-							$scope.$apply(function () {
-								if ($scope.model.current_time + 0.04 < $scope.model.supbndsec) {
-									$scope.model.current_time = $scope.model.current_time + 0.04;
-								} else {
-									$scope.model.current_time = $scope.model.supbndsec;
-								}
-							});
-						}
-						//Up
-						if (event.keyCode == 38) {
-							$scope.$apply(function () {
-								if ($scope.model.current_time - 1 > $scope.model.infbndsec) {
-									$scope.model.current_time = $scope.model.current_time - 1;
-								} else {
-									$scope.model.current_time = $scope.model.infbndsec;
-								}
-							});
-
-						} //Down
-						if (event.keyCode == 40) {
-							$scope.$apply(function () {
-
-								if ($scope.model.current_time + 1 < $scope.model.supbndsec) {
-									$scope.model.current_time = $scope.model.current_time + 1;
-								} else {
-									$scope.model.current_time = $scope.model.supbndsec;
-								}
-							});
-						}
+	$document.on(
+		"keydown",
+		function (event) {
+			var targetID = event.target.id;
+			var button_checked = false;
+				if (targetID == 'confirm' || targetID == 'cancel') {
+					button_checked = true;
+				}
+				//enter
+				if (event.keyCode == 13 && targetID != 'localServerInput') {
+					//If the focus is on the check buttons, blur the focus first
+					if (button_checked) {
+						event.target.blur();
 					}
-				);
-        }
+						$scope.$apply(function () {
+						$scope.model.validate();
+					});
+				}
+				//space
+				if (event.keyCode == 32 && targetID != "entry_input") {
+					if (button_checked) {
+						event.target.blur();
+					}
+					$scope.$apply(function () {
+						$scope.model.toggle_play();
+					});
+				}
+				//esc-> skip
+				if (event.keyCode == 27) {
+					$scope.$apply(function () {
+						//skip
+						$scope.model.skip();
+					});
+				}
+				//Left
+				if (event.keyCode == 37) {
+					$scope.$apply(function () {
+						if ($scope.model.current_time - 0.04 > $scope.model.infbndsec) {
+							$scope.model.current_time = $scope.model.current_time - 0.04;
+						} else {
+							$scope.model.current_time = $scope.model.infbndsec;
+						}
+					});
+				}
+				//Right
+				if (event.keyCode == 39) {
+					$scope.$apply(function () {
+						if ($scope.model.current_time + 0.04 < $scope.model.supbndsec) {
+							$scope.model.current_time = $scope.model.current_time + 0.04;
+						} else {
+							$scope.model.current_time = $scope.model.supbndsec;
+						}
+					});
+				}
+				//Up
+				if (event.keyCode == 38) {
+					$scope.$apply(function () {
+						if ($scope.model.current_time - 1 > $scope.model.infbndsec) {
+							$scope.model.current_time = $scope.model.current_time - 1;
+						} else {
+							$scope.model.current_time = $scope.model.infbndsec;
+						}
+					});
+
+				}
+				 //Down
+				if (event.keyCode == 40) {
+					$scope.$apply(function () {
+						if ($scope.model.current_time + 1 < $scope.model.supbndsec) {
+							$scope.model.current_time = $scope.model.current_time + 1;
+						} else {
+							$scope.model.current_time = $scope.model.supbndsec;
+						}
+					});
+				}
+			});
+        	}
     ]);
