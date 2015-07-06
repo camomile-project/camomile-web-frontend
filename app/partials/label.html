@@ -21,6 +21,18 @@
                     </video>
                 </div>
                 <br/>
+                <div class="row row-horizon"
+                    popover-title="Step 3 - Complete"
+                    popover="If the video shot contains another speaking face, select it in this list."
+                    popover-trigger="mouseenter"
+                    popover-append-to-body="true"
+                    popover-placement="top">
+                    <img ng-repeat="personName in model.candidates"
+                    tooltip="{{ personName }}" tooltip-placement="bottom"
+                    src="{{ cache.png[personName] }}" height="80px" width="80px"
+                    ng-click="addPerson(personName)" />
+                </div>
+                <br/>
                 <div class="row">
                     <div class="col-md-9">
                         <form ng-submit="manualAddPerson(selected)" class="">
@@ -36,22 +48,10 @@
                         popover-trigger="mouseenter"
                         popover-append-to-body="true"
                         popover-placement="top">
-                        <img src="../img/new.png" height="80px" width="80px"
+                        <img src="../img/new.png" height="60px" width="60px"
                         title="unknown"
                         ng-click="addUnknown()" />
                     </div>
-                </div>
-                <br/>
-                <div class="row row-horizon"
-                    popover-title="Step 3 - Complete"
-                    popover="If the video shot contains another speaking face, select it in this list."
-                    popover-trigger="mouseenter"
-                    popover-append-to-body="true"
-                    popover-placement="top">
-                    <img ng-repeat="personName in model.candidates"
-                    tooltip="{{ personName }}" tooltip-placement="bottom"
-                    src="{{ cache.png[personName] }}" height="80px" width="80px"
-                    ng-click="addPerson(personName)" />
                 </div>
             </div>
             <br/>
