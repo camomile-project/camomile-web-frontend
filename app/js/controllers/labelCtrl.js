@@ -96,7 +96,6 @@ angular.module('myApp.controllers')
                     // returns it directly
                     callback(null, $scope.cache.mugshotLayer);
                 }
-
             };
 
             var _getPng = function (personName, callback) {
@@ -280,7 +279,6 @@ angular.module('myApp.controllers')
                     });
 
                 });
-
             };
 
             $scope.showAddPersonModal = function () {
@@ -331,7 +329,7 @@ angular.module('myApp.controllers')
 
                 // remove this person from the output
                 $scope.setFaceState(personName, undefined);
-            }
+            };
 
             $scope.model.validate = function () {
 
@@ -375,6 +373,7 @@ angular.module('myApp.controllers')
                         $scope.model.popQueueElement();
                     })
             };
+
             $document.on(
                 "keydown",
                 function (event) {
@@ -451,5 +450,6 @@ angular.module('myApp.controllers')
                         });
                     }
                 });
+
         }
     ]);

@@ -12,6 +12,7 @@ angular.module('myApp.controllers')
             $scope.model = {};
             $scope.model.absUrl = $rootScope.absUrl;
             $scope.model.videoPath = Cookies.get("video.path") || "";
+            $scope.tutorial = 'hide';
 
             var config = $resource($rootScope.absUrl + '/config');
 
@@ -78,12 +79,14 @@ angular.module('myApp.controllers')
                 console.log("probe called");
             };
 
-            // hide contextmenu if clicked anywhere but on relevant targets
-            $("body").on("click", function () {
-                $("#contextMenu").hide().find("li").removeClass("disabled").children().css({
-                    "pointer-events": "auto"
-                });
-            });
+            $scope.toggleTutorial = function () {
+                if ($scope.tutorial === 'show') {
+                    $scope.tutorial = 'hide';
+                } else {
+                    $scope.tutorial = 'show';
+                }
+                $('.tutorial').popover($scope.tutorial);
+            };
 
         }
     ]);

@@ -1,84 +1,127 @@
 <div ng-controller="labelCtrl"
     ng-show='isLogged()'
     ng-init="model.popQueueElement()">
-    <div ng-show="validating" class="container-fluid">
+    <div ng-show="validating" class="container">
         Looking for a new annotation...
     </div>
-    <div ng-hide="validating" class="container-fluid">
-        <div class="row" height="100px"></div>
+    <div ng-hide="validating" class="container">
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <div id="video-container">
-                    <video autoplay id="player"
+                    <video ng-src={{model.video}}
+                        autoplay id="player"
                         cm-video-player
-                        ng-src={{model.video}}
                         width="100%"
-                        popover-title="Step 1 - Watch"
-                        popover="Watch the video segment entirely"
-                        popover-trigger="mouseenter"
-                        popover-append-to-body="true"
-                        popover-placement="right">
+                        class="tutorial"
+                        data-toggle="popover"
+                        data-trigger="manual"
+                        data-container="body"
+                        data-placement="left"
+                        title="Step 1"
+                        data-content="Carefully watch and listen to the video.">
                     </video>
                 </div>
                 <br/>
-                <div class="row row-horizon"
-                    popover-title="Step 3 - Complete"
-                    popover="If the video shot contains another speaking face, select it in this list."
-                    popover-trigger="mouseenter"
-                    popover-append-to-body="true"
-                    popover-placement="top">
-                    <img ng-repeat="personName in model.candidates"
-                    tooltip="{{ personName }}" tooltip-placement="bottom"
-                    src="{{ cache.png[personName] }}" height="80px" width="80px"
-                    ng-click="addPerson(personName)" />
+                <div class="row tutorial"
+                    data-toggle="popover"
+                    data-trigger="manual"
+                    data-container="body"
+                    data-placement="top"
+                    data-html="true"
+                    title="Step 3"
+                    data-content="Click on missing speaking faces or type in their name and press <kbd>ENTER</kbd>. Click the question mark face if you do not know the name of the speaking face.">
+                    <div class="col-md-12">
+                        <form ng-submit="manualAddPerson(selected)" class="">
+                            <input id="personNameInput"
+                            type="text"
+                            ng-model="selected"
+                            typeahead="personName for personName in cache.mugshots | filter:$viewValue | limitTo:8"
+                            class="form-control input-lg"
+                            placeholder="firstname_lastname">
+                        </form>
+                    </div>
+                    <div class="col-md-12">
+                        <img ng-repeat="personName in model.candidates"
+                        tooltip="{{ personName }}"
+                        tooltip-placement="bottom"
+                        src="{{ cache.png[personName] }}"
+                        height="80px"
+                        width="80px"
+                        ng-click="addPerson(personName)" />
+                        <img src="../img/new.png" 
+                             height="80px"
+                             width="80px"
+                             title="unknown"
+                             ng-click="addUnknown()" />
+                    </div>
                 </div>
                 <br/>
                 <div class="row">
-                    <div class="col-md-9">
-                        <form ng-submit="manualAddPerson(selected)" class="">
-                            <input id="personNameInput" type="text"
-                            ng-model="selected"
-                            typeahead="personName for personName in cache.mugshots | filter:$viewValue | limitTo:8"
-                            class="form-control input-lg" >
-                        </form>
+                    <div class="col-md-1 tutorial"
+                        data-toggle="popover"
+                        data-trigger="manual"
+                        data-container="body"
+                        data-placement="left"
+                        data-html="true"
+                        title="<kbd>ESC</kbd>"
+                        data-content="Skip this annotation if something is wrong with it.">
+                        <img ng-click="model.skip()"
+                        src="../img/un validate.png"
+                        title="skip"
+                        width="80px"/>
                     </div>
-                    <div class="col-md-3" style="text-align: center"
-                        popover-title="Step 4 - Complete (continued)"
-                        popover="If you cannot find it, mark the video shot with this 'unknown' tag."
-                        popover-trigger="mouseenter"
-                        popover-append-to-body="true"
-                        popover-placement="top">
-                        <img src="../img/new.png" height="60px" width="60px"
-                        title="unknown"
-                        ng-click="addUnknown()" />
+                    <div class="col-md-1 col-md-offset-10 tutorial"
+                        data-toggle="popover"
+                        data-trigger="manual"
+                        data-container="body"
+                        data-placement="left"
+                        data-html="true"
+                        title="<kbd>ENTER</kbd>"
+                        data-content="Validate this annotation when you are done.">
+                        <img src="../img/validate.png"
+                        width="80px"
+                        ng-click="model.validate()" />
                     </div>
                 </div>
+
             </div>
             <br/>
-            <div class="col-md-4">
-                <table class="table table-bordered table-hover" style="text-align: center" id="clickable-table">
+            <div class="col-md-6">
+                <table class="table table-bordered table-hover tutorial" 
+                       style="text-align: center" 
+                       id="clickable-table"
+                       data-toggle="popover"
+                       data-trigger="manual"
+                       data-container="body"
+                       data-placement="bottom"
+                       title="Step 2"
+                       data-html="true"
+                       data-content="Decide whether each person is <ul><li>NOT visible</li><li>visible but NOT speaking</li><li>visible AND speaking (must hear their voice)</li></ul><img src='../img/tutorial.png' width='150px'>">
                     <thead>
-                        <tr class="active"
-                            popover-title="Step 2 - Judge"
-                            popover="Move each person into the correct column"
-                            popover-trigger="mouseenter"
-                            popover-append-to-body="true"
-                            popover-placement="right">
+                        <tr class="active">
                             <td tooltip="I am not quite sure"
                                 tooltip-placement="bottom">
-                                <img src="../img/dontKnow.png" width="80px" height="80px" />
+                                <img src="../img/dontKnow.png"
+                                width="80px"
+                                height="80px" />
                             </td>
                             <td tooltip="Person is NOT visible"
                                 tooltip-placement="bottom">
-                                <img src="../img/noFace.png" width="80px" height="80px" />
+                                <img src="../img/noFace.png"
+                                width="80px"
+                                height="80px" />
                             </td>
                             <td tooltip="Person is visible, but NOT speaking"
                                 tooltip-placement="bottom">
-                                <img src="../img/silentFace.png" width="80px" height="80px" />
+                                <img src="../img/silentFace.png"
+                                width="80px"
+                                height="80px" />
                             </td>
                             <td tooltip="Person is visible AND speaking"
                                 tooltip-placement="bottom">
-                                <img src="../img/speakingFace.png" width="80px" height="80px" />
+                                <img src="../img/speakingFace.png"
+                                width="80px"
+                                height="80px" />
                             </td>
                         </tr>
                     </thead>
@@ -88,8 +131,11 @@
                                 id="{{ state + personName }}"
                                 ng-click="setFaceState(personName, state)">
                                 <img ng-show="model.output.known[personName] == state"
-                                tooltip="{{ personName }}" tooltip-placement="bottom"
-                                src="{{ cache.png[personName] }}" width="80px" height="80px" />
+                                tooltip="{{ personName }}"
+                                tooltip-placement="bottom"
+                                src="{{ cache.png[personName] }}"
+                                width="80px"
+                                height="80px" />
                             </td>
                         </tr>
                         <tr ng-repeat="personName in model.missing">
@@ -113,36 +159,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <div class="row">
-                    <div class="col-md-4"
-                        popover-title="Skip"
-                        popover="If something is wrong with this shot, just skip it (ESC)"
-                        popover-trigger="mouseenter"
-                        popover-append-to-body="true"
-                        popover-placement="bottom">
-                        <img src="../img/un validate.png"
-                        title="skip" width="80px"
-                        ng-click="model.skip()" />
-                    </div>
-                    <div class="col-md-4"
-                        popover-title="Step 5 - Validate"
-                        popover="If you are happy with the current state, validate (ENTER)"
-                        popover-trigger="mouseenter"
-                        popover-append-to-body="true"
-                        popover-placement="top">
-                        <img src="../img/validate.png"
-                        width="80px"
-                        ng-click="model.validate()" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6" style="text-align: left" >
-            </div>
-            <div class="col-md-2">
             </div>
         </div>
     </div>
-    
 </div>
