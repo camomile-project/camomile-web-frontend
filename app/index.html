@@ -100,9 +100,23 @@
 
                         <div ng-controller="ParameterButtonCtrl">
                             <form ng-submit="saveVideoPreferences()" class="navbar-form navbar-left">
-                                <input type="text" id="localServerInput" class="form-control" 
+                                <input type="text"
+                                       id="localServerInput" 
+                                       class="form-control tutorial" 
                                        ng-model="model.videoPath" 
-                                       placeholder="Local video server">
+                                       placeholder="Local video server"
+                                       data-toggle="popover"
+                                       data-trigger="manual"
+                                       data-container="body"
+                                       data-placement="bottom"
+                                       data-html="true"
+                                       title="Step 0 (do this once)"
+                                       data-content="Type in URL of local video server, press <kbd>ENTER</kbd> and refresh.">
+                            </form>
+                        </div>
+                        <div>
+                            <form ng-submit="toggleTutorial()" class="navbar-form navbar-left">
+                                <button type="submit" class="btn btn-primary">Tutorial</button>
                             </form>
                         </div>
                     </div>
