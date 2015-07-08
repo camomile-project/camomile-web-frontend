@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="bower_components/bootstrap-horizon/bootstrap-horizon.css">
-    <link rel="stylesheet" href="bower_components/angular-bootstrap/ui-bootstrap-csp.css"></script>
 
     <link rel="stylesheet" href="css/app.css"/>
     <link rel="stylesheet" href="css/sticky-footer-navbar.css"/>
@@ -36,8 +35,8 @@
     <script src="bower_components/d3/d3.js"></script>
 
     <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
-    <script src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
-    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+    <script src="bower_components/angular-strap/dist/angular-strap.min.js"></script>
+    <script src="bower_components/angular-strap/dist/angular-strap.tpl.min.js"></script>
 
     <script src="./bower_components/async/lib/async.js"></script>
 
@@ -50,8 +49,11 @@
     <script src="js/app.js"></script>
 
     <!-- Services-->
-    <script src="js/services/defaults.js"></script>
+    <script src="js/services/cmError.js"></script>
     <script src="js/services/dateUtils.js"></script>
+    <script src="js/services/defaults.js"></script>
+    <script src="js/services/langUtils.js"></script>
+    <script src="js/services/palette.js"></script>
     <script src="js/services/session.js"></script>
     <script src="js/services/camomileService.js"></script>
 
@@ -60,12 +62,26 @@
     <script src="js/filters.js"></script>
 
     <!-- Directives-->
+    <script src="js/directives/appVersion.js"></script>
+    <script src="js/directives/blurbtn.js"></script>
+    <script src="js/directives/cmBarchart.js"></script>
+    <script src="js/directives/cmContextBar.js"></script>
+    <script src="js/directives/cmDescriptionModal.js"></script>
+    <script src="js/directives/cmEditModal.js"></script>
+    <script src="js/directives/cmLegend.js"></script>
+    <script src="js/directives/cmPiechart.js"></script>
+    <script src="js/directives/cmTimeLine.js"></script>
+    <script src="js/directives/cmTreemap.js"></script>
     <script src="js/directives/cmVideoPlayer.js"></script>
+    <script src="js/directives/cmVideoThumbnail.js"></script>
+    <script src="js/directives/ngLoginSubmit.js"></script>
+    <script src="js/directives/ngRightClick.js"></script>
 
     <!-- Controllers-->
     <script src="js/controllers/commonCtrl.js"></script>
     <script src="js/controllers/parameterButtonCtrl.js"></script>
     <script src="js/controllers/sessionCtrl.js"></script>
+    <script src="js/controllers/evidenceCtrl.js"></script>
     <script src="js/controllers/labelCtrl.js"></script>
 
 

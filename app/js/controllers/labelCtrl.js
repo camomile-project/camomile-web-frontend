@@ -174,7 +174,7 @@ angular.module('myApp.controllers')
 
                     // this usually happens when the queue is empty
                     if (error) {
-                        alert(item.error);
+                        console.log(item.error);
                         $scope.$apply(function () {
                             $scope.model.video = undefined;
                         });
@@ -206,7 +206,7 @@ angular.module('myApp.controllers')
                             $rootScope.queues.labelIn, item,
                             function (error, data) {
                                 if (error) {
-                                    alert(data.error);
+                                    console.log(data.error);
                                     return;
                                 }
                                 $scope.model.popQueueElement();
@@ -347,7 +347,7 @@ angular.module('myApp.controllers')
                     $rootScope.queues.labelOut, item,
                     function (error, data) {
                         if (error) {
-                            alert(data.error);
+                            console.log(data.error);
                             return;
                         }
                         $scope.model.popQueueElement();
@@ -367,7 +367,7 @@ angular.module('myApp.controllers')
                     $rootScope.queues.labelIn, $scope.model.input,
                     function (error, data) {
                         if (error) {
-                            alert(data.error);
+                            console.log(data.error);
                             return;
                         }
                         $scope.model.popQueueElement();
