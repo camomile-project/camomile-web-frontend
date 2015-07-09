@@ -12,7 +12,7 @@ angular.module(
             'myApp.controllers',
             'ngRoute',
             'ngSanitize',
-            'mgcrea.ngStrap'
+            'ui.bootstrap'
         ])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider.when('/', {
