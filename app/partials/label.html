@@ -33,11 +33,11 @@
                     <div class="col-md-12">
                         <form ng-submit="manualAddPerson(selected)" class="">
                             <input id="personNameInput"
-                            type="text"
-                            ng-model="selected"
-                            typeahead="personName for personName in cache.mugshots | filter:$viewValue | limitTo:8"
-                            class="form-control input-lg"
-                            placeholder="firstname_lastname">
+                                   type="text"
+                                   ng-model="selected"
+                                   typeahead="personName for personName in cache.mugshots | filter:$viewValue | limitTo:8"
+                                   class="form-control input-lg"
+                                   placeholder="firstname_lastname">
                         </form>
                     </div>
                     <div class="col-md-12">
@@ -96,30 +96,38 @@
                        data-placement="bottom"
                        title="Step 2"
                        data-html="true"
-                       data-content="Decide whether each person is <ul><li>NOT visible</li><li>visible but NOT speaking</li><li>visible AND speaking (must hear their voice)</li></ul><img src='../img/tutorial.png' width='150px'>">
+                       data-content="Decide whether each person is <ul><li>NOT visible</li><li>visible but NOT speaking</li><li>visible AND speaking (must hear their voice)</li></ul>Select ? if you are not sure.<img src='../img/tutorial.png' width='150px'>">
                     <thead>
                         <tr class="active">
-                            <td tooltip="I am not quite sure"
-                                tooltip-placement="bottom">
-                                <img src="../img/dontKnow.png"
+                            <td>
+                                <img data-toggle="tooltip"
+                                title="I am not quite sure"
+                                data-placement="bottom"
+                                src="../img/dontKnow.png"
                                 width="80px"
                                 height="80px" />
                             </td>
-                            <td tooltip="Person is NOT visible"
-                                tooltip-placement="bottom">
-                                <img src="../img/noFace.png"
+                            <td>
+                                <img title="Person is NOT visible"
+                                data-toggle="tooltip"
+                                data-placement="bottom"
+                                src="../img/noFace.png"
                                 width="80px"
                                 height="80px" />
                             </td>
-                            <td tooltip="Person is visible, but NOT speaking"
-                                tooltip-placement="bottom">
-                                <img src="../img/silentFace.png"
+                            <td>
+                                <img title="Person is visible, but NOT speaking"
+                                data-toggle="tooltip"
+                                data-placement="bottom"
+                                src="../img/silentFace.png"
                                 width="80px"
                                 height="80px" />
                             </td>
-                            <td tooltip="Person is visible AND speaking"
-                                tooltip-placement="bottom">
-                                <img src="../img/speakingFace.png"
+                            <td>
+                                <img title="Person is visible AND speaking"
+                                data-toggle="tooltip"
+                                data-placement="bottom"
+                                src="../img/speakingFace.png"
                                 width="80px"
                                 height="80px" />
                             </td>
