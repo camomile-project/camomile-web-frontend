@@ -88,5 +88,9 @@ angular.module('myApp.controllers')
                 $('.tutorial').popover($scope.tutorial);
             };
 
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip()
+            })
+
         }
     ]);
