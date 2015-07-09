@@ -230,10 +230,10 @@ angular.module('myApp.controllers')
                     // person names selected from (+) modal
                     $scope.model.missing = [];
 
-                    // defaults all hypotheses to "don't know"
+                    // defaults all hypotheses to "no face"
                     for (var i = item.hypothesis.length - 1; i >= 0; i--) {
                         var personName = item.hypothesis[i];
-                        $scope.setFaceState(personName, 'dontKnow');
+                        $scope.setFaceState(personName, 'noFace');
                     };
 
                     async.parallel({
@@ -401,12 +401,12 @@ angular.module('myApp.controllers')
                             $scope.model.toggle_play();
                         });
                     }
-                    //esc-> skip
+                    //esc -> skip
                     if (event.keyCode == 27) {
                         $scope.$apply(function () {
-                            //skip
                             $scope.model.skip();
                         });
+
                     }
                     //Left
                     if (event.keyCode == 37) {
