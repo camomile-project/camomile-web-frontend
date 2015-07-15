@@ -100,7 +100,7 @@ angular.module('myApp.controllers')
 
             var _getPng = function (personName, callback) {
 
-                // if we reach this point, it means that 
+                // if we reach this point, it means that
                 // we know the ID of mugshot layer
 
                 // if personName's mugshot has not been cached yet
@@ -112,7 +112,7 @@ angular.module('myApp.controllers')
                     options.filter.fragment = personName;
                     options.filter.id_layer = $scope.cache.mugshotLayer;
 
-                    // get 
+                    // get
                     camomileService.getAnnotations(
                         function (error, annotations) {
 
@@ -149,7 +149,7 @@ angular.module('myApp.controllers')
 
                 } else {
 
-                    // if we reach this point, it means that we 
+                    // if we reach this point, it means that we
                     // already have cached personName's mugshot
                     callback(null, $scope.cache.png[personName]);
                 }
@@ -183,34 +183,9 @@ angular.module('myApp.controllers')
                     }
 
                     // if current user already annotated this shot
+                    // just try next one...
                     if (item.annotated_by.indexOf(Session.username) > -1) {
-
-                        if (item.skipped_by === undefined) {
-                            item.skipped_by = [];
-                        }
-
-                        var count = 0;
-                        for (var i = 0; i < item.skipped_by.length; ++i) {
-                            if (item.skipped_by[i] === Session.username)
-                                count++;
-                        }
-                        if (count > 2) {
-                            // increment a "already skippped by you" counter
-                            // and do something based on that number
-                            alert('looks like you are the only one working...');
-                        } else {
-                            item.skipped_by.push(Session.username);
-                        }
-
-                        camomileService.enqueue(
-                            $rootScope.queues.labelIn, item,
-                            function (error, data) {
-                                if (error) {
-                                    console.log(data.error);
-                                    return;
-                                }
-                                $scope.model.popQueueElement();
-                            })
+                        $scope.model.popQueueElement();
                         return;
                     }
 
@@ -355,23 +330,8 @@ angular.module('myApp.controllers')
             };
 
             $scope.model.skip = function () {
-
                 $scope.validating = true;
-
-                if ($scope.model.input.skipped_by === undefined) {
-                    $scope.model.input.skipped_by = [];
-                }
-                $scope.model.input.skipped_by.push(Session.username);
-
-                camomileService.enqueue(
-                    $rootScope.queues.labelIn, $scope.model.input,
-                    function (error, data) {
-                        if (error) {
-                            console.log(data.error);
-                            return;
-                        }
-                        $scope.model.popQueueElement();
-                    })
+                $scope.model.popQueueElement();
             };
 
             $document.on(
