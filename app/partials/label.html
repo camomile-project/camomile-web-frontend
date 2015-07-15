@@ -6,6 +6,7 @@
     </div>
     <div ng-hide="validating" class="container">
         <div class="row">
+            <br/>
             <div class="col-md-6">
                 <div id="video-container">
                     <video ng-src={{model.video}}
@@ -48,7 +49,7 @@
                         src="{{ cache.png[personName] }}"
                         height="80px"
                         width="80px"
-                        ng-click="addPerson(personName)" />
+                        ng-dblclick="addPerson(personName)" />
                         <img src="../img/new.png" 
                              height="80px"
                              width="80px"
@@ -86,7 +87,6 @@
                 </div>
 
             </div>
-            <br/>
             <div class="col-md-6">
                 <table class="table table-bordered table-hover tutorial" 
                        style="text-align: center" 
@@ -141,25 +141,23 @@
                                 ng-click="setFaceState(personName, state)">
                                 <img ng-show="model.output.known[personName] == state"
                                 tooltip="{{ personName }}"
-                                tooltip-placement="bottom"
-                                src="{{ cache.png[personName] }}"
-                                width="80px"
-                                height="80px" />
+                                tooltip-placement="top"
+                                src="{{ cache.png[personName] }}" width="80px" height="80px" />
                             </td>
                         </tr>
                         <tr ng-repeat="personName in model.missing">
-                            <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
+                            <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace', 'speakingFace']"
                                 id="{{ state + personName }}"
-                                ng-click="removePerson(personName)">
-                            </td>
-                            <td>
-                                <img tooltip="{{ personName }}"
+                                ng-click="setFaceState(personName, state)"
+                                ng-dblclick="removePerson(personName)">
+                                <img ng-show="model.output.known[personName] == state"
+                                tooltip="{{ personName }}"
                                 src="{{ cache.png[personName] }}" width="80px" height="80px" />
                             </td>
                         </tr>
                         <tr ng-if="model.output.unknown">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
-                                ng-click="removeUnknown()">
+                                ng-dblclick="removeUnknown()">
                             </td>
                             <td>
                                 <img src="../img/new.png"
