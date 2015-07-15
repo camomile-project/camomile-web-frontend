@@ -48,7 +48,7 @@
                         src="{{ cache.png[personName] }}"
                         height="80px"
                         width="80px"
-                        ng-click="addPerson(personName)" />
+                        ng-dblclick="addPerson(personName)" />
                         <img src="../img/new.png" 
                              height="80px"
                              width="80px"
@@ -150,7 +150,7 @@
                         <tr ng-repeat="personName in model.missing">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
                                 id="{{ state + personName }}"
-                                ng-click="removePerson(personName)">
+                                ng-dblclick="removePerson(personName)">
                             </td>
                             <td>
                                 <img tooltip="{{ personName }}"
@@ -159,7 +159,7 @@
                         </tr>
                         <tr ng-if="model.output.unknown">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
-                                ng-click="removeUnknown()">
+                                ng-dblclick="removeUnknown()">
                             </td>
                             <td>
                                 <img src="../img/new.png"
