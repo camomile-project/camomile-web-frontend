@@ -135,10 +135,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="personName in model.input.hypothesis">
+                        <tr ng-repeat="personName in model.input.hypothesis" id="{{personName}}" class="hypothesis">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace', 'speakingFace']"
-                                id="{{ state + personName }}"
-                                ng-click="setFaceState(personName, state)">
+                                id="{{ $index + personName }}"
+                                ng-click="setFaceState(personName, state)"
+                                ng-class="{true: 'checked' , false: 'unchecked'}[model.output.known[personName] == state]"
+                                class="{{state}}">
                                 <img ng-show="model.output.known[personName] == state"
                                 tooltip="{{ personName }}"
                                 tooltip-placement="bottom"
@@ -147,7 +149,7 @@
                                 height="80px" />
                             </td>
                         </tr>
-                        <tr ng-repeat="personName in model.missing">
+                        <tr ng-repeat="personName in model.missing" id="{{personName}}" class="missing">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
                                 id="{{ state + personName }}"
                                 ng-click="removePerson(personName)">
@@ -157,7 +159,7 @@
                                 src="{{ cache.png[personName] }}" width="80px" height="80px" />
                             </td>
                         </tr>
-                        <tr ng-if="model.output.unknown">
+                        <tr ng-if="model.output.unknown" class="unknown">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
                                 ng-click="removeUnknown()">
                             </td>

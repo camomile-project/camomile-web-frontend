@@ -343,3 +343,6 @@ th.jh-key{
     position: absolute;
     z-index: 3;
 }
+.highlighted {
+    background: #F5F5F5;
+}
