@@ -100,18 +100,6 @@ span.label {
     color: red;
 }
 
-div.tooltip, div.piecharttooltip, div.treeemaptooltip {
-    position: absolute;
-    text-align: left;
-    padding: 2px;
-    font: 12px sans-serif;
-    stroke: black;
-    fill: white;
-    background: white;
-    border: solid 1px;
-    pointer-events: none;
-}
-
 g.slice {
     cursor: pointer;
 }
@@ -126,17 +114,17 @@ rect.legend, rect.barchart-bar, rect.node {
 }
 
 
-#video-container {
+/*#video-container {
     width: 640px;
     height: 410px;
     position: relative;
 }
-
+*/
 #svgcontrol {
     display: block;
 }
 
-#video-controls {
+/*#video-controls {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -146,11 +134,11 @@ rect.legend, rect.barchart-bar, rect.node {
     transition: opacity .3s;
     color: white;
 }
-
-#video-container:hover #video-controls {
+*/
+/*#video-container:hover #video-controls {
     opacity: .9;
 }
-
+*/
 button.video-control {
     background: rgba(0,0,0,.5);
     border: 0;
@@ -166,31 +154,31 @@ button.video-control {
     display:none;
 }
 
-.controls {
+/*.controls {
     position: relative;
     box-shadow: inset 0 0 0 5px #add;
-    opacity: 0;
+    opacity: 0.5;
     transition: opacity .3s;
     color: white;
 }
-
-#video-container:hover .controls {
+*/
+/*#video-container:hover .controls {
     opacity: .9;
 }
-
-#controlsvg {
+*/
+/*#controlsvg {
     background: #FFF;
     display:block;
     width:100%;
     height:50px;
     pointer-events: none;
 }
-
+*/
 .mark {
     pointer-events: visiblePainted;
 }
 
-#controlsoverlay {
+/*#controlsoverlay {
     position: absolute;
     top:10px;
     bottom:0;
@@ -198,9 +186,10 @@ button.video-control {
     right:0;
 
 }
+*/
 
 #play-button {
-    position: absolute;
+    /*position: absolute;*/
     left:5px;
     top:10px;
     width:60px;
@@ -208,7 +197,7 @@ button.video-control {
 }
 
 #control-bar {
-    position: absolute;
+    /*position: absolute;*/
     left: 70px;
     width: 470px;
 }
@@ -354,4 +343,3 @@ th.jh-key{
     position: absolute;
     z-index: 3;
 }
-

@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en" ng-app="myApp">
 <head>
-    <title>Camomile @ ERRARE</title>
+    <title>MediaEval Person Discovery Task</title>
 
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bower_components/bootstrap-horizon/bootstrap-horizon.css">
 
     <link rel="stylesheet" href="css/app.css"/>
     <link rel="stylesheet" href="css/sticky-footer-navbar.css"/>
@@ -34,12 +35,8 @@
     <script src="bower_components/d3/d3.js"></script>
 
     <script src="bower_components/angular-sanitize/angular-sanitize.min.js"></script>
-    <script src="bower_components/angular-strap/dist/angular-strap.min.js"></script>
-    <script src="bower_components/angular-strap/dist/angular-strap.tpl.min.js"></script>
-
-    <!-- Json to Human lib-->
-    <script src="./bower_components/json-human/lib/crel.js"></script>
-    <script src="./bower_components/json-human/src/json.human.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-min.js"></script>
+    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
 
     <script src="./bower_components/async/lib/async.js"></script>
 
@@ -83,22 +80,10 @@
     <!-- Controllers-->
     <script src="js/controllers/commonCtrl.js"></script>
     <script src="js/controllers/parameterButtonCtrl.js"></script>
-    <script src="js/controllers/explorationBaseCtrl.js"></script>
     <script src="js/controllers/sessionCtrl.js"></script>
-    <script src="js/controllers/regressionCtrl.js"></script>
-    <script src="js/controllers/fusionCtrl.js"></script>
-    <script src="js/controllers/diffCtrl.js"></script>
-    <script src="js/controllers/queueCtrl.js"></script>
     <script src="js/controllers/evidenceCtrl.js"></script>
     <script src="js/controllers/labelCtrl.js"></script>
 
-    <!-- together js -->
-    <!--
-    <script>
-
-    </script>
-    <script src="https://togetherjs.com/togetherjs-min.js"></script>
-    -->
 
 </head>
 <body>
@@ -115,23 +100,10 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="#">Camomile</a>
+                <a class="navbar-brand" href="#">MediaEval</a>
             </div>
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <!--<li><a href="" onclick="TogetherJS(this); return false;">Start Multi-user session</a></li>-->
-                    <li><a href="#/diff">Diff</a></li>
-                    <li><a href="#/regression">Regression</a></li>
-                    <!--<li><a href="#/fusion">Fusion</a></li>-->
-                    <li><a href="#/queue?type=shot">Annotate shot</a></li>
-                    <li><a href="#/queue?type=head">Annotate head</a></li>
-                    <li><a href="#/evidence">Evidence</a></li>
-                    <li><a href="#/label">Label</a></li>
-                </ul>
 
-                <div id="parameterButtons_button_id" ng-controller="ParameterButtonCtrl">
-                    <input class="image-button navbar-right" type="image" src="./img/params.png"  ng-click="openParameters()" width="28px" height="27px" style="margin-top: 10px;margin-left: 15px;">
-                </div>
                 <div ng-controller="SessionCtrl">
 
                     <div ng-if="isLogged()">
@@ -141,11 +113,32 @@
                             </div>
                             <button type="submit" class="btn btn-danger">Logout</button>
                         </form>
+
+                        <div ng-controller="ParameterButtonCtrl">
+                            <form ng-submit="saveVideoPreferences()" class="navbar-form navbar-left">
+                                <input type="text"
+                                       id="localServerInput" 
+                                       class="form-control tutorial" 
+                                       ng-model="model.videoPath" 
+                                       placeholder="Local video server"
+                                       data-toggle="popover"
+                                       data-trigger="manual"
+                                       data-container="body"
+                                       data-placement="bottom"
+                                       data-html="true"
+                                       title="Step 0 (do this once)"
+                                       data-content="Type in URL of local video server, press <kbd>ENTER</kbd> and refresh.">
+                            </form>
+                        </div>
+                        <div>
+                            <form ng-submit="toggleTutorial()" class="navbar-form navbar-left">
+                                <button type="submit" class="btn btn-primary">Tutorial</button>
+                            </form>
+                        </div>
                     </div>
 
                     <div ng-if="!isLogged()">
-                        <!-- 2 forms (1 stays hidden) to enable username and password save -->
-                        <!-- see http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs -->
+
                         <form name="login-form" id="login-form" method="POST" action="" style="display: none;">
                             <input name="login" id="login-login" type="text">
                             <input name="password" id="login-password" type="password">
@@ -173,54 +166,16 @@
                 </div>
 
             </div>
-            <!--/.navbar-collapse -->
         </div>
     </div>
 
     <!-- Begin page content -->
     <div class="container">
-
-        <!--<div class="col-xs-6 cm-selector" ng-show='!isLogged()'>-->
-            <!--Enter your Login / Password an select a case.-->
-        <!--</div>-->
         <div ng-view>
-
         </div>
 
     </div>
 </div>
-
-<div id="parameterModal" class="modal fade" ng-controller="ParameterButtonCtrl">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <h4 class="modal-title">Change the video path</h4>
-            </div>
-            <div class="modal-body">
-                <div>
-                    <span>
-                        Use default video path
-                        <input type="checkbox" ng-model="model.useDefaultVideoPath">
-                    </span>
-                </div>
-                <div class="input-group" style="margin-top: 20px;">
-                    <span class="input-group-addon" data-title="Specify your path here"><b>Video path:</b></span>
-
-                    <form ng-submit="model.modifyVideoPath" class="ng-pristine ng-valid">
-                        <input id="videoPathInput" type="text" class="form-control ng-pristine ng-valid" ng-model="model.videoPath" ng-disabled="model.useDefaultVideoPath">
-                    </form>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" data-dismiss="modal" ng-click="modifyVideoPath()">Ok</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div id="button-tooltip"></div>
 
 <div id="footer">
     <div class="container">

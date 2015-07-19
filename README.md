@@ -7,7 +7,6 @@ $ docker run -d
              -e CAMOMILE_API=https://camomile.fr/api \
              -e CAMOMILE_LOGIN=my_login \
              -e CAMOMILE_PASSWORD=my_password \
-             -e PYANNOTE_API=https://pyannote.fr/tool \
              camomile/web
 ```
 
@@ -42,7 +41,6 @@ Options:
     --camomile <url>       URL of Camomile server (e.g. https://camomile.fr/api)
     --login <login>        Login for Camomile server (for queues creation)
     --password <password>  Password for Camomile server
-    --pyannote <url>       URL of PyAnnote server (e.g. https://camomile.fr/tool)
 ````
 
 or use environment variables `CAMOMILE_*` and `PYANNOTE_API`:
@@ -51,5 +49,4 @@ or use environment variables `CAMOMILE_*` and `PYANNOTE_API`:
 $ export CAMOMILE_API=https://camomile.fr/api
 $ export CAMOMILE_LOGIN=my_login
 $ export CAMOMILE_PASSWORD=my_password
-$ export PYANNOTE_API=https://pyannote.fr/tool
 $ node web-server.js
