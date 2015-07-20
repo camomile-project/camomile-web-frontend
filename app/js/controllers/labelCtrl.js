@@ -141,6 +141,7 @@ angular.module('myApp.controllers')
                             $scope.$apply(
                                 function () {
                                     $scope.cache.png[personName] = 'data:image/png;base64,' + annotations[0].data.png;
+                                    $scope.cache.PNG[personName] = 'data:image/png;base64,' + annotations[0].data.PNG;
                                 });
 
                             // ... and returns it with no error
@@ -152,6 +153,7 @@ angular.module('myApp.controllers')
                     // if we reach this point, it means that we
                     // already have cached personName's mugshot
                     callback(null, $scope.cache.png[personName]);
+                    callback(null, $scope.cache.PNG[personName]);
                 }
             };
 
@@ -413,7 +415,6 @@ angular.module('myApp.controllers')
                     }else if(direction === 39){
                        state_next = state_index + 1;
                        state_next = state_next>3? 0 : state_next;
-                        
                     }
                     return states[state_next];
                 };
@@ -445,7 +446,7 @@ angular.module('myApp.controllers')
                     }
                     $(trs).removeClass('highlighted');
                     $(next).addClass('highlighted');
-                }
+                };
 
 
 
