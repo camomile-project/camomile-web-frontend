@@ -50,6 +50,7 @@ angular.module('myApp.controllers')
             $scope.cache.mugshotLayer = undefined;
             $scope.cache.png = {};
             $scope.cache.PNG = {};
+            $scope.personInPool = undefined;
 
             var _getMugshotLayer = function (callback) {
 
@@ -141,6 +142,7 @@ angular.module('myApp.controllers')
                             $scope.$apply(
                                 function () {
                                     $scope.cache.png[personName] = 'data:image/png;base64,' + annotations[0].data.png;
+                                    $scope.cache.PNG[personName] = 'data:image/png;base64,' + annotations[0].data.PNG;
                                 });
 
                             // ... and returns it with no error
@@ -152,6 +154,7 @@ angular.module('myApp.controllers')
                     // if we reach this point, it means that we
                     // already have cached personName's mugshot
                     callback(null, $scope.cache.png[personName]);
+                    callback(null, $scope.cache.PNG[personName]);
                 }
             };
 
@@ -334,9 +337,14 @@ angular.module('myApp.controllers')
                 $scope.model.popQueueElement();
             };
 
+            $scope.changeMugPool = function(personName){
+                $scope.personInPool =  personName;
+            };
+
             $document.on(
                 "keydown",
                 function (event) {
+
                     var targetID = event.target.id;
                     var button_checked = false;
                     if (targetID == 'confirm' || targetID == 'cancel') {
@@ -368,48 +376,85 @@ angular.module('myApp.controllers')
                         });
 
                     }
-                    //Left
-                    if (event.keyCode == 37) {
-                        $scope.$apply(function () {
-                            if ($scope.model.current_time - 0.04 > $scope.model.infbndsec) {
-                                $scope.model.current_time = $scope.model.current_time - 0.04;
-                            } else {
-                                $scope.model.current_time = $scope.model.infbndsec;
-                            }
-                        });
-                    }
-                    //Right
-                    if (event.keyCode == 39) {
-                        $scope.$apply(function () {
-                            if ($scope.model.current_time + 0.04 < $scope.model.supbndsec) {
-                                $scope.model.current_time = $scope.model.current_time + 0.04;
-                            } else {
-                                $scope.model.current_time = $scope.model.supbndsec;
-                            }
-                        });
-                    }
-                    //Up
-                    if (event.keyCode == 38) {
-                        $scope.$apply(function () {
-                            if ($scope.model.current_time - 1 > $scope.model.infbndsec) {
-                                $scope.model.current_time = $scope.model.current_time - 1;
-                            } else {
-                                $scope.model.current_time = $scope.model.infbndsec;
-                            }
-                        });
 
+                    if(event.keyCode === 38 || event.keyCode === 40){
+                        //Up | Down
+                        event.preventDefault();
+                        _mugChangeRow(event.keyCode);
                     }
-                    //Down
-                    if (event.keyCode == 40) {
-                        $scope.$apply(function () {
-                            if ($scope.model.current_time + 1 < $scope.model.supbndsec) {
-                                $scope.model.current_time = $scope.model.current_time + 1;
-                            } else {
-                                $scope.model.current_time = $scope.model.supbndsec;
+
+                    if(event.keyCode === 37 || event.keyCode === 39){
+                        //Left  | Right
+                        var trs = $("#clickable-table  > tbody > tr");
+                        if(!trs.hasClass('highlighted')){
+                            //make the first highlighted area
+                            $($(trs).first()[0]).addClass('highlighted');
+                        }else{
+                            var highlighted =  $("#clickable-table  > tbody > tr.highlighted")[0];
+                            var personName = highlighted.id;
+                            if(highlighted.classList.contains('hypothesis')){
+                                 // console.log('hypothesis/left');
+                                var checked =  $(highlighted).find('td.checked')[0];
+                                var state_index =  parseInt(checked.id[0]);
+
+                                var new_state = _mugChangeState(state_index, event.keyCode);
+                                $scope.$apply(function () {
+                                    $scope.setFaceState(personName, new_state);
+                                });
+                            }else{
+                                $scope.$apply(function () {
+                                    $scope.removePerson(personName);
+                                });
                             }
-                        });
+                        }
                     }
                 });
+
+                var _mugChangeState = function(state_index, direction){
+
+                    var state_next;
+                    var states = ['dontKnow', 'noFace', 'silentFace', 'speakingFace'];
+                    if(direction === 37){
+                       state_next = state_index - 1;
+                       state_next = state_next<0? 3 : state_next;
+                    }else if(direction === 39){
+                       state_next = state_index + 1;
+                       state_next = state_next>3? 0 : state_next;
+                    }
+                    return states[state_next];
+                };
+
+                var _mugChangeRow = function(direction){
+                    var next;
+                    var trs = $("#clickable-table  > tbody > tr");
+
+                    if(!trs.hasClass('highlighted')){
+                        //make the first highlighted area
+                        if (direction === 40){
+                            next = $(trs).first()[0];
+                        }else if(direction === 38){
+                            next = $(trs).last()[0];
+                        }
+                    }else{
+                        var highlighted =  $("#clickable-table  > tbody > tr.highlighted")[0];
+                        if (highlighted === undefined)
+                            return null;
+                        if (direction === 40){
+                            next = $(highlighted).closest('tr').next()[0];
+                            if(next === undefined)
+                                next = $(trs).first()[0];
+                        }else if(direction === 38){
+                            next = $(highlighted).closest('tr').prev()[0];
+                            if(next === undefined)
+                                next = $(trs).last()[0];
+                        }
+                    }
+                    $(trs).removeClass('highlighted');
+                    $(next).addClass('highlighted');
+                };
+
+
+
 
         }
     ]);

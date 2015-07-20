@@ -343,3 +343,21 @@ th.jh-key{
     position: absolute;
     z-index: 3;
 }
+.highlighted {
+    background: #F5F5F5;
+}
+.mugshot{
+    width: 80px;
+    height: 80px;
+    margin:1px;
+    overflow: hidden;
+    display: inline-block;
+}
+.mugshot:hover{
+    box-shadow: 2px 2px 4px #515151;
+
+}
+
+img{
+    height: 80px;
+}
