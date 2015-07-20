@@ -50,6 +50,7 @@ angular.module('myApp.controllers')
             $scope.cache.mugshotLayer = undefined;
             $scope.cache.png = {};
             $scope.cache.PNG = {};
+            $scope.personInPool = undefined;
 
             var _getMugshotLayer = function (callback) {
 
@@ -334,6 +335,10 @@ angular.module('myApp.controllers')
             $scope.model.skip = function () {
                 $scope.validating = true;
                 $scope.model.popQueueElement();
+            };
+
+            $scope.changeMugPool = function(personName){
+                $scope.personInPool =  personName;
             };
 
             $document.on(

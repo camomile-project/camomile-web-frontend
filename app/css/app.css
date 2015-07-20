@@ -346,9 +346,18 @@ th.jh-key{
 .highlighted {
     background: #F5F5F5;
 }
-.mug{
-    -webkit-clip-path: polygon(0 0, 0 80px, 80px 80px,80px 0);
+.mugshot{
+    width: 80px;
+    height: 80px;
+    margin:1px;
+    overflow: hidden;
+    display: inline-block;
 }
+.mugshot:hover{
+    box-shadow: 2px 2px 4px #515151;
+
+}
+
 img{
-    height: 81px;
+    height: 80px;
 }

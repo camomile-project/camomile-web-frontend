@@ -41,17 +41,31 @@
                                    placeholder="firstname_lastname">
                         </form>
                     </div>
-                    <div class="col-md-12">
-                        <img ng-repeat="personName in model.candidates"
-                        tooltip="{{ personName }}"
-                        tooltip-placement="bottom"
-                        src="{{ cache.png[personName] }}"
-                        ng-click="addPerson(personName)" />
-                        <img src="../img/new.png" 
-                             height="80px"
-                             width="80px"
-                             title="unknown"
-                             ng-click="addUnknown()" />
+                    <div id="mugs" class="col-md-12">
+                        <div class="mugshot" ng-repeat="personName in model.candidates">
+                            <img class="mug"
+                            tooltip="{{ personName }}"
+                            tooltip-placement="bottom"
+                            src="{{ cache.PNG[personName] }}"
+                            ng-click="addPerson(personName)" 
+                            ng-mouseover="changeMugPool(personName)"
+                            ng-mouseleave="changeMugPool(undefined)"/>
+                        </div>
+                        <div class="mugshot">
+                            <img src="../img/new.png" 
+                                 height="80px"
+                                 width="80px"
+                                 title="unknown"
+                                 ng-click="addUnknown()" />
+                         </div>
+                        <div id="mugPool"class="span6">
+                            Mug Pool
+                            <img ng-show="personInPool!==undefined"
+                            tooltip="{{ personInPool }}"
+                            tooltip-placement="bottom"
+                            src="{{ cache.PNG[personInPool] }}"/>
+                            
+                        </div>
                     </div>
                 </div>
                 <br/>
