@@ -139,8 +139,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="personName in model.input.hypothesis" id="{{personName}}" class="hypothesis">
-                            <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace', 'speakingFace']"
+                        <tr ng-repeat="personName in model.input.hypothesis" id="{{personName}}" class="hypothesis" ng-class='{highlighted:$first}'>
+                            <td ng-repeat ="state in ['dontKnow', 'noFace', 'silentFace', 'speakingFace']"
                                 id="{{ $index + personName }}"
                                 ng-click="setFaceState(personName, state)"
                                 ng-class="{true: 'checked' , false: 'unchecked'}[model.output.known[personName] == state]"

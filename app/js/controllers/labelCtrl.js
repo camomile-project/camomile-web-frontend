@@ -379,27 +379,23 @@ angular.module('myApp.controllers')
                     if(event.keyCode === 37 || event.keyCode === 39){
                         //Left  | Right
                         var trs = $("#clickable-table  > tbody > tr");
-                        if(!trs.hasClass('highlighted')){
-                            //make the first highlighted area
-                            $($(trs).first()[0]).addClass('highlighted');
-                        }else{
-                            var highlighted =  $("#clickable-table  > tbody > tr.highlighted")[0];
-                            var personName = highlighted.id;
-                            if(highlighted.classList.contains('hypothesis')){
-                                 // console.log('hypothesis/left');
-                                var checked =  $(highlighted).find('td.checked')[0];
-                                var state_index =  parseInt(checked.id[0]);
+                        var highlighted =  $("#clickable-table  > tbody > tr.highlighted")[0];
+                        var personName = highlighted.id;
+                        if(highlighted.classList.contains('hypothesis')){
+                             // console.log('hypothesis/left');
+                            var checked =  $(highlighted).find('td.checked')[0];
+                            var state_index =  parseInt(checked.id[0]);
 
-                                var new_state = _mugChangeState(state_index, event.keyCode);
-                                $scope.$apply(function () {
-                                    $scope.setFaceState(personName, new_state);
-                                });
-                            }else{
-                                $scope.$apply(function () {
-                                    $scope.removePerson(personName);
-                                });
-                            }
+                            var new_state = _mugChangeState(state_index, event.keyCode);
+                            $scope.$apply(function () {
+                                $scope.setFaceState(personName, new_state);
+                            });
+                        }else{
+                            $scope.$apply(function () {
+                                $scope.removePerson(personName);
+                            });
                         }
+
                     }
                 });
 
