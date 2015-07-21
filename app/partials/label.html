@@ -42,18 +42,19 @@
                         </form>
                     </div>
                     <div class="col-md-12">
-                        <img ng-repeat="personName in model.candidates"
-                        tooltip="{{ personName }}"
-                        tooltip-placement="bottom"
-                        src="{{ cache.png[personName] }}"
-                        height="80px"
-                        width="80px"
-                        ng-click="addPerson(personName)" />
-                        <img src="../img/new.png" 
-                             height="80px"
-                             width="80px"
-                             title="unknown"
-                             ng-click="addUnknown()" />
+                        <div class="mugshot" ng-repeat="personName in model.candidates">
+                            <img  tooltip="{{ personName }}"
+                            tooltip-placement="bottom"
+                            src="{{ cache.PNG[personName] }}"
+                            ng-click="addPerson(personName)"/>
+                        </div>
+                        <div class="mugshot" >
+                            <img src="../img/new.png" 
+                                 height="80px"
+                                 width="80px"
+                                 title="unknown"
+                                 ng-click="addUnknown()" />
+                        </div>
                     </div>
                 </div>
                 <br/>
@@ -142,7 +143,7 @@
                                 <img ng-show="model.output.known[personName] == state"
                                 tooltip="{{ personName }}"
                                 tooltip-placement="bottom"
-                                src="{{ cache.png[personName] }}"
+                                src="{{ cache.PNG[personName] }}"
                                 width="80px"
                                 height="80px" />
                             </td>
@@ -154,7 +155,7 @@
                             </td>
                             <td>
                                 <img tooltip="{{ personName }}"
-                                src="{{ cache.png[personName] }}" width="80px" height="80px" />
+                                src="{{ cache.PNG[personName] }}" width="80px" height="80px" />
                             </td>
                         </tr>
                         <tr ng-if="model.output.unknown">

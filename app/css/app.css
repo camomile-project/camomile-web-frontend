@@ -343,3 +343,11 @@ th.jh-key{
     position: absolute;
     z-index: 3;
 }
+img{
+    height: 80px;
+}
+.mugshot{
+    width: 80px;
+    overflow: hidden;
+    display: inline-block;
+}
