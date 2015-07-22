@@ -22,6 +22,13 @@
                         data-content="Carefully watch and listen to the video. Use <kbd>SPACE</kbd> to play and pause.">
                     </video>
                 </div>
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped active"
+                       role="progressbar"
+                       style="width: {{ 100 * (model.current_time - model.infbndsec) / (model.supbndsec - model.infbndsec) }}%">
+                    <span class="sr-only">{{ model.current_time }}</span>
+                  </div>
+                </div>
                 <br/>
                 <div class="row tutorial"
                     data-toggle="popover"
