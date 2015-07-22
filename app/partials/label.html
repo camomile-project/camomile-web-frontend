@@ -153,7 +153,7 @@
                                 height="80px" />
                             </td>
                         </tr>
-                        <tr ng-repeat="personName in model.missing" id="{{personName}}" class="missing">
+                        <tr ng-repeat="personName in model.missing" id="{{personName}}" class="missing" ng-class='{highlighted:$last}'>
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
                                 id="{{ state + personName }}"
                                 ng-click="removePerson(personName)">
@@ -163,7 +163,7 @@
                                 src="{{ cache.png[personName] }}" width="80px" height="80px" />
                             </td>
                         </tr>
-                        <tr ng-if="model.output.unknown" class="unknown">
+                        <tr ng-if="model.output.unknown" class="unknown highlighted">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
                                 ng-click="removeUnknown()">
                             </td>
@@ -173,6 +173,7 @@
                             </td>
                         </tr>
                     </tbody>
+
                 </table>
             </div>
         </div>

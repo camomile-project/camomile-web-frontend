@@ -283,14 +283,19 @@ angular.module('myApp.controllers')
 
                 // defaults this person to "speaking face"
                 $scope.setFaceState(personName, 'speakingFace');
+                //the last row will be highlighted in the html
+                _removeHighlighted();
+
             };
 
             $scope.addUnknown = function (personName) {
                 $scope.model.output.unknown = true;
+                _removeHighlighted();
             };
 
             $scope.removeUnknown = function (personName) {
                 $scope.model.output.unknown = false;
+                _highlightedlastRow();
             };
 
             $scope.removePerson = function (personName) {
@@ -304,6 +309,7 @@ angular.module('myApp.controllers')
 
                 // remove this person from the output
                 $scope.setFaceState(personName, undefined);
+                _highlightedlastRow();
             };
 
             $scope.model.validate = function () {
@@ -390,9 +396,13 @@ angular.module('myApp.controllers')
                             $scope.$apply(function () {
                                 $scope.setFaceState(personName, new_state);
                             });
-                        }else{
+                        }else if(highlighted.classList.contains('missing')){
                             $scope.$apply(function () {
                                 $scope.removePerson(personName);
+                            });
+                        }else{
+                            $scope.$apply(function () {
+                                $scope.removeUnknown();
                             });
                         }
 
@@ -441,9 +451,20 @@ angular.module('myApp.controllers')
                     }
                     $(trs).removeClass('highlighted');
                     $(next).addClass('highlighted');
-                }
+                };
 
+                var _highlightedlastRow =  function(){
+                    var trs = $("#clickable-table  > tbody > tr");
+                    var last =  trs[trs.length-2];
+                    $(trs).removeClass('highlighted');
+                    $(last).addClass('highlighted');
+                };
 
+                var _removeHighlighted =  function(){
+                    var trs = $("#clickable-table  > tbody > tr");
+                    var last =  trs.last();
+                    $(trs).removeClass('highlighted');
+                };
 
 
         }
