@@ -280,14 +280,19 @@ angular.module('myApp.controllers')
 
                 // defaults this person to "speaking face"
                 $scope.setFaceState(personName, 'speakingFace');
+                //the last row will be highlighted in the html
+                _removeHighlighted();
+
             };
 
             $scope.addUnknown = function (personName) {
                 $scope.model.output.unknown = true;
+                _removeHighlighted();
             };
 
             $scope.removeUnknown = function (personName) {
                 $scope.model.output.unknown = false;
+                _highlightedlastRow();
             };
 
             $scope.removePerson = function (personName) {
@@ -301,6 +306,7 @@ angular.module('myApp.controllers')
 
                 // remove this person from the output
                 $scope.setFaceState(personName, undefined);
+                _highlightedlastRow();
             };
 
             $scope.model.validate = function () {
@@ -336,6 +342,7 @@ angular.module('myApp.controllers')
             $document.on(
                 "keydown",
                 function (event) {
+
                     var targetID = event.target.id;
                     var button_checked = false;
                     if (targetID == 'confirm' || targetID == 'cancel') {
@@ -367,48 +374,97 @@ angular.module('myApp.controllers')
                         });
 
                     }
-                    //Left
-                    if (event.keyCode == 37) {
-                        $scope.$apply(function () {
-                            if ($scope.model.current_time - 0.04 > $scope.model.infbndsec) {
-                                $scope.model.current_time = $scope.model.current_time - 0.04;
-                            } else {
-                                $scope.model.current_time = $scope.model.infbndsec;
-                            }
-                        });
+
+                    if(event.keyCode === 38 || event.keyCode === 40){
+                        //Up | Down
+                        event.preventDefault();
+                        _mugChangeRow(event.keyCode);
                     }
-                    //Right
-                    if (event.keyCode == 39) {
-                        $scope.$apply(function () {
-                            if ($scope.model.current_time + 0.04 < $scope.model.supbndsec) {
-                                $scope.model.current_time = $scope.model.current_time + 0.04;
-                            } else {
-                                $scope.model.current_time = $scope.model.supbndsec;
-                            }
-                        });
-                    }
-                    //Up
-                    if (event.keyCode == 38) {
-                        $scope.$apply(function () {
-                            if ($scope.model.current_time - 1 > $scope.model.infbndsec) {
-                                $scope.model.current_time = $scope.model.current_time - 1;
-                            } else {
-                                $scope.model.current_time = $scope.model.infbndsec;
-                            }
-                        });
+
+                    if(event.keyCode === 37 || event.keyCode === 39){
+                        //Left  | Right
+                        var trs = $("#clickable-table  > tbody > tr");
+                        var highlighted =  $("#clickable-table  > tbody > tr.highlighted")[0];
+                        var personName = highlighted.id;
+                        if(highlighted.classList.contains('hypothesis')){
+                             // console.log('hypothesis/left');
+                            var checked =  $(highlighted).find('td.checked')[0];
+                            var state_index =  parseInt(checked.id[0]);
+
+                            var new_state = _mugChangeState(state_index, event.keyCode);
+                            $scope.$apply(function () {
+                                $scope.setFaceState(personName, new_state);
+                            });
+                        }else if(highlighted.classList.contains('missing')){
+                            $scope.$apply(function () {
+                                $scope.removePerson(personName);
+                            });
+                        }else{
+                            $scope.$apply(function () {
+                                $scope.removeUnknown();
+                            });
+                        }
 
                     }
-                    //Down
-                    if (event.keyCode == 40) {
-                        $scope.$apply(function () {
-                            if ($scope.model.current_time + 1 < $scope.model.supbndsec) {
-                                $scope.model.current_time = $scope.model.current_time + 1;
-                            } else {
-                                $scope.model.current_time = $scope.model.supbndsec;
-                            }
-                        });
-                    }
                 });
+
+                var _mugChangeState = function(state_index, direction){
+
+                    var state_next;
+                    var states = ['dontKnow', 'noFace', 'silentFace', 'speakingFace'];
+                    if(direction === 37){
+                       state_next = state_index - 1;
+                       state_next = state_next<0? 3 : state_next;
+                    }else if(direction === 39){
+                       state_next = state_index + 1;
+                       state_next = state_next>3? 0 : state_next;
+                        
+                    }
+                    return states[state_next];
+                };
+
+                var _mugChangeRow = function(direction){
+                    var next;
+                    var trs = $("#clickable-table  > tbody > tr");
+
+                    if(!trs.hasClass('highlighted')){
+                        //make the first highlighted area
+                        if (direction === 40){
+                            next = $(trs).first()[0];
+                        }else if(direction === 38){
+                            next = $(trs).last()[0];
+                        }
+                    }else{
+                        var highlighted =  $("#clickable-table  > tbody > tr.highlighted")[0];
+                        if (highlighted === undefined)
+                            return null;
+                        if (direction === 40){
+                            next = $(highlighted).closest('tr').next()[0];
+                            if(next === undefined)
+                                next = $(trs).first()[0];
+                        }else if(direction === 38){
+                            next = $(highlighted).closest('tr').prev()[0];
+                            if(next === undefined)
+                                next = $(trs).last()[0];
+                        }
+                    }
+                    $(trs).removeClass('highlighted');
+                    $(next).addClass('highlighted');
+                };
+
+                var _highlightedlastRow =  function(){
+                    var trs = $("#clickable-table  > tbody > tr");
+                    var last =  trs[trs.length-2];
+                    $(trs).removeClass('highlighted');
+                    $(last).addClass('highlighted');
+                };
+
+                var _removeHighlighted =  function(){
+                    var trs = $("#clickable-table  > tbody > tr");
+                    var last =  trs.last();
+                    $(trs).removeClass('highlighted');
+                };
+
 
         }
     ]);

@@ -95,7 +95,7 @@
             </div>
             <br/>
             <div class="col-md-6">
-                <table class="table table-bordered table-hover tutorial" 
+                <table class="table table-bordered tutorial" 
                        style="text-align: center" 
                        id="clickable-table"
                        data-toggle="popover"
@@ -104,7 +104,11 @@
                        data-placement="bottom"
                        title="Step 2"
                        data-html="true"
-                       data-content="Decide whether each person is <ul><li>NOT visible</li><li>visible but NOT speaking</li><li>visible AND speaking (must hear their voice)</li></ul>Select ? if you are not sure.<img src='../img/tutorial.png' width='150px'>">
+                       data-content="Decide whether each person is <ul><li>NOT visible</li><li>visible but NOT speaking</li><li>visible AND speaking (must hear their voice)</li></ul>
+                       Select ? if you are not sure.<img src='../img/tutorial.png' width='150px'><br>
+                       Shortcut Keys <br>
+                       <ul><li><kbd>Up/Down</kbd> change row</li>
+                        <li><kbd>Left/Right</kbd> change column</li></ul>">
                     <thead>
                         <tr class="active">
                             <td>
@@ -142,10 +146,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr ng-repeat="personName in model.input.hypothesis">
-                            <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace', 'speakingFace']"
-                                id="{{ state + personName }}"
-                                ng-click="setFaceState(personName, state)">
+                        <tr ng-repeat="personName in model.input.hypothesis" id="{{personName}}" class="hypothesis" ng-class='{highlighted:$first}'>
+                            <td ng-repeat ="state in ['dontKnow', 'noFace', 'silentFace', 'speakingFace']"
+                                id="{{ $index + personName }}"
+                                ng-click="setFaceState(personName, state)"
+                                ng-class="{true: 'checked' , false: 'unchecked'}[model.output.known[personName] == state]"
+                                class="{{state}}">
                                 <img ng-show="model.output.known[personName] == state"
                                 tooltip="{{ personName }}"
                                 tooltip-placement="bottom"
@@ -154,7 +160,7 @@
                                 height="80px" />
                             </td>
                         </tr>
-                        <tr ng-repeat="personName in model.missing">
+                        <tr ng-repeat="personName in model.missing" id="{{personName}}" class="missing" ng-class='{highlighted:$last}'>
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
                                 id="{{ state + personName }}"
                                 ng-click="removePerson(personName)">
@@ -164,7 +170,7 @@
                                 src="{{ cache.png[personName] }}" width="80px" height="80px" />
                             </td>
                         </tr>
-                        <tr ng-if="model.output.unknown">
+                        <tr ng-if="model.output.unknown" class="unknown highlighted">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
                                 ng-click="removeUnknown()">
                             </td>
@@ -174,6 +180,7 @@
                             </td>
                         </tr>
                     </tbody>
+
                 </table>
             </div>
         </div>
