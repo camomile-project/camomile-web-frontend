@@ -251,13 +251,10 @@ angular.module('myApp.controllers')
                             $scope.model.current_time = $scope.model.input.start;
                         });
 
+                        $scope.model.toggle_play(true);
                     });
 
                 });
-            };
-
-            $scope.showAddPersonModal = function () {
-                $("#addPersonModal").modal('show');
             };
 
             $scope.manualAddPerson = function (personName) {
@@ -309,6 +306,7 @@ angular.module('myApp.controllers')
             $scope.model.validate = function () {
 
                 $scope.validating = true;
+                $scope.model.toggle_play(false);
 
                 var item = {};
                 item.input = $scope.model.input;
@@ -331,6 +329,7 @@ angular.module('myApp.controllers')
 
             $scope.model.skip = function () {
                 $scope.validating = true;
+                $scope.model.toggle_play(false);
                 $scope.model.popQueueElement();
             };
 
