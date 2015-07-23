@@ -332,6 +332,7 @@ angular.module('myApp.controllers')
                 item.log.user = Session.username;
                 item.log.date = $scope.model.serverDate;
                 item.log.duration = Date.now() - $scope.model.clientDate;
+                item.log.current_time = $scope.model.current_time;
 
                 camomileService.enqueue(
                     $rootScope.queues.labelOut, item,
