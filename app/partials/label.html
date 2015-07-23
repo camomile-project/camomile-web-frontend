@@ -42,11 +42,13 @@
                         </form>
                     </div>
                     <div class="col-md-12">
-                        <div class="mugshot" ng-repeat="personName in model.candidates">
-                            <img  tooltip="{{ personName }}"
-                            tooltip-placement="bottom"
-                            src="{{ cache.PNG[personName] }}"
-                            ng-click="addPerson(personName)"/>
+                        <div class="mugshot" ng-repeat="personName in model.candidates" 
+                            tooltip="{{ personName }}"
+                            tooltip-placement="bottom" 
+                            ng-click="addPerson(personName)" 
+                            ng-mousemove="switchImage($event)">
+                            <img class="mug" 
+                            src="{{ cache.PNG[personName] }}"/>
                         </div>
                         <div class="mugshot" >
                             <img src="../img/new.png" 
@@ -143,7 +145,7 @@
                                 <img ng-show="model.output.known[personName] == state"
                                 tooltip="{{ personName }}"
                                 tooltip-placement="bottom"
-                                src="{{ cache.PNG[personName] }}"
+                                src="{{ cache.png[personName] }}"
                                 width="80px"
                                 height="80px" />
                             </td>
@@ -155,7 +157,7 @@
                             </td>
                             <td>
                                 <img tooltip="{{ personName }}"
-                                src="{{ cache.PNG[personName] }}" width="80px" height="80px" />
+                                src="{{ cache.png[personName] }}" width="80px" height="80px" />
                             </td>
                         </tr>
                         <tr ng-if="model.output.unknown">

@@ -347,7 +347,12 @@ img{
     height: 80px;
 }
 .mugshot{
+    height: 80px;
     width: 80px;
     overflow: hidden;
     display: inline-block;
+}
+.mug{
+    position: relative;
+    height: 80px;
 }
