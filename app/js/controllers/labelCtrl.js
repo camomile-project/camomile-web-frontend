@@ -13,7 +13,13 @@ angular.module('myApp.controllers')
                 Session: Session
             });
 
+            // when true, we should hide most of user interface to avoid
+            // erroneous interactions (with video player, mugshots, etc...)
             $scope.validating = true;
+
+            // this is used to provide a useful feedback to the user
+            $scope.model.doneCount = 0;
+            $scope.model.skipCount = 0;
 
             var _getTestCorpus = function (callback) {
 
@@ -183,13 +189,18 @@ angular.module('myApp.controllers')
                     }
 
                     // if current user already annotated this shot
-                    // just try next one...
+                    // just increment skip count and try next one.
                     if (item.annotated_by.indexOf(Session.username) > -1) {
-                        $scope.model.popQueueElement();
-                        return;
+                      $scope.$apply(function() {
+                        $scope.model.skipCount += 1;
+                        $scope.model.skipCount %= 100;
+                      });
+                      $scope.model.popQueueElement();
+                      return;
                     }
 
                     $scope.validating = false;
+                    $scope.model.skipCount = 0;
 
                     $scope.model.input = item;
                     $scope.model.output = {};
@@ -329,6 +340,7 @@ angular.module('myApp.controllers')
                             console.log(data.error);
                             return;
                         }
+                        $scope.model.doneCount += 1;
                         $scope.model.popQueueElement();
                     });
             };
@@ -418,7 +430,7 @@ angular.module('myApp.controllers')
                     }else if(direction === 39){
                        state_next = state_index + 1;
                        state_next = state_next>3? 0 : state_next;
-                        
+
                     }
                     return states[state_next];
                 };

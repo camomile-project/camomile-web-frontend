@@ -2,7 +2,23 @@
     ng-show='isLogged()'
     ng-init="model.popQueueElement()">
     <div ng-show="validating" class="container">
-        Looking for a new annotation...
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Looking for a new annotation, please wait...</h3>
+          </div>
+          <div class="panel-body">
+            <div class="progress">
+              <div class="progress-bar progress-bar-info"
+                   role="progressbar"
+                   aria-valuenow="{{ model.skipCount }}"
+                   aria-valuemin="0"
+                   aria-valuemax="100"
+                   style="width: {{ model.skipCount }}%;">
+              <span class="sr-only">{{ model.skipCount }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
     <div ng-hide="validating" class="container">
         <div class="row">
@@ -56,7 +72,7 @@
                         height="80px"
                         width="80px"
                         ng-click="addPerson(personName)" />
-                        <img src="../img/new.png" 
+                        <img src="../img/new.png"
                              height="80px"
                              width="80px"
                              title="unknown"
@@ -95,8 +111,8 @@
             </div>
             <br/>
             <div class="col-md-6">
-                <table class="table table-bordered tutorial" 
-                       style="text-align: center" 
+                <table class="table table-bordered tutorial"
+                       style="text-align: center"
                        id="clickable-table"
                        data-toggle="popover"
                        data-trigger="manual"
