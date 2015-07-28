@@ -49,8 +49,10 @@ angular.module('myApp.directives')
 
 				element[0].addEventListener("loadedmetadata", function () {
 					scope.$apply(function () {
-
+				
 						scope.model.duration = scope.model.fullDuration = element[0].duration;
+						//console.log(scope.model.supbndsec);
+						//console.log(scope.model.infbndsec);
 
 						element[0].currentTime = scope.model.current_time;
 						if (scope.model.supbndsec === undefined) {
@@ -68,21 +70,43 @@ angular.module('myApp.directives')
 					});
 				});
 
+				var bufferPercent =  function(video){
+					var length = video.buffered.length
+					var buffer = video.buffered.end(length-1);
+					var start = scope.model.current_time;
+					if (buffer >= start)
+						return 100;
+					else{
+							console.log("buffer");
+							console.log(buffer);
+							console.log("start");
+							console.log(start);
+							return buffer * 100/ start;
+					}
+				};
 				element[0].addEventListener("timeupdate", function () {
 					scope.$apply(function () {
-						// if player paused,  has been changed for exogenous reasons
-						if (!element[0].paused) {
-							if (element[0].currentTime > scope.model.supbndsec) {
-                               					if (scope.model.loop === false) {
-                                    					scope.model.toggle_play(false);
-                                    					scope.model.current_time = scope.model.supbndsec;
-                                				}else {
-                                    					scope.model.toggle_play(true);
-                                    					scope.model.current_time = scope.model.infbndsec;
-                               				}
-                            			} else {
-                                			scope.model.current_time = element[0].currentTime;
-                            				}	
+						if (bufferPercent(element[0]) === 100){
+							element[0].currentTime = scope.model.current_time;
+							element[0].style.visibility = "visible";
+							// if player paused,  has been changed for exogenous reasons
+							if (!element[0].paused) {
+								if (element[0].currentTime > scope.model.supbndsec) {
+									if (scope.model.loop === false) {
+										scope.model.toggle_play(false);
+										scope.model.current_time = scope.model.supbndsec;
+									}else {
+										scope.model.toggle_play(true);
+										scope.model.current_time = scope.model.infbndsec;
+									}
+								} else {
+									scope.model.current_time = element[0].currentTime;
+								}	
+							}
+						}else{
+
+							element[0].style.visibility = "hidden";
+
 						}
 					});
 				});
