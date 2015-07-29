@@ -417,14 +417,15 @@ angular.module('myApp.controllers')
                 var image = e.target;
                 var num =  image.width/image.height;
                  
-                if(num === 1 || isNaN(num))
+                if(num === 1 || isNaN(num)){
                     return;
-
+                }
                 var original = $(e.target).parent().offset().left;
                 var relativeX =  x - original;
-                var index = Math.floor(relativeX/(80/num));
-                if(index < 0)
+                index = Math.floor(relativeX/(80/num));
+                if(index < 0){
                     return;
+                }
                 e.target.style.left = -80 * index + "px" ;
             };
         }

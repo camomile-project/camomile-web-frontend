@@ -82,8 +82,7 @@
                         data-html="true"
                         title="<kbd>ENTER</kbd>"
                         data-content="Validate this annotation when you are done.">
-                        <img src="../img/validate.png"
-                        width="80px"
+                        <img src="../img/validate.png" width="80px"
                         ng-click="model.validate()" />
                     </div>
                 </div>
@@ -142,12 +141,13 @@
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace', 'speakingFace']"
                                 id="{{ state + personName }}"
                                 ng-click="setFaceState(personName, state)">
-                                <img ng-show="model.output.known[personName] == state"
-                                tooltip="{{ personName }}"
-                                tooltip-placement="bottom"
-                                src="{{ cache.png[personName] }}"
-                                width="80px"
-                                height="80px" />
+                                <div class="mugshot" ng-show="model.output.known[personName] == state"
+                                    tooltip="{{ personName }}"
+                                    tooltip-placement="bottom"
+                                    ng-mousemove="switchImage($event)">
+                                    <img class="mug" src="{{cache.PNG[personName] }}"/>
+                                </div>
+                                    
                             </td>
                         </tr>
                         <tr ng-repeat="personName in model.missing">
@@ -156,8 +156,12 @@
                                 ng-click="removePerson(personName)">
                             </td>
                             <td>
-                                <img tooltip="{{ personName }}"
-                                src="{{ cache.png[personName] }}" width="80px" height="80px" />
+                                <div class="mugshot"
+                                    tooltip="{{ personName }}"
+                                    tooltip-placement="bottom"
+                                    ng-mousemove="switchImage($event)">
+                                    <img class="mug" src="{{cache.PNG[personName]}}" style="left:" + {{-80 * this.index + "px"}}/>
+                                </div>
                             </td>
                         </tr>
                         <tr ng-if="model.output.unknown">
