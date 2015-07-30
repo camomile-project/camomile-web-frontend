@@ -45,7 +45,7 @@
                         <div class="mugshot" ng-repeat="personName in model.candidates" 
                             tooltip="{{ personName }}"
                             tooltip-placement="bottom" 
-                            ng-click="addPerson(personName)" 
+                            ng-click="addPerson(personName); logMouseClick('addPerson')" 
                             ng-mousemove="switchImage($event)">
                             <img class="mug" 
                             src="{{ cache.PNG[personName] }}"/>
@@ -55,7 +55,7 @@
                                  height="80px"
                                  width="80px"
                                  title="unknown"
-                                 ng-click="addUnknown()" />
+                                 ng-click="addUnknown(); logMouseClick('addUnknown')" />
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                         data-html="true"
                         title="<kbd>ESC</kbd>"
                         data-content="Skip this annotation if something is wrong with it.">
-                        <img ng-click="model.skip()"
+                        <img ng-click="model.skip(); logMouseClick('skip')"
                         src="../img/un validate.png"
                         title="skip"
                         width="80px"/>
@@ -83,7 +83,7 @@
                         title="<kbd>ENTER</kbd>"
                         data-content="Validate this annotation when you are done.">
                         <img src="../img/validate.png" width="80px"
-                        ng-click="model.validate()" />
+                        ng-click="model.validate(); logMouseClick('validate')" />
                     </div>
                 </div>
 
@@ -144,7 +144,7 @@
                         <tr ng-repeat="personName in model.input.hypothesis" id="{{personName}}" class="hypothesis" ng-class='{highlighted:$first}'>
                             <td ng-repeat ="state in ['dontKnow', 'noFace', 'silentFace', 'speakingFace']"
                                 id="{{ $index + personName }}"
-                                ng-click="setFaceState(personName, state)"
+                                ng-click="setFaceState(personName, state); logMouseClick('setFaceState')"
                                 ng-class="{true: 'checked' , false: 'unchecked'}[model.output.known[personName] == state]"
                                 class="{{state}}">
                                 <div class="mugshot" ng-show="model.output.known[personName] == state"
@@ -158,7 +158,7 @@
                         <tr ng-repeat="personName in model.missing" id="{{personName}}" class="missing" ng-class='{highlighted:$last}'>
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
                                 id="{{ state + personName }}"
-                                ng-click="removePerson(personName)">
+                                ng-click="removePerson(personName); logMouseClick('removePerson')">
                             </td>
                             <td>
                                 <div class="mugshot"
@@ -171,7 +171,7 @@
                         </tr>
                         <tr ng-if="model.output.unknown" class="unknown highlighted">
                             <td ng-repeat="state in ['dontKnow', 'noFace', 'silentFace']"
-                                ng-click="removeUnknown()">
+                                ng-click="removeUnknown(); logMouseClick('removeUnknown')">
                             </td>
                             <td>
                                 <img src="../img/new.png"

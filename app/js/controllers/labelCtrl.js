@@ -13,6 +13,27 @@ angular.module('myApp.controllers')
                 Session: Session
             });
 
+            //Behavior log
+            $scope.keyboardData = {'pressTotal':0 , 'setFaceState':0, 'addPerson':0, 
+            'validate': 0, 'skip':0, 'toggle_play':0,'changePerson':0, 'setFaceState':0,
+             'removePerson':0, 'removeUnknown':0};
+            $scope.mouseData = {'clickTotal':0 , 'setFaceState':0, 'addPerson':0, 
+            'validate': 0, 'skip':0, 'toggle_play':0,'changePerson':0, 'setFaceState':0,
+             'removePerson':0, 'removeUnknown':0};
+
+            $scope.logMouseClick = function(behavior){
+                $scope.mouseData.clickTotal += 1;
+                $scope.mouseData[behavior] += 1;
+            };
+            $scope.logKeyboardData = function(behavior) {
+                $scope.keyboardData.pressTotal += 1;
+                $scope.keyboardData[behavior] += 1;
+            };
+
+            $(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+
             $scope.validating = true;
 
             var _getTestCorpus = function (callback) {
@@ -326,6 +347,8 @@ angular.module('myApp.controllers')
                 item.log.user = Session.username;
                 item.log.date = $scope.model.serverDate;
                 item.log.duration = Date.now() - $scope.model.clientDate;
+                item.log.mouseData =  $scope.mouseData;
+                item.log.keyboardData =  $scope.keyboardData;
 
                 camomileService.enqueue(
                     $rootScope.queues.labelOut, item,
@@ -346,7 +369,6 @@ angular.module('myApp.controllers')
             $document.on(
                 "keydown",
                 function (event) {
-
                     var targetID = event.target.id;
                     var button_checked = false;
                     if (targetID == 'confirm' || targetID == 'cancel') {
@@ -361,6 +383,7 @@ angular.module('myApp.controllers')
                         $scope.$apply(function () {
                             $scope.model.validate();
                         });
+                        $scope.logKeyboardData('validate');
                     }
                     //space
                     if (event.keyCode == 32 && targetID != "entry_input") {
@@ -370,11 +393,13 @@ angular.module('myApp.controllers')
                         $scope.$apply(function () {
                             $scope.model.toggle_play();
                         });
+                        $scope.logKeyboardData('toggle_play');
                     }
                     //esc -> skip
                     if (event.keyCode == 27) {
                         $scope.$apply(function () {
                             $scope.model.skip();
+                            $scope.logKeyboardData('skip');
                         });
 
                     }
@@ -383,6 +408,7 @@ angular.module('myApp.controllers')
                         //Up | Down
                         event.preventDefault();
                         _mugChangeRow(event.keyCode);
+                        $scope.logKeyboardData('changePerson');
                     }
 
                     if(event.keyCode === 37 || event.keyCode === 39){
@@ -399,14 +425,17 @@ angular.module('myApp.controllers')
                             $scope.$apply(function () {
                                 $scope.setFaceState(personName, new_state);
                             });
+                            $scope.logKeyboardData('setFaceState');
                         }else if(highlighted.classList.contains('missing')){
                             $scope.$apply(function () {
                                 $scope.removePerson(personName);
                             });
+                            $scope.logKeyboardData('removePerson');
                         }else{
                             $scope.$apply(function () {
                                 $scope.removeUnknown();
                             });
+                            $scope.logKeyboardData('removeUnknown');
                         }
 
                     }
