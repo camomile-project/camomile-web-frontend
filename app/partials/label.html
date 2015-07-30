@@ -42,18 +42,21 @@
                         </form>
                     </div>
                     <div class="col-md-12">
-                        <img ng-repeat="personName in model.candidates"
-                        tooltip="{{ personName }}"
-                        tooltip-placement="bottom"
-                        src="{{ cache.png[personName] }}"
-                        height="80px"
-                        width="80px"
-                        ng-click="addPerson(personName)" />
-                        <img src="../img/new.png" 
-                             height="80px"
-                             width="80px"
-                             title="unknown"
-                             ng-click="addUnknown()" />
+                        <div class="mugshot" ng-repeat="personName in model.candidates" 
+                            tooltip="{{ personName }}"
+                            tooltip-placement="bottom" 
+                            ng-click="addPerson(personName)" 
+                            ng-mousemove="switchImage($event)">
+                            <img class="mug" 
+                            src="{{ cache.PNG[personName] }}"/>
+                        </div>
+                        <div class="mugshot" >
+                            <img src="../img/new.png" 
+                                 height="80px"
+                                 width="80px"
+                                 title="unknown"
+                                 ng-click="addUnknown()" />
+                        </div>
                     </div>
                 </div>
                 <br/>
@@ -79,8 +82,7 @@
                         data-html="true"
                         title="<kbd>ENTER</kbd>"
                         data-content="Validate this annotation when you are done.">
-                        <img src="../img/validate.png"
-                        width="80px"
+                        <img src="../img/validate.png" width="80px"
                         ng-click="model.validate()" />
                     </div>
                 </div>
@@ -145,12 +147,12 @@
                                 ng-click="setFaceState(personName, state)"
                                 ng-class="{true: 'checked' , false: 'unchecked'}[model.output.known[personName] == state]"
                                 class="{{state}}">
-                                <img ng-show="model.output.known[personName] == state"
-                                tooltip="{{ personName }}"
-                                tooltip-placement="bottom"
-                                src="{{ cache.png[personName] }}"
-                                width="80px"
-                                height="80px" />
+                                <div class="mugshot" ng-show="model.output.known[personName] == state"
+                                    tooltip="{{ personName }}"
+                                    tooltip-placement="bottom"
+                                    ng-mousemove="switchImage($event)">
+                                    <img class="mug" src="{{cache.PNG[personName] }}"/>
+                                </div>
                             </td>
                         </tr>
                         <tr ng-repeat="personName in model.missing" id="{{personName}}" class="missing" ng-class='{highlighted:$last}'>
@@ -159,8 +161,12 @@
                                 ng-click="removePerson(personName)">
                             </td>
                             <td>
-                                <img tooltip="{{ personName }}"
-                                src="{{ cache.png[personName] }}" width="80px" height="80px" />
+                                <div class="mugshot"
+                                    tooltip="{{ personName }}"
+                                    tooltip-placement="bottom"
+                                    ng-mousemove="switchImage($event)">
+                                    <img class="mug" src="{{cache.PNG[personName]}}" style="left:" + {{-80 * this.index + "px"}}/>
+                                </div>
                             </td>
                         </tr>
                         <tr ng-if="model.output.unknown" class="unknown highlighted">
