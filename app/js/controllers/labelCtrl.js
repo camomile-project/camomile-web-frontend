@@ -140,8 +140,10 @@ angular.module('myApp.controllers')
                             // cache the png...
                             $scope.$apply(
                                 function () {
-                                    $scope.cache.png[personName] = 'data:image/png;base64,' + annotations[0].data.png;
-                                    $scope.cache.PNG[personName] = 'data:image/png;base64,' + annotations[0].data.PNG;
+                                    var png = 'data:image/png;base64,' + annotations[0].data.png;
+                                    var PNG = 'data:image/png;base64,' + annotations[0].data.PNG;
+                                    $scope.cache.png[personName] = png;
+                                    $scope.cache.PNG[personName] =  PNG !== undefined? PNG: png;
                                 });
 
                             // ... and returns it with no error
