@@ -50,7 +50,8 @@ angular.module('myApp.controllers')
 				}
 				$scope.model.layers[0] = {
 					'label': 'Reference',
-					'_id': layer_id + "_0"
+					'_id': layer_id + "_0",
+					layer: []
 				};
 
 				camomileService.getAnnotations(function (err, data) {
@@ -89,7 +90,8 @@ angular.module('myApp.controllers')
 				}
 				$scope.model.layers[1] = {
 					'label': 'Hypothesis',
-					'_id': layer_id + "_1"
+					'_id': layer_id + "_1",
+					layer: []
 				};
 
 				camomileService.getAnnotations(function (err, data) {
@@ -158,42 +160,38 @@ angular.module('myApp.controllers')
 			});
 
 			$scope.$watch('model.selected_medium', function (newValue, oldValue, scope) {
-				// when the medium changes, the viz is reinit, and the select box gets the new layers
-				// TODO: no more necessary since all videos have the same layers
-//				scope.model.selected_reference = undefined;
-//				scope.model.selected_hypothesis = undefined;
-
 				if (newValue) {
+					// async: ensure video is actually loaded before updating associated layers
+					async.waterfall([function (callback) {
+							if(scope.model.useDefaultVideoPath) {
+								scope.model.video = $sce.trustAsResourceUrl(camomileService.getMediumURL(scope.model.selected_medium, 'webm'));
+								callback(null, scope);
+							}
+							else {
+								camomileService.getMedium(scope.model.selected_medium, function(err, data) {
+									scope.model.video = $sce.trustAsResourceUrl(scope.model.videoPath+ '/' + data.url +'.webm');
+									callback(err, scope);
+								});
+							}
+						},
+						function (scope, callback) {
+							scope.get_layers(scope.model.selected_corpus);
 
-//					scope.model.video = $sce.trustAsResourceUrl($rootScope.dataroot + "/medium/" + scope.model.selected_medium + "/video");
+							// re-initialize the reference is needed
+							if (scope.model.selected_reference != undefined) {
+								scope.get_reference_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference, false);
+							}
 
-                    if($scope.model.useDefaultVideoPath)
-                    {
-                        scope.model.video = $sce.trustAsResourceUrl(camomileService.getMediumURL(scope.model.selected_medium, 'webm'));
-                    }
-                    else
-                    {
-                        camomileService.getMedium(scope.model.selected_medium, function(err, data)
-                        {
-                            $scope.model.video = $sce.trustAsResourceUrl($scope.model.videoPath+ '/' + data.url +'.webm');
+							// re-initialize the hypothesis is needed
+							if (scope.model.selected_hypothesis != undefined) {
+								scope.get_hypothesis_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_hypothesis, false);
+							}
 
-                        });
-                    }
+							scope.resetSummaryView(true);
 
-                    scope.get_layers(scope.model.selected_corpus);
+						}
 
-					// re-initialize the reference is needed
-					if (scope.model.selected_reference != undefined) {
-						$scope.get_reference_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_reference, false);
-					}
-
-					// re-initialize the hypothesis is needed
-					if (scope.model.selected_hypothesis != undefined) {
-						$scope.get_hypothesis_annotations(scope.model.selected_corpus, scope.model.selected_medium, scope.model.selected_hypothesis, false);
-					}
-
-					$scope.resetSummaryView(true);
-
+					]);
 				}
 			});
 

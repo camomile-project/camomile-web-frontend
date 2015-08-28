@@ -79,19 +79,19 @@ angular.module('myApp.controllers')
 
 
                     if (layer.mapping.colors === undefined) {
-                        vals = layer.layer.map(layer.mapping.getKey);
-                        vals = $.grep(vals, function (v, k) {
-                            return $.inArray(v, vals) === k;
-                        }); // jQuery hack to get Array of unique values
-                        // and then all that are not already in the scale domain
-                        newVals = newVals.concat(vals.filter(function (l) {
-                            return (!($scope.model.colScale.domain().indexOf(l) > -1)
-                                && !(newVals.indexOf(l) > -1));
-                        }));
+						vals = layer.layer.map(layer.mapping.getKey);
+						vals = $.grep(vals, function (v, k) {
+							return $.inArray(v, vals) === k;
+						}); // jQuery hack to get Array of unique values
+						// and then all that are not already in the scale domain
+						newVals = newVals.concat(vals.filter(function (l) {
+							return (!($scope.model.colScale.domain().indexOf(l) > -1)
+								&& !(newVals.indexOf(l) > -1));
+						}));
 
-                        oldVals = oldVals.filter(function (l) {
-                            return !(vals.indexOf(l) > -1);
-                        });
+						oldVals = oldVals.filter(function (l) {
+							return !(vals.indexOf(l) > -1);
+						});
                     } else {
                         vals = Object.keys(layer.mapping.colors).filter(function (l) {
                             return (!($scope.model.colScale.domain().indexOf(l) > -1)
