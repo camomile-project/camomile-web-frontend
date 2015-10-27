@@ -71,11 +71,11 @@ function log_in(callback) {
         },
         json: true
     };
-
     request(
         options,
         function (error, response, body) {
             // TODO: error handling
+
             callback(null);
         });
 };
@@ -104,7 +104,7 @@ function getQueueByName(name, callback) {
         qs: {
             name: name
         },
-        json: true,
+        json: true
     };
 
     request(
