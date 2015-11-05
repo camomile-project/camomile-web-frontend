@@ -82,7 +82,8 @@ angular.module('myApp.directives')
 				scope.$watch("model.current_time", function (newValue) {
 					if (newValue !== undefined  && element[0].id != "thumbnail") {
 						scope.model.current_time_display = DateUtils.timestampFormat(DateUtils.parseDate(scope.model.current_time));
-						if (element[0].readyState !== 0) {
+                        // Check if this event hasn't been launched by the timeupdate event, to avoid a loop
+						if (element[0].readyState !== 0 && element[0].currentTime !== scope.model.current_time) {
 							element[0].currentTime = newValue;
 						}
 					}
