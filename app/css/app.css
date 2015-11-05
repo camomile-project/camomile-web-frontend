@@ -142,7 +142,7 @@ rect.legend, rect.barchart-bar, rect.node {
     left: 0;
     right: 0;
     padding: 5px;
-    opacity: 0;
+    opacity: 1;
     transition: opacity .3s;
     color: white;
 }
@@ -169,13 +169,13 @@ button.video-control {
 .controls {
     position: relative;
     box-shadow: inset 0 0 0 5px #add;
-    opacity: 0;
+    opacity: 1;
     transition: opacity .3s;
     color: white;
 }
 
 #video-container:hover .controls {
-    opacity: .9;
+    opacity: 1;
 }
 
 #controlsvg {

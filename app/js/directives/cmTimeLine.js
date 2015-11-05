@@ -60,6 +60,15 @@ angular.module('myApp.directives')
 			restrict: 'A',
 			link: function (scope, element) {
 
+				// utility function to bring given elements to front (time marker here)
+				// cf http://stackoverflow.com/questions/17786618/how-to-use-z-index-in-svg-elements
+				// and http://stackoverflow.com/questions/14167863/how-can-i-bring-a-circle-to-the-front-with-d3
+				d3.selection.prototype.moveToFront = function() {
+					return this.each(function(){
+						this.parentNode.appendChild(this);
+					});
+				};
+
 				// definition of timeline properties
 				var margin = {}, margin2 = {}, width, height, height2;
 				var lanePadding = 5;
@@ -228,11 +237,14 @@ angular.module('myApp.directives')
 					var gContainer = $(focus[0][0]);
 					var xAxisContainer = $(".x path");
 
-					focus.append("g").attr("id", "time").append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + scope.model.xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
-
+					// PBR: so that time marker is the same group as the annotations (and can be brought to top as SVG
+					// does not support z-index)
+					//focus.append("g").attr("id", "time").append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + scope.model.xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black").attr("z", 0);
+					focus.append("circle").attr("id", "draggable").attr("cx", gContainer.offset().left + scope.model.xMsScale(0)).attr('cy', 0).attr("r", 8).style("fill", "steelblue").style("stroke", "black");
 					circleElement = d3.select("circle");
 
-					focus.append("g").append("line").attr("id", "line").attr("x1", gContainer.offset().left + scope.model.xMsScale(0)).attr("x2", gContainer.offset().left + scope.model.xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
+					//focus.append("g").append("line").attr("id", "line").attr("x1", gContainer.offset().left + scope.model.xMsScale(0)).attr("x2", gContainer.offset().left + scope.model.xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
+					focus.append("line").attr("id", "line").attr("x1", gContainer.offset().left + scope.model.xMsScale(0)).attr("x2", gContainer.offset().left + scope.model.xMsScale(0)).attr('y1', parseInt(circleElement.attr("r"))).attr('y2', 130).style("fill", "black").style("stroke", "black").style("stroke-width", "1").style("stroke-dasharray", ("3, 3"));
 					lineElement = d3.select("#line");
 
 					circleElement.on("mousemove", function () {
@@ -587,7 +599,12 @@ angular.module('myApp.directives')
 
 					scope.model.xMsScale.domain(brush.empty() ? x2MsScale.domain() : brush.extent());
 					xTimeScale.domain(brush.empty() ? x2TimeScale.domain() : brush.extent().map(x2MsScale).map(x2TimeScale.invert));
+
+					lineElement.moveToFront();
+					circleElement.moveToFront();
 				};
+
+
 
 				var updateLayerSelectedItem = function (selectedSliceValue) {
 					if (scope.model.selected_layer != undefined && scope.model.selected_layer != -1) {
@@ -630,7 +647,8 @@ angular.module('myApp.directives')
 									return scope.model.colScale(addedLayer.mapping.getKey(d));
 								}
 							});
-
+						lineElement.moveToFront();
+						circleElement.moveToFront();
 					}
 				};
 
