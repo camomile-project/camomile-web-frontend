@@ -33,6 +33,9 @@ angular.module(
         $routeProvider.when('/label', {
             templateUrl: 'partials/label.html'
         });
+        $routeProvider.when('/error', {
+            templateUrl: 'partials/errorAnalysis.html'
+        });        
         $routeProvider.otherwise({
             redirectTo: '/'
         });
@@ -41,9 +44,15 @@ angular.module(
 // Store config for data and tool access in the rootScope after promise resolution
 .run(['$resource', '$location', '$rootScope', function ($resource, $location, $rootScope) {
     // remove /# and everything following to ensure we get host root url (and everything between / and #)
-    $rootScope.absUrl = $location.absUrl().replace(/(\/.*#.*)/, '');
-    // remove trailing slash
-    $rootScope.absUrl = $rootScope.absUrl.replace(/(\/)$/, '');
+    $rootScope.absUrl = $location.absUrl().replace(/(\/#.*)/, '');
+    $rootScope.refDomain = $rootScope.absUrl.match(/(.*):/);
+    if ($rootScope.refDomain.length > 1) {
+        $rootScope.refDomain = $rootScope.refDomain[1];
+    }
+    $rootScope.refPort = $rootScope.absUrl.match(/:(\d+)/);
+    if ($rootScope.refPort.length > 1) {
+        $rootScope.refPort = $rootScope.refPort[1];
+    }
 
     var index = $rootScope.absUrl.indexOf('lig');
     if (index == -1) {
