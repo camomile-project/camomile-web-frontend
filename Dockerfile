@@ -4,6 +4,6 @@ ADD . /app
 WORKDIR /app
 RUN npm install
 
-EXPOSE 8070
+EXPOSE 8073
 
-CMD ["node", "web-server.js"]
+CMD ["node", "/app/web-server.js", "--pyannote=http://localhost:8071", "--camomile=http://localhost:8070", "--login=root", "--password=password"]

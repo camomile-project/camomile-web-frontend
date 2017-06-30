@@ -14,7 +14,6 @@ var request = request.defaults({
 // read parameters from command line or from environment variables 
 // (CAMOMILE_API, CAMOMILE_LOGIN, CAMOMILE_PASSWORD, PYANNOTE_API)
 
-// PBR patch : support parametrized shotIn and shotOut
 program
     .option('--camomile <url>', 'URL of Camomile server (e.g. https://camomile.fr/api)')
     .option('--login <login>', 'Login for Camomile server (for queues creation)')
@@ -47,7 +46,6 @@ app.configure(function () {
 
 // handle the hidden form submit
 app.post('/', function (req, res) {
-    console.log("là");
     res.redirect('/');
 });
 
@@ -74,9 +72,10 @@ function log_in(callback) {
     request(
         options,
         function (error, response, body) {
-            // TODO: error handling
-
-            callback(null);
+            if (error) {
+                console.log('authentication error, error is ' + error);
+            }
+            callback(error);
         });
 };
 
@@ -91,8 +90,7 @@ function log_out(callback) {
     request(
         options,
         function (error, response, body) {
-            // TODO: error handling
-            callback(null);
+            callback(error);
         });
 };
 
@@ -110,11 +108,14 @@ function getQueueByName(name, callback) {
     request(
         options,
         function (error, response, body) {
-            if (body.length === 0) {
+            if (!body || body.length === 0) {
                 queue = undefined;
             } else {
                 queue = body[0]._id;
             };
+            if (error) {
+                console.log('error for queue ' + name + ', error is ' + error);
+            }
             callback(error, queue);
         });
 };
@@ -237,7 +238,10 @@ function create_config_file(callback) {
 
 // run app when everything is set up
 function run_app(err, results) {
-    // TODO: error handling
+    if (err) {
+        console.log('error: ' + err);
+    }
+    
     app.listen(port);
     console.log('App is running at http://localhost:' + port + ' with');
     console.log('   * Camomile API --> ' + camomile_api);

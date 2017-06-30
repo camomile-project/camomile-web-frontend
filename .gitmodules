@@ -1,3 +1,0 @@
-[submodule "app/lib/camomile-client-javascript"]
-	path = app/lib/camomile-client-javascript
-	url = git://github.com/camomile-project/camomile-client-javascript.git
