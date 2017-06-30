@@ -1,0 +1,244 @@
+<div ng-controller="AnalyseCommonCtrl">
+
+    <div class="container-fluid" style="margin-bottom: 20px">
+
+        <div class="row">
+
+            <div class="col-sm-1" >
+            </div>
+
+            <div class="col-sm-1" >
+                <label>Reference:</label>
+            </div>
+            <!-- Reference selection -->
+            <div class="col-xs-3 cm-selector">
+                <select class="form-control" ng-model='model.selected_reference'>
+                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-sm-1" >
+            </div>
+
+            <div class="col-sm-1" >
+                <label>Hypothesis:</label>
+            </div>
+            <!-- Hypothesis selection -->
+            <div class="col-xs-3 cm-selector">
+                <select class="form-control" ng-model='model.selected_hypothesis'>
+                    <option ng-repeat='layer in model.available_layers | orderBy : "layer_type"' value={{layer._id}}>{{layer.name}}
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-sm-1" >
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" ng-show="!model.initialisationCompleted && model.displayInitialisationMessage">
+        <label>Please wait while initialising data...</label>
+    </div>
+    <div class="container-fluid" ng-show="model.initialisationCompleted && model.overviewIsDisplayed" ng-controller="OverViewCtrl">
+
+        <div class="row">
+            <div class="col-sm-1" >
+            </div>
+
+            <div class="col-sm-1" >
+                <label>Metric:</label>
+            </div>
+
+            <div class="col-sm-3" >
+                <select class="form-control" ng-model="model.selectedMetric" value="nothing">
+                    <option value="" disabled>-- Select a metric --</option>
+                    <option ng-repeat='metric in model.metrics' value={{metric}}>{{metric}}</option>
+                </select>
+            </div>
+
+            <div class="col-sm-1" >
+            </div>
+
+            <div class="col-sm-1" >
+                <label>Order:</label>
+            </div>
+
+            <div class="col-sm-4" >
+                <select class="form-control" ng-model="model.selectedOrder" value="nothing">
+                    <option value="" disabled>-- Select an order --</option>
+                    <option value="nothing">Nothing</option>
+                    <option value="increasing">Increasing</option>
+                    <option value="decreasing">Decreasing</option>
+                    <option value="alphabetic">Alphabetic</option>
+                    <option value="r-alphabetic">Reverse alphabetic</option>
+                </select>
+            </div>
+
+            <div class="col-sm-1" >
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 20px">
+
+            <div class="col-sm-1" >
+            </div>
+
+            <div class="col-sm-1" >
+                <label>Name Filter:</label>
+            </div>
+
+            <div class="col-sm-3" >
+                <input type="text" class="form-control" ng-model="model.nameFilter">
+            </div>
+
+            <div class="col-sm-1" >
+            </div>
+
+
+            <div class="col-sm-1" >
+                <label>Medium Filter:</label>
+            </div>
+
+            <div class="col-sm-4" >
+                <input type="text" class="form-control" ng-model="model.mediumFilter">
+            </div>
+
+            <div class="col-sm-1" >
+            </div>
+        </div>
+
+        <div class="row" style="height: 400px; overflow-y: auto; border: solid 1px gray">
+            <div class="col-sm-12" >
+                <cm-overview></cm-overview>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-5" >
+            </div>
+            <div class="col-sm-2 btn btn-default" ng-click="proceed()" ng-disabled="model.selectedElement == undefined">
+                Proceed
+            </div>
+            <div class="col-sm-5" >
+            </div>
+        </div>
+
+    </div>
+    <div class="container-fluid" ng-show="model.initialisationCompleted && model.detailIsDisplayed" ng-controller="DetailCtrl">
+        <div class="row">
+            <div class="col-sm-3" >
+
+            </div>
+
+            <div class="col-sm-3" >
+                <cm-person-vignette></cm-person-vignette>
+            </div>
+
+            <div class="col-sm-3" >
+                <select class="form-control" ng-model="model.selectedMediaMetric" value="nothing">
+                    <option value="" selected="selected">-- Select a metric --</option>
+                    <option ng-repeat='metric in model.metrics' value={{metric}}>{{metric}}</option>
+                </select>
+            </div>
+
+            <div class="col-sm-3" >
+
+            </div>
+
+        </div>
+
+        <div class="row" >
+            <div class="col-sm-12" >
+                <label>Media Distribution:</label>
+            </div>
+        </div>
+
+        <div class="row" style="height: 160px; overflow-x: auto; border: solid 1px gray">
+            <div class="col-sm-12" >
+                <cm-media-distribution></cm-media-distribution>
+            </div>
+        </div>
+
+        <div class="row" >
+            <div class="col-sm-12 panel-group" id="accordion" role="tablist" aria-multiselectable="true" style="padding-left: 0px;padding-right: 0px;"  ng-show="model.selected_medium_distribution != undefined">
+                <!--<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">-->
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h4 class="panel-title">
+                                <div  class="btn btn-default" data-toggle="collapse" data-target="#collapseOne" data-parent="#accordion"  aria-expanded="true" aria-controls="collapseOne">
+                                    Detail
+                                </div>
+                            </h4>
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                            <div class="panel-body">
+                                <div id="video-container">
+                                    <!-- video player behaviour managed by cm-video-player angular attribute -->
+                                    <video id="player"
+                                           cm-video-player
+                                           ng-src={{model.video}}
+                                           height="360px">
+                                    </video>
+                                    <div class="controls">
+                                        <div id="play-button">
+                                            <button type="button" class="video-control" id="play-pause"
+                                                    ng-click="model.toggle_play()">
+                                                {{ model.play_label }}
+                                            </button>
+                                            <!-- use directive for quite simple way to indicate annotation to perform -->
+                                            <!-- + extensible for reference layer and controls for extension to x seconds -->
+                                        </div>
+                                        <!--!!! KNOWN PROBLEM WITH INPUT RANGE TYPE-->
+                                        <!--see https://github.com/angular/angular.js/issues/6726-->
+                                        <div id="control-bar">
+                                            <div id="controlsoverlay">
+                                                <input width="100%" type="range" id="seek-bar"
+                                                       min="{{ model.infbndsec }}" max="{{ model.supbndsec }}"
+                                                       step="{{ (model.supbndsec - model.infbndsec) / 400 }}" ng-model="model.current_time">
+                                            </div>
+                                        </div>
+                                        <div id="time-display">
+                                            <label>{{ model.current_time_display }}</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <svg cm-timeline cm-context-menu></svg>
+                        </div>
+                    </div>
+                <!--</div>-->
+
+
+            </div>
+        </div>
+
+        <div class="row" >
+            <div class="col-sm-12" >
+                <label>Confusion:</label>
+            </div>
+        </div>
+
+        <div class="row" style="height: 150px; overflow-x: auto; border: solid 1px gray">
+            <div class="col-sm-12" >
+                <cm-confusion><b>TODO!!</b></cm-confusion>
+
+            </div>
+        </div>
+
+        <div class="row" >
+            <div class="col-sm-5" >
+            </div>
+            <div class="col-sm-2 btn btn-default" ng-click="goBack()">
+                Go back
+            </div>
+            <div class="col-sm-5" >
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="tooltip-overview"></div>
+<div id="tooltip-detail"></div>

@@ -1,0 +1,380 @@
+.whiteclr {
+    background-color: #ffffff;
+}
+
+.emph {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.elem {
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+.opened > .title:before {
+    content: '▼ ';
+}
+
+.closed > .title:before {
+    content: '► ';
+}
+
+.filler {
+    height: 100px;
+}
+
+.layerList {
+    background-color: #ddddee;
+}
+
+.annotDisplay {
+    background-color: #ffff99;
+}
+
+.padded {
+    padding: 10px;
+}
+
+span.label {
+    background-color: #6f6f6f;
+    font-size: 14pt;
+}
+
+.brush .extent {
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
+}
+
+.axis {
+    font-size: 100%;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+.scroll-pane {
+    height: 200px;
+    outline: none;
+}
+
+.cm-slidable-axis {
+    cursor: pointer;
+}
+
+.cm-dropdown li {
+    width: 100% !important; /* override the even-3 behavior */
+}
+
+.inactive {
+    opacity: 0.3;
+}
+
+.cm-selector {
+    display: table;
+}
+
+.cm-selector label {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.cm-selector select {
+    display: table-cell;
+}
+
+.cm-infomsg {
+    color: white;
+}
+
+.cm-errmsg {
+    color: red;
+}
+
+div.tooltip, div.piecharttooltip, div.treeemaptooltip {
+    position: absolute;
+    text-align: left;
+    padding: 2px;
+    font: 12px sans-serif;
+    stroke: black;
+    fill: white;
+    background: white;
+    border: solid 1px;
+    pointer-events: none;
+}
+
+g.slice {
+    cursor: pointer;
+}
+
+rect.legend, rect.barchart-bar, rect.node {
+    cursor: pointer;
+}
+
+#legend
+{
+    float:right;
+}
+
+
+#video-container {
+    width: 640px;
+    height: 410px;
+    position: relative;
+}
+
+#svgcontrol {
+    display: block;
+}
+
+#video-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 5px;
+    opacity: 1;
+    transition: opacity .3s;
+    color: white;
+}
+
+#video-container:hover #video-controls {
+    opacity: .9;
+}
+
+button.video-control {
+    background: rgba(0,0,0,.5);
+    border: 0;
+    color: #EEE;
+}
+
+.top-padding {
+    padding-top: 20px;
+}
+
+#contextMenu {
+    position: absolute;
+    display:none;
+}
+
+.controls {
+    position: relative;
+    box-shadow: inset 0 0 0 5px #add;
+    opacity: 1;
+    transition: opacity .3s;
+    color: white;
+}
+
+#video-container:hover .controls {
+    opacity: 1;
+}
+
+#controlsvg {
+    background: #FFF;
+    display:block;
+    width:100%;
+    height:50px;
+    pointer-events: none;
+}
+
+.mark {
+    pointer-events: visiblePainted;
+}
+
+#controlsoverlay {
+    position: absolute;
+    top:10px;
+    bottom:0;
+    left:0;
+    right:0;
+
+}
+
+#play-button {
+    position: absolute;
+    left:5px;
+    top:10px;
+    width:60px;
+    height:30px;
+}
+
+#control-bar {
+    position: absolute;
+    left: 70px;
+    width: 470px;
+}
+
+#time-display {
+    position: absolute;
+    left: 545px;
+    width:90px;
+    top:10px;
+    color: #000000;
+}
+
+.image-button{
+    /*width:90px;*/
+}
+
+#transparent-plan{
+    background-color: rgba(0,0,0,0);
+    position: absolute;
+    z-index:1;
+}
+
+.jh-root, .jh-type-object, .jh-type-array, .jh-key, .jh-value, .jh-root tr{
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+.jh-key, .jh-value{
+    margin: 0;
+    padding: 0.2em;
+}
+
+.jh-value{
+    border-left: 1px solid #ddd;
+}
+
+.jh-type-bool, .jh-type-number{
+    font-weight: bold;
+    text-align: center;
+    color: #5286BC;
+}
+
+.jh-type-string{
+    font-style: italic;
+    color: #5286BC;
+}
+
+.jh-array-key{
+    font-style: italic;
+    font-size: small;
+    text-align: center;
+}
+
+.jh-object-key, .jh-array-key{
+    color: #444;
+    vertical-align: top;
+}
+
+.jh-type-object > tr:nth-child(odd), .jh-type-array > tr:nth-child(odd){
+    background-color: #f5f5f5;
+}
+
+.jh-type-object > tr:nth-child(even), .jh-type-array > tr:nth-child(even){
+    background-color: #fff;
+}
+
+.jh-type-object, .jh-type-array{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.jh-root{
+    border: 1px solid #ccc;
+    margin: 0.2em;
+}
+
+th.jh-key{
+    text-align: left;
+}
+
+.jh-type-object > tr, .jh-type-array > tr{
+    border: 1px solid #ddd;
+    border-bottom: none;
+}
+
+.jh-type-object > tr:last-child, .jh-type-array > tr:last-child{
+    border-bottom: 1px solid #ddd;
+}
+
+.jh-type-object > tr:hover, .jh-type-array > tr:hover{
+    border: 1px solid #F99927;
+}
+
+.jh-empty{
+    font-style: italic;
+    color: #999;
+    font-size: small;
+}
+
+[data-title]:hover:before
+{
+    content: attr(data-title);
+    display: block;
+
+    border: solid 2px;
+    background: #333;
+    background: rgba(0,0,0,.6);
+    border-color: rgb(0,0,0);
+    border-radius: 5px;
+
+    top:32px;
+    color: #fff;
+
+    padding: 5px 15px;
+    position: absolute;
+    z-index: 3;
+}
+
+[data-title]:hover:after{
+    border: solid;
+    border-color: rgb(0,0,0) transparent;
+    border-width: 0 8px 10px 8px  ;
+    top:22px;
+    content: "";
+    position: absolute;
+    z-index: 3;
+}
+
+#button-tooltip{
+    display: block;
+
+    border: solid 2px;
+    background: rgba(255,255,255,.6);
+    border-color: rgb(0,0,0);
+    border-radius: 5px;
+
+    left:0px;
+    top:32px;
+    color: #fff;
+
+    padding: 5px 15px;
+    position: absolute;
+    z-index: 3;
+}
+
+.overview-element:hover{
+    cursor:pointer;
+}
+
+.selectableRect:hover, .selectableCurrentRect:hover{
+    cursor:pointer;
+}
+
+.progress-bar-striped, .progress-striped .progress-bar {
+    background-image: -webkit-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-image: -o-linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+    -webkit-background-size: 40px 40px;
+    background-size: 40px 40px;
+}
+
+.progress-bar.active, .progress.active .progress-bar {
+    -webkit-animation: progress-bar-stripes 2s linear infinite;
+    -o-animation: progress-bar-stripes 2s linear infinite;
+    animation: progress-bar-stripes 2s linear infinite;
+}
+
+
