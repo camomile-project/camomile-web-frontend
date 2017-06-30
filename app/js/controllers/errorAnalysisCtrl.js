@@ -15,7 +15,7 @@ angular.module('myApp.controllers')
             $scope.model.invertMode = false;
 
             // initialise fermata so the request will be available
-            $scope.model.request = fermata.json($rootScope.refDomain + ":8086");
+            $scope.model.request = fermata.json($rootScope.refDomain + ":8074");
 
             $scope.model.isLoading = false;
 
