@@ -15,7 +15,8 @@ angular.module('myApp.controllers')
             $scope.model.invertMode = false;
 
             // initialise fermata so the request will be available
-            $scope.model.request = fermata.json($rootScope.refDomain + ":8074");
+            // analytics routes now hosted by the camomile/web server
+            $scope.model.request = fermata.json($rootScope.absUrl);
 
             $scope.model.isLoading = false;
 

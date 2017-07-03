@@ -4,7 +4,11 @@ var express = require("express"),
     fs = require('fs'),
     request = require('request'),
     async = require('async'),
-    sprintf = require('sprintf').sprintf;
+    sprintf = require('sprintf').sprintf,
+    r = require('rserve'),
+    Promise = require('bluebird'),
+    _ = require("underscore");
+
 
 // remember cookie
 var request = request.defaults({
@@ -19,6 +23,7 @@ program
     .option('--login <login>', 'Login for Camomile server (for queues creation)')
     .option('--password <password>', 'Password for Camomile server')
     .option('--pyannote <url>', 'URL of PyAnnote server (e.g. https://camomile.fr/tool)')
+    .option('--analytics <url>', 'URL of R Analytics server (e.g. https://camomile.fr/analytics)')
     .option('--port <int>', 'Local port to listen to (default: 8073)')
     .parse(process.argv);
 
@@ -26,6 +31,7 @@ var camomile_api = program.camomile || process.env.CAMOMILE_API;
 var login = program.login || process.env.CAMOMILE_LOGIN;
 var password = program.password || process.env.CAMOMILE_PASSWORD;
 var pyannote_api = program.pyannote || process.env.PYANNOTE_API;
+var analytics_api = program.analytics || process.env.ANALYTICS_API;
 var port = parseInt(program.port || process.env.PORT || '8073', 10);
 var shot_in = program.shotIn;
 var shot_out = program.shotOut;
@@ -56,6 +62,53 @@ app.get('/lig', function (req, res) {
 app.get('/limsi', function (req, res) {
     res.sendfile(__dirname + '/app/indexLimsi.html');
 });
+
+
+
+// initialize analytics server (when information provided)
+if(analytics_api) {
+    var s = r.create({
+        host: analytics_api,
+        on_connect: init
+    });
+    function init() {
+
+        // ocap = "object capabilities", to facilitate interaction between R and JS
+        var ocap = s.ocap;
+        ocap(function(err, funs) {
+            // funs is the result of "give.first.functions" in serverScript.R
+            Promise.promisifyAll(funs); // enable "then"
+
+            // if req.body.name is undefined, return the list of available data processes. If not undefined,
+            // generate data according to specified process
+            app.post('/init', function(req, res) {
+                funs.initAsync().then(function(vec) {
+                    res.json(vec);
+                })
+            });
+            app.post('/current', function(req, res) {
+                funs.currentAsync().then(function(vec) {
+                    res.json(vec);
+                })
+            });
+            app.post('/add', function(req, res) {
+                funs.addAsync(req.body.name).then(function(vec) {
+                    res.json(vec);
+                })
+            });
+
+            app.post('/del', function(req, res) {
+                funs.delAsync(req.body.name).then(function(vec) {
+                    res.json(vec);
+                })
+            });
+            console.log('initialized analytics routes.');
+        });
+    }    
+}
+
+
+
 
 // log in Camomile API and callback
 function log_in(callback) {
@@ -246,6 +299,8 @@ function run_app(err, results) {
     console.log('App is running at http://localhost:' + port + ' with');
     console.log('   * Camomile API --> ' + camomile_api);
     console.log('   * PyAnnote API --> ' + pyannote_api);
+    console.log('   * Analytics API --> ' + analytics_api);
+    
 };
 
 // this is where all these functions are actually called, in this order:
